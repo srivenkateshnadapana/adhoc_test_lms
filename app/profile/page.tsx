@@ -10,7 +10,8 @@ import {
 import { ProtectedRoute } from "@/components/auth"
 import { StorageHub, AUTH_KEY, USERS_KEY, FAVORITES_KEY } from "@/lib/storage-hub"
 import { generateCertificatePDF } from "@/lib/certificate-generator"
-import { Shield, Bell, Key, Trash2 } from "lucide-react"
+import { Shield, Bell, Key, Trash2, Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
 
 // Mock certificates
 const certificatesData = [
@@ -40,12 +41,21 @@ function ProfileContent() {
   const [authState, setAuthState] = React.useState(StorageHub.getAuthState())
   const [isHydrated, setIsHydrated] = React.useState(false)
 
+  const [enrollments, setEnrollments] = React.useState<any[]>([])
+  const { theme, setTheme } = useTheme()
+
   React.useEffect(() => {
     const handleUpdate = () => {
       setAuthState(StorageHub.getAuthState())
     }
     
+    const fetchEnrollments = async () => {
+      const data = await StorageHub.getEnrollments()
+      setEnrollments(data)
+    }
+    
     setIsHydrated(true)
+    fetchEnrollments()
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
     return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
   }, [])
@@ -56,7 +66,7 @@ function ProfileContent() {
     name: user.name,
     email: user.email,
     initials: user.name.substring(0, 2).toUpperCase(),
-    coursesEnrolled: StorageHub.getEnrollments().length,
+    coursesEnrolled: enrollments.length,
     memberSince: "2024",
   }
 
@@ -159,14 +169,14 @@ function ProfileContent() {
             Saved for Later
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {favoriteCourses.map((course) => {
+            {favoriteCourses.map((course) => (
                 <FavoriteCourseCard
                   key={course.id}
                   {...course}
                   isFavorite={favorites.has(course.id)}
                   onFavoriteToggle={handleFavoriteToggle}
                 />
-            })}
+            ))}
           </div>
         </section>
 
@@ -205,9 +215,22 @@ function ProfileContent() {
               <div className="bg-surface-container-lowest border border-surface-dim rounded-3xl p-8 ambient-shadow">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-3 bg-surface-container-high rounded-xl text-primary border border-surface-dim shadow-sm"><Bell className="w-6 h-6" /></div>
-                  <h3 className="text-xl font-headline font-bold text-primary">Notifications</h3>
+                  <h3 className="text-xl font-headline font-bold text-primary">Preferences</h3>
                 </div>
                 <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-primary font-bold">Interface Theme</div>
+                      <div className="text-sm text-secondary font-medium mt-1">Switch between dark and light modes.</div>
+                    </div>
+                    <button 
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      className="p-2 bg-surface-container-high rounded-xl border border-surface-dim hover:bg-surface-dim transition-colors"
+                    >
+                      {theme === "dark" ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-primary" />}
+                    </button>
+                  </div>
+                  <div className="w-full h-px bg-surface-dim"></div>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-primary font-bold">New Course Alerts</div>
@@ -215,16 +238,6 @@ function ProfileContent() {
                     </div>
                     <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer border border-primary">
                       <div className="absolute right-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow-sm" />
-                    </div>
-                  </div>
-                  <div className="w-full h-px bg-surface-dim"></div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-primary font-bold">Marketing Emails</div>
-                      <div className="text-sm text-secondary font-medium mt-1">Occasional promotions and discounts.</div>
-                    </div>
-                    <div className="w-12 h-6 bg-surface-container-high rounded-full relative cursor-pointer border border-surface-dim hover:bg-surface-dim transition-colors">
-                      <div className="absolute left-0.5 top-0.5 bg-secondary w-4 h-4 rounded-full shadow-sm" />
                     </div>
                   </div>
                 </div>

@@ -22,9 +22,8 @@ function DashboardContent() {
 
   React.useEffect(() => {
     const handleUpdate = async () => {
-      const enrolledIds = await StorageHub.getEnrollments()
-      const matching = enrolledIds.map(id => masterCourses.find(c => c.id === id)).filter(Boolean)
-      setEnrolledPrograms(matching)
+      const data = await StorageHub.getEnrollments()
+      setEnrolledPrograms(data)
     }
 
     handleUpdate()

@@ -41,34 +41,37 @@ export const metadata: Metadata = {
   },
 }
 
+import { ThemeProvider } from "@/components/theme-provider"
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={[
           inter.variable,
           manrope.variable,
-          "font-body antialiased bg-surface text-on-surface",
+          "font-body antialiased bg-surface text-on-surface transition-colors duration-300",
         ].join(" ")}
       >
-        <Header />
-        <div className="pt-24">{children}</div>
-        <Footer />
-        <Toaster
-          theme="light"
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "#ffffff",
-              border: "1px solid #e0e3e6",
-              color: "#191c1e",
-            },
-          }}
-        />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <div className="min-h-screen">
+            {children}
+          </div>
+          <Footer />
+          <Toaster
+            position="top-right"
+          />
+        </ThemeProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

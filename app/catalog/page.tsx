@@ -8,6 +8,7 @@ import { masterCourses as courses } from "@/lib/data/courses"
 import { StorageHub, FAVORITES_KEY } from "@/lib/storage-hub"
 
 export default function CatalogPage() {
+  const [courses, setCourses] = React.useState<any[]>([])
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeCategory, setActiveCategory] = React.useState("all")
   const [sortBy, setSortBy] = React.useState("popular")
@@ -19,6 +20,13 @@ export default function CatalogPage() {
     const handleUpdate = () => {
       setFavorites(new Set(StorageHub.getFavorites()))
     }
+    
+    const fetchCourses = async () => {
+      const data = await StorageHub.getAllCourses()
+      setCourses(data)
+    }
+
+    fetchCourses()
     window.addEventListener(`storage-update-${FAVORITES_KEY}`, handleUpdate)
     setIsHydrated(true)
     return () => window.removeEventListener(`storage-update-${FAVORITES_KEY}`, handleUpdate)
@@ -30,7 +38,7 @@ export default function CatalogPage() {
 
   // Filter courses based on search query, category, and level
   const filteredCourses = React.useMemo(() => {
-    let result = courses
+    let result = [...courses]
 
     // Filter by search query (searches title and instructor)
     if (searchQuery.trim()) {

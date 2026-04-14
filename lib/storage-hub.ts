@@ -5,6 +5,7 @@ export const AUTH_KEY = "adhoc-lms-auth"
 export const TOKEN_KEY = "adhoc-lms-token"
 export const ENROLLMENTS_KEY = "adhoc-lms-enrollments"
 export const FAVORITES_KEY = "adhoc-lms-favorites"
+export const USERS_KEY = "adhoc-lms-users"
 
 // --- Types ---
 export interface MockUser {
@@ -13,6 +14,7 @@ export interface MockUser {
   email: string
   password?: string
   image?: string
+  role?: 'student' | 'admin'
 }
 
 export interface AuthState {
@@ -49,6 +51,23 @@ export const StorageHub = {
   getToken: (): string | null => {
     if (typeof window === "undefined") return null
     return localStorage.getItem(TOKEN_KEY)
+  },
+
+  getMe: async (): Promise<MockUser | null> => {
+    const token = StorageHub.getToken()
+    if (!token) return null
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      if (data.success) {
+        return data.user
+      }
+      return null
+    } catch {
+      return null
+    }
   },
 
   signup: async (user: MockUser): Promise<{ success: boolean; error?: string }> => {
@@ -93,12 +112,12 @@ export const StorageHub = {
   },
 
   socialLogin: (provider: string): { success: boolean; user: MockUser } => {
-    // Keeping this as mock for now unless provider endpoints exist
     const mockUser: MockUser = {
       id: "social-" + Math.random().toString(36).substr(2, 9),
       name: "Alex Smith",
       email: "alex@google.com",
-      image: "https://lh3.googleusercontent.com/a/O-tN=s96-c"
+      image: "https://lh3.googleusercontent.com/a/O-tN=s96-c",
+      role: 'student'
     }
     const state = { isAuthenticated: true, user: mockUser }
     setStorage(AUTH_KEY, state)
@@ -110,8 +129,33 @@ export const StorageHub = {
     setStorage(AUTH_KEY, { isAuthenticated: false, user: null })
   },
 
+  // Courses
+  getAllCourses: async (): Promise<any[]> => {
+    try {
+      const response = await fetch('/api/courses')
+      const data = await response.json()
+      return data.success ? data.data : []
+    } catch {
+      return []
+    }
+  },
+
+  getCourseById: async (id: string): Promise<any> => {
+    const token = StorageHub.getToken()
+    try {
+      const headers: any = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      
+      const response = await fetch(`/api/courses/${id}`, { headers })
+      const data = await response.json()
+      return data.success ? data.data : null
+    } catch {
+      return null
+    }
+  },
+
   // Enrollments
-  getEnrollments: async (): Promise<string[]> => {
+  getEnrollments: async (): Promise<any[]> => {
     const token = StorageHub.getToken()
     if (!token) return []
     try {
@@ -120,7 +164,7 @@ export const StorageHub = {
       })
       const data = await response.json()
       if (data.success) {
-        return data.data.map((c: any) => c.id)
+        return data.data
       }
       return []
     } catch {
@@ -144,7 +188,6 @@ export const StorageHub = {
           amount: 499 
         })
       })
-      // Trigger a refresh/update
       window.dispatchEvent(new CustomEvent('enrollment-update'))
     } catch (err) {
       console.error("Enrollment failed", err)
@@ -152,7 +195,6 @@ export const StorageHub = {
   },
 
   isEnrolled: (courseId: string): boolean => {
-    // This remains synchronous for UI immediate checks, but should be used with state
     return getStorage<string[]>(ENROLLMENTS_KEY, []).includes(courseId)
   },
 
@@ -250,3 +292,4 @@ export const StorageHub = {
     }
   }
 }
+

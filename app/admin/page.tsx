@@ -22,7 +22,9 @@ function AdminDashboardContent() {
   React.useEffect(() => {
     const fetchStats = async () => {
       const data = await StorageHub.getAdminStats()
-      setStats(data)
+      if (data) {
+        setStats(data)
+      }
       setLoading(false)
     }
     fetchStats()

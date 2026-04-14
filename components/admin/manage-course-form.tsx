@@ -20,7 +20,9 @@ export function ManageCourseForm({ initialData, isEditing = false }: ManageCours
     instructor: "",
     category: "development",
     level: "Beginner",
-    price: 499,
+    price_1month: 499,
+    price_3months: 1299,
+    price_6months: 2499,
     modules: []
   })
 
@@ -141,12 +143,30 @@ export function ManageCourseForm({ initialData, isEditing = false }: ManageCours
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] ml-2">Enrolment Unit (INR)</label>
+              <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] ml-2">1 Month Price (INR)</label>
               <input 
                 type="number" 
                 className="w-full bg-surface-container border border-surface-dim rounded-2xl py-4 px-6 outline-none focus:border-primary/30 transition-all font-black text-primary"
-                value={course.price}
-                onChange={e => setCourse({...course, price: parseInt(e.target.value)})}
+                value={course.price_1month}
+                onChange={e => setCourse({...course, price_1month: parseInt(e.target.value)})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] ml-2">3 Months Price (INR)</label>
+              <input 
+                type="number" 
+                className="w-full bg-surface-container border border-surface-dim rounded-2xl py-4 px-6 outline-none focus:border-primary/30 transition-all font-black text-primary"
+                value={course.price_3months}
+                onChange={e => setCourse({...course, price_3months: parseInt(e.target.value)})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] ml-2">6 Months Price (INR)</label>
+              <input 
+                type="number" 
+                className="w-full bg-surface-container border border-surface-dim rounded-2xl py-4 px-6 outline-none focus:border-primary/30 transition-all font-black text-primary"
+                value={course.price_6months}
+                onChange={e => setCourse({...course, price_6months: parseInt(e.target.value)})}
               />
             </div>
           </div>
