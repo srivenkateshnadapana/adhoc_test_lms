@@ -76,14 +76,17 @@ const startServer = async () => {
     console.log('✅ Database synced');
     console.log('✅ Database connected successfully');
     
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📡 Health check: http://localhost:${PORT}/health`);
-    });
+    if (require.main === module) {
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📡 Health check: http://localhost:${PORT}/health`);
+      });
+    }
   } catch (error) {
     console.error('❌ Failed to start server:', error.message);
-    process.exit(1);
+    if (require.main === module) process.exit(1);
   }
 };
 
 startServer();
+module.exports = app;

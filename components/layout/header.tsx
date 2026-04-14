@@ -3,7 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Menu, X, LogOut, User as UserIcon } from "lucide-react"
+import { Menu, X, LogOut, User as UserIcon, Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
 import { AnimatePresence, motion } from "framer-motion"
 import { StorageHub, AUTH_KEY } from "@/lib/storage-hub"
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 export function Header() {
   const router = useRouter()
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isAtTop, setIsAtTop] = React.useState(true)
   const [authState, setAuthState] = React.useState({ isAuthenticated: false, user: null as any })
@@ -90,6 +92,12 @@ export function Header() {
                 <span className="text-xs font-bold text-primary truncate max-w-[120px]">{user?.name}</span>
                 <span className="text-[10px] text-secondary truncate max-w-[120px]">{user?.email}</span>
               </div>
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
+              </button>
               <button
                 onClick={handleSignOut}
                 className="p-2 bg-error/10 text-error rounded-full hover:bg-error/20 transition-all duration-200 active:scale-95 shadow-sm border border-error/10"
