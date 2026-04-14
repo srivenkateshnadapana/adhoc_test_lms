@@ -48,7 +48,7 @@ function AdminCoursesContent() {
             <div className="flex items-center gap-3 mb-2">
               <Link href="/admin" className="text-secondary hover:text-primary transition-colors text-sm font-bold uppercase tracking-widest">Dashboard</Link>
               <span className="text-surface-dim font-bold">/</span>
-              <span className="text-primary text-sm font-bold uppercase tracking-widest">Course Management</span>
+              <span className="text-primary text-sm font-bold uppercase tracking-widest">Proctoring Management</span>
             </div>
             <h1 className="text-4xl font-headline font-extrabold text-primary tracking-tight">System Content</h1>
             <p className="text-secondary mt-1 italic">Manage learning protocols and academic syllabus structures.</p>

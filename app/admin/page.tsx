@@ -50,7 +50,7 @@ function AdminDashboardContent() {
     { label: "Total Learners", value: stats?.users?.students || 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Active Revenue", value: `₹${stats?.revenue?.total || 0}`, icon: IndianRupee, color: "text-emerald-600", bg: "bg-emerald-50" },
     { label: "Live Courses", value: stats?.content?.courses || 0, icon: BookOpen, color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "Admin Staff", value: stats?.users?.admins || 0, icon: Layout, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "Proctoring Staff", value: stats?.users?.admins || 0, icon: Layout, color: "text-amber-600", bg: "bg-amber-50" },
   ]
 
   return (
@@ -58,8 +58,8 @@ function AdminDashboardContent() {
       <div className="max-w-7xl mx-auto">
         <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-headline font-extrabold text-primary tracking-tight">Admin Console</h1>
-            <p className="text-secondary mt-2">Central command for platform operations and institutional growth.</p>
+            <h1 className="text-4xl font-headline font-extrabold text-primary tracking-tight">Proctor Dashboard</h1>
+            <p className="text-secondary mt-2">Central command for platform content and student proctoring.</p>
           </div>
           <div className="flex gap-3">
             <Link href="/admin/courses" className="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg active:scale-95 text-sm">

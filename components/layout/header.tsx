@@ -19,9 +19,13 @@ export function Header() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isAtTop, setIsAtTop] = React.useState(true)
-  const [authState, setAuthState] = React.useState(StorageHub.getAuthState())
+  const [authState, setAuthState] = React.useState({ isAuthenticated: false, user: null as any })
+  const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
+    setMounted(true)
+    setAuthState(StorageHub.getAuthState())
+
     const handleUpdate = () => {
       setAuthState(StorageHub.getAuthState())
     }
@@ -43,17 +47,17 @@ export function Header() {
     router.push("/auth")
   }
 
-  if (pathname === "/auth") {
-    return null;
+  if (pathname === "/auth" || !mounted) {
+    return (pathname === "/auth" ? null : <div className="h-20" />); // Placeholder box for layout stability
   }
 
   const { isAuthenticated, user } = authState
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isAtTop ? 'bg-surface/90' : 'bg-surface/80 backdrop-blur-md shadow-sm'}`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isAtTop ? 'bg-surface/90' : 'bg-surface/80 backdrop-blur-md shadow-sm border-b border-surface-dim'}`}>
       <div className="flex justify-between items-center w-full px-4 sm:px-8 py-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-4">
-          <span className="text-xl font-bold tracking-tighter text-blue-950 font-headline">ADHOC LMS</span>
+          <span className="text-xl font-bold tracking-tighter text-primary font-headline">ADHOC LMS</span>
         </Link>
         <div className="hidden md:flex items-center gap-8 font-headline font-semibold tracking-tight">
           {NAV_ITEMS.map((item) => (
@@ -77,14 +81,14 @@ export function Header() {
               {user?.role === 'admin' && (
                 <Link 
                   href="/admin" 
-                  className="px-4 py-1.5 border border-primary text-primary rounded-lg text-xs font-bold hover:bg-primary/5 transition-all"
+                  className="px-4 py-1.5 border border-primary text-primary rounded-lg text-xs font-bold hover:bg-primary/5 transition-all uppercase tracking-widest"
                 >
-                  Admin Console
+                  Proctor Console
                 </Link>
               )}
               <div className="flex flex-col items-end">
                 <span className="text-xs font-bold text-primary truncate max-w-[120px]">{user?.name}</span>
-                <span className="text-[10px] text-secondary-variant truncate max-w-[120px]">{user?.email}</span>
+                <span className="text-[10px] text-secondary truncate max-w-[120px]">{user?.email}</span>
               </div>
               <button
                 onClick={handleSignOut}

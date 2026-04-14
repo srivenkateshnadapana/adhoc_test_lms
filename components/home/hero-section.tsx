@@ -39,7 +39,7 @@ export function HeroSection() {
                 className="px-8 py-4 signature-gradient text-white rounded-xl font-bold text-lg transition-colors flex items-center gap-2"
               >
                 Explore Courses
-                <span className="material-symbols-outlined">arrow_forward</span>
+                <span className="material-symbols-outlined ml-2 text-md leading-none">arrow_forward</span>
               </motion.div>
             </Link>
           </motion.div>
