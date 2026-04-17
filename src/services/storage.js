@@ -22,9 +22,49 @@ export const StorageService = {
   
   setToken: (token) => setStorage(TOKEN_KEY, token),
   
+  login: (email, password) => {
+    // Pure frontend mock login
+    const state = {
+      isAuthenticated: true,
+      user: {
+        name: email.split('@')[0],
+        email,
+        role: email.toLowerCase().includes('admin') ? 'admin' : 'student'
+      }
+    }
+    StorageService.setAuthState(state)
+    StorageService.setToken("mock-jwt-token")
+    window.dispatchEvent(new Event('auth-change'))
+    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+    return true
+  },
+
   logout: () => {
     removeStorage(TOKEN_KEY)
     removeStorage(AUTH_KEY)
+    window.dispatchEvent(new Event('auth-change'))
+    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+  },
+
+  getUser: () => {
+    const state = StorageService.getAuthState()
+    return state.user
+  },
+
+  register: (userData) => {
+    // Pure frontend registration (mock)
+    const state = {
+      isAuthenticated: true,
+      user: {
+        ...userData,
+        role: userData.email?.includes('admin') ? 'admin' : 'student'
+      }
+    }
+    StorageService.setAuthState(state)
+    StorageService.setToken("mock-jwt-token")
+    window.dispatchEvent(new Event('auth-change'))
+    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+    return state
   },
 
   // --- Courses ---
