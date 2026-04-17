@@ -51,7 +51,7 @@ export function Header() {
   const { isAuthenticated, user } = authState
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isAtTop ? 'bg-surface/90' : 'bg-surface/80 backdrop-blur-md shadow-sm border-b border-surface-dim'}`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isAtTop ? 'bg-surface/90' : 'bg-surface shadow-sm border-b border-surface-dim'}`}>
       <div className="flex justify-between items-center w-full px-4 sm:px-8 py-4 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-4">
           <span className="text-xl font-bold tracking-tighter text-primary font-headline">ADHOC LMS</span>
@@ -71,7 +71,7 @@ export function Header() {
           {!isAuthenticated ? (
             <>
               <Link to="/auth" className="px-5 py-2 text-primary font-semibold hover:opacity-80 transition-all duration-200 active:scale-95">Login</Link>
-              <Link to="/auth?mode=signup" className="px-6 py-2 signature-gradient text-on-primary rounded-lg font-semibold hover:opacity-90 transition-all duration-200 active:scale-95 shadow-md">Sign Up</Link>
+              <Link to="/auth/register" className="px-6 py-2 signature-gradient text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-200 active:scale-95 shadow-md">Sign Up</Link>
             </>
           ) : (
             <div className="flex items-center gap-4">
@@ -142,7 +142,7 @@ export function Header() {
                     Login
                   </Link>
                   <Link
-                    to="/auth?mode=signup"
+                    to="/auth/register"
                     className="mt-1 rounded-md px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-dim"
                     onClick={() => setIsOpen(false)}
                   >

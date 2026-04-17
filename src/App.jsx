@@ -5,6 +5,7 @@ import { Toaster } from 'sonner'
 
 // Pages
 import Home from './pages/public/Home'
+import Catalog from './pages/public/Catalog'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import CourseDetail from './pages/public/CourseDetail'
@@ -21,7 +22,7 @@ function App() {
         <main className="pt-20">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/catalog" element={<Home />} />
+            <Route path="/catalog" element={<Catalog />} />
             <Route path="/course/:id" element={<CourseDetail />} />
             <Route path="/auth" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />

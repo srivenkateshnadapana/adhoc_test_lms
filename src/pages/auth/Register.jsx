@@ -114,7 +114,7 @@ export default function Register() {
               whileHover={{ scale: 1.01 }} 
               whileTap={{ scale: 0.98 }} 
               disabled={isLoading}
-              className="w-full py-5 signature-gradient text-on-primary rounded-2xl font-bold transition-all shadow-xl mt-4 disabled:opacity-50"
+              className="w-full py-5 signature-gradient text-primary-foreground rounded-2xl font-bold transition-all shadow-xl mt-4 disabled:opacity-50"
               type="submit"
             >
               {isLoading ? "INITIALIZING..." : "CREATE ACCOUNT"}

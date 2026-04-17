@@ -98,7 +98,7 @@ export default function Login() {
               whileHover={{ scale: 1.01 }} 
               whileTap={{ scale: 0.98 }} 
               disabled={isLoading}
-              className="w-full py-5 signature-gradient text-on-primary rounded-2xl font-bold transition-all shadow-xl disabled:opacity-50"
+              className="w-full py-5 signature-gradient text-primary-foreground rounded-2xl font-bold transition-all shadow-xl disabled:opacity-50"
             >
               {isLoading ? "AUTHORIZING..." : "AUTHORIZE ENTRY"}
             </motion.button>
