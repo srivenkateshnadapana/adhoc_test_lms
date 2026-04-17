@@ -1,13 +1,12 @@
 import * as React from "react"
 import { Search } from "lucide-react"
-import { cn } from "../../utils/cn"
 
 const categories = [
-  { id: "all", label: "All" },
+  { id: "all", label: "All Protocols" },
   { id: "cybersecurity", label: "Cybersecurity" },
-  { id: "cloud", label: "Cloud" },
-  { id: "aiml", label: "AI/ML" },
-  { id: "devops", label: "DevOps" },
+  { id: "cloud", label: "Cloud Infra" },
+  { id: "aiml", label: "AI Matrix" },
+  { id: "devops", label: "DevOps Ops" },
 ]
 
 export function SearchFilterBar({
@@ -17,32 +16,33 @@ export function SearchFilterBar({
   onCategoryChange,
 }) {
   return (
-    <div className="bg-surface/90 backdrop-blur-sm py-4 border-b border-outline-variant/30">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="bg-surface pt-12 pb-8 px-8">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center gap-6">
+        {/* Search Input Shard */}
+        <div className="relative flex-1 group">
+          <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-outline group-focus-within:text-primary transition-colors" />
+          </div>
           <input
             type="text"
-            placeholder="Search courses..."
+            placeholder="Search tactical archives..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 w-full rounded-md border border-border bg-input pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+            className="w-full pl-16 pr-8 py-5 bg-surface-container-low border-none rounded-[2rem] text-primary font-body font-semibold placeholder:opacity-30 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
           />
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Category Pill Shard */}
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 lg:pb-0 px-2 lg:px-0">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
-              className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+              className={`px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-all active:scale-95 ${
                 activeCategory === category.id
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              )}
+                  ? "signature-gradient text-white shadow-xl shadow-primary/20"
+                  : "bg-surface-container-high text-secondary hover:bg-surface-dim hover:text-primary"
+              }`}
             >
               {category.label}
             </button>

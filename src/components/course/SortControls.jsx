@@ -1,20 +1,19 @@
 import * as React from "react"
-import { ChevronDown } from "lucide-react"
-import { cn } from "../../utils/cn"
+import { ChevronDown, SlidersHorizontal, Filter } from "lucide-react"
 
 const sortOptions = [
   { id: "popular", label: "Most Popular" },
-  { id: "newest", label: "Newest" },
-  { id: "price-low", label: "Price: Low to High" },
-  { id: "price-high", label: "Price: High to Low" },
-  { id: "rating", label: "Highest Rated" },
+  { id: "newest", label: "Recently Initialized" },
+  { id: "price-low", label: "Price: Standard" },
+  { id: "price-high", label: "Price: Exclusive" },
+  { id: "rating", label: "Highest Clearance" },
 ]
 
 const levelOptions = [
-  { id: "all", label: "All" },
-  { id: "beginner", label: "Beginner" },
-  { id: "intermediate", label: "Intermediate" },
-  { id: "advanced", label: "Advanced" },
+  { id: "all", label: "Universal" },
+  { id: "beginner", label: "Fundamental" },
+  { id: "intermediate", label: "Operational" },
+  { id: "advanced", label: "Strategic" },
 ]
 
 export function SortControls({
@@ -27,80 +26,89 @@ export function SortControls({
   const [levelOpen, setLevelOpen] = React.useState(false)
 
   const currentSort = sortOptions.find((o) => o.id === sortBy)?.label || "Most Popular"
-  const currentLevel = levelOptions.find((o) => o.id === level)?.label || "All"
+  const currentLevel = levelOptions.find((o) => o.id === level)?.label || "Universal"
 
   return (
-    <div className="flex items-center gap-4 py-4">
-      {/* Sort Dropdown */}
-      <div className="relative">
-        <button
-          onClick={() => {
-            setSortOpen(!sortOpen)
-            setLevelOpen(false)
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-md border border-border bg-input text-sm text-foreground hover:bg-secondary transition-colors min-w-[180px] justify-between"
-        >
-          <span>
-            <span className="text-muted-foreground">Sort: </span>
-            {currentSort}
-          </span>
-          <ChevronDown className={cn("h-4 w-4 transition-transform", sortOpen && "rotate-180")} />
-        </button>
-        {sortOpen && (
-          <div className="absolute top-full left-0 mt-1 w-full bg-popover border border-border rounded-md shadow-lg z-50">
-            {sortOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => {
-                  onSortChange(option.id)
-                  setSortOpen(false)
-                }}
-                className={cn(
-                  "w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors first:rounded-t-md last:rounded-b-md",
-                  sortBy === option.id && "bg-primary/20 text-primary"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="bg-surface pb-12 px-8">
+      <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-6">
+        
+        {/* Sort Node Dropdown */}
+        <div className="relative group min-w-[240px]">
+          <button
+            onClick={() => {
+              setSortOpen(!sortOpen)
+              setLevelOpen(false)
+            }}
+            className={`w-full flex items-center justify-between px-8 py-4 rounded-[1.5rem] border transition-all ${
+              sortOpen ? 'bg-surface-container-high border-primary ring-4 ring-primary/5' : 'bg-white border-surface-dim/20 hover:bg-surface-container-low'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <SlidersHorizontal className="w-4 h-4 text-primary opacity-50" />
+              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{currentSort}</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-primary transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {sortOpen && (
+            <div className="absolute top-full left-0 mt-3 w-full bg-surface-container-low/80 backdrop-blur-2xl border border-white/20 rounded-[2rem] shadow-2xl z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              {sortOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    onSortChange(option.id)
+                    setSortOpen(false)
+                  }}
+                  className={`w-full px-8 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group ${
+                    sortBy === option.id ? 'text-primary bg-primary/5' : 'text-secondary hover:bg-surface-container-high hover:text-primary'
+                  }`}
+                >
+                  {option.label}
+                  {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Level Dropdown */}
-      <div className="relative">
-        <button
-          onClick={() => {
-            setLevelOpen(!levelOpen)
-            setSortOpen(false)
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-md border border-border bg-input text-sm text-foreground hover:bg-secondary transition-colors min-w-[140px] justify-between"
-        >
-          <span>
-            <span className="text-muted-foreground">Level: </span>
-            {currentLevel}
-          </span>
-          <ChevronDown className={cn("h-4 w-4 transition-transform", levelOpen && "rotate-180")} />
-        </button>
-        {levelOpen && (
-          <div className="absolute top-full left-0 mt-1 w-full bg-popover border border-border rounded-md shadow-lg z-50">
-            {levelOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => {
-                  onLevelChange(option.id)
-                  setLevelOpen(false)
-                }}
-                className={cn(
-                  "w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors first:rounded-t-md last:rounded-b-md",
-                  level === option.id && "bg-primary/20 text-primary"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Level Node Dropdown */}
+        <div className="relative group min-w-[200px]">
+          <button
+            onClick={() => {
+              setLevelOpen(!levelOpen)
+              setSortOpen(false)
+            }}
+            className={`w-full flex items-center justify-between px-8 py-4 rounded-[1.5rem] border transition-all ${
+              levelOpen ? 'bg-surface-container-high border-primary ring-4 ring-primary/5' : 'bg-white border-surface-dim/20 hover:bg-surface-container-low'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Filter className="w-4 h-4 text-primary opacity-50" />
+              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{currentLevel}</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-primary transition-transform ${levelOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {levelOpen && (
+            <div className="absolute top-full left-0 mt-3 w-full bg-surface-container-low/80 backdrop-blur-2xl border border-white/20 rounded-[2rem] shadow-2xl z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              {levelOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    onLevelChange(option.id)
+                    setLevelOpen(false)
+                  }}
+                  className={`w-full px-8 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group ${
+                    level === option.id ? 'text-primary bg-primary/5' : 'text-secondary hover:bg-surface-container-high hover:text-primary'
+                  }`}
+                >
+                  {option.label}
+                  {level === option.id && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
