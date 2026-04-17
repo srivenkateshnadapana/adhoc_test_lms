@@ -1,6 +1,4 @@
-import * as React from "react"
-import { Link } from "react-router-dom"
-import { Search, ArrowRight, Star, Verified, Psychology, History, Groups, CheckCircle, ChevronRight, PlayCircle } from "lucide-react"
+import { Search, ArrowRight, Star, ShieldCheck, Brain, History, Users, CheckCircle, ChevronRight, PlayCircle } from "lucide-react"
 import { CourseCard } from "../../components/course/CourseCard"
 import { SearchFilterBar } from "../../components/course/SearchFilterBar"
 import { StorageService } from "../../services/storage"
@@ -177,14 +175,14 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6">
             <div className="md:col-span-2 bg-primary-container p-12 rounded-[2.5rem] border border-white/10 flex flex-col justify-between hover:bg-primary-container/80 transition-all group">
-              <Verified className="w-16 h-16 text-primary-fixed mb-10 group-hover:scale-110 transition-transform" />
+              <Award className="w-16 h-16 text-primary-fixed mb-10 group-hover:scale-110 transition-transform" />
               <div>
                 <h3 className="text-3xl font-bold font-headline mb-4">Industry Accredited</h3>
                 <p className="text-on-primary-fixed opacity-60 leading-relaxed text-lg">Our certifications are recognized by top global tech and creative firms, giving you a competitive edge.</p>
               </div>
             </div>
             <div className="bg-surface-container-highest/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/5 hover:bg-white/10 transition-all flex flex-col items-center text-center justify-center">
-              <Psychology className="w-12 h-12 text-white mb-6" />
+              <Brain className="w-12 h-12 text-white mb-6" />
               <h3 className="text-xl font-bold font-headline mb-2">Expert Instructors</h3>
               <p className="text-sm text-on-primary-fixed opacity-60">Learn directly from CTOs and Founders.</p>
             </div>
@@ -194,7 +192,7 @@ export default function Home() {
               <p className="text-sm text-on-primary-fixed opacity-60">Purchase once and revisit anytime.</p>
             </div>
             <div className="bg-white/5 p-10 rounded-[2.5rem] border border-white/5 flex flex-col items-center text-center justify-center">
-              <Groups className="w-12 h-12 text-white mb-6" />
+              <Globe className="w-12 h-12 text-white mb-6" />
               <h3 className="text-xl font-bold font-headline mb-2">Global Network</h3>
               <p className="text-sm text-on-primary-fixed opacity-60">Join 45k+ alumni from various sectors.</p>
             </div>

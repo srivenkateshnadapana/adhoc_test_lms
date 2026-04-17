@@ -1,6 +1,6 @@
 import * as React from "react"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
-import { BookOpen, GraduationCap, LayoutDashboard, Clock, PlayCircle, Trophy, Target, ArrowRight } from "lucide-react"
+import { BookOpen, GraduationCap, Clock, PlayCircle, Trophy, Target, ArrowRight } from "lucide-react"
 import { StorageService, ENROLLMENTS_KEY } from "../../services/storage"
 import { Link, useNavigate } from "react-router-dom"
 
