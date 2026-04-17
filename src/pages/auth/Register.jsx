@@ -62,7 +62,6 @@ export default function Register() {
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/20 to-transparent"></div>
         </section>
 
         {/* Right Side: Register Form */}

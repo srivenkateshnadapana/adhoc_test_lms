@@ -87,10 +87,11 @@
 
 @layer utilities {
   .signature-gradient {
-    background: linear-gradient(135deg, #00020e 0%, #0d1b3e 100%);
+    /* High-contrast solid blue to dark blue */
+    background: linear-gradient(135deg, #001529 0%, #00020e 100%);
   }
   .ambient-shadow {
-    box-shadow: 0 10px 32px -4px rgba(25, 28, 30, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;

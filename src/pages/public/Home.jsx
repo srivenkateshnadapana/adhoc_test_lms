@@ -65,10 +65,7 @@ export default function Home() {
               <p className="text-sm font-semibold text-secondary">Joined by <span className="text-primary font-bold">12,000+</span> ambitious learners</p>
             </div>
           </div>
-          <div className="relative">
-            <div className="absolute -top-12 -left-12 w-64 h-64 bg-primary-fixed opacity-30 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-secondary-fixed opacity-30 rounded-full blur-3xl animate-pulse delay-700"></div>
-            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-surface-container-lowest transform hover:scale-[1.02] transition-transform duration-500">
+          <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-surface-container-lowest transform hover:scale-[1.02] transition-transform duration-500">
               <img 
                 alt="Students Learning" 
                 className="w-full h-[600px] object-cover" 
@@ -86,7 +83,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
       </section>
 
       {/* About Us Section */}
@@ -167,9 +163,6 @@ export default function Home() {
 
       {/* Why Choose Us: Bento Grid */}
       <section className="py-24 px-8 bg-primary text-white overflow-hidden relative rounded-[4rem] mx-4 my-24 lg:mx-8">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2"></div>
-        </div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20 max-w-2xl mx-auto">
             <h2 className="text-5xl font-headline font-bold mb-6 italic tracking-tight">The Academic Advantage</h2>

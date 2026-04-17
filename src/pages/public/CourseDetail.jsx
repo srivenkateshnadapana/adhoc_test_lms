@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { CheckCircle2, PlayCircle, Clock, BarChart, Shield, Globe, ArrowLeft, Loader2, Star, TrendingUp } from "lucide-react"
+import { CheckCircle2, PlayCircle, Clock, BarChart, Shield, Globe, ArrowLeft, ArrowRight, Loader2, Star, TrendingUp } from "lucide-react"
 import { StorageService } from "../../services/storage"
 
 export default function CourseDetail() {
@@ -12,10 +12,12 @@ export default function CourseDetail() {
 
   React.useEffect(() => {
     const fetchCourse = () => {
-      const data = StorageService.getCourseById(id)
+      // Ensure ID is handled correctly for both string and number lookups
+      const data = StorageService.getCourseById(String(id))
+      console.log('Fetching course data:', data)
       if (data) {
         setCourse(data)
-        setIsEnrolled(StorageService.isEnrolled(id))
+        setIsEnrolled(StorageService.isEnrolled(String(id)))
       }
       setLoading(false)
     }
@@ -28,7 +30,7 @@ export default function CourseDetail() {
       navigate("/auth")
       return
     }
-    StorageService.enroll(id)
+    StorageService.enroll(String(id))
     setIsEnrolled(true)
   }
 
@@ -59,7 +61,7 @@ export default function CourseDetail() {
           className="w-full h-full object-cover" 
           alt={course.title} 
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
         
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-8 w-full mt-24 lg:mt-32">

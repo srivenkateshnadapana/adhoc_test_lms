@@ -101,13 +101,13 @@ export function Header() {
           ) : (
             <div className="flex items-center gap-4">
               <Link 
-                to="/auth" 
+                to="/login" 
                 className="px-6 py-2.5 text-secondary font-headline font-bold text-sm hover:text-primary transition-all active:scale-95"
               >
                 Login
               </Link>
               <Link 
-                to="/auth/register" 
+                to="/register" 
                 className="px-8 py-2.5 signature-gradient text-white rounded-xl font-headline font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/10 transition-all active:scale-95 flex items-center gap-2"
               >
                 Sign Up
@@ -162,14 +162,14 @@ export function Header() {
               ) : (
                 <div className="flex flex-col gap-4">
                   <Link 
-                    to="/auth" 
+                    to="/login" 
                     className="w-full py-5 text-center text-primary font-bold border border-surface-dim rounded-2xl"
                     onClick={() => setIsOpen(false)}
                   >
                     Login
                   </Link>
                   <Link 
-                    to="/auth/register" 
+                    to="/register" 
                     className="w-full py-5 text-center signature-gradient text-white font-bold rounded-2xl"
                     onClick={() => setIsOpen(false)}
                   >

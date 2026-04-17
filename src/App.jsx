@@ -26,8 +26,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Home />} />
             <Route path="/course/:id" element={<CourseDetail />} />
-            <Route path="/auth" element={<Login />} />
-            <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/auth/register" element={<Navigate to="/register" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/student/course/:id" element={<CoursePlayer />} />
             <Route path="/profile" element={<Profile />} />

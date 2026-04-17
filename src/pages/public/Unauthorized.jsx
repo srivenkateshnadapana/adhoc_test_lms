@@ -5,8 +5,6 @@ import { ShieldCheck, Lock, ArrowRight, UserCheck } from "lucide-react"
 export default function Unauthorized() {
   return (
     <main className="min-h-screen bg-surface flex items-center justify-center p-8 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] pointer-events-none -translate-y-1/2 -translate-x-1/2" />
       
       <div className="max-w-xl w-full text-center relative z-10">
         <div className="mb-12 relative inline-block">
