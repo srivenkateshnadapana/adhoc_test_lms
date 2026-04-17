@@ -1,0 +1,112 @@
+import * as React from "react"
+import { toast } from "sonner"
+import { ProtectedRoute } from "../../context/ProtectedRoute"
+import { StorageService, AUTH_KEY } from "../../services/storage"
+import { Shield, Bell, Key, Trash2, Sun, Moon, Award, Heart } from "lucide-react"
+
+export default function Profile() {
+  return (
+    <ProtectedRoute fallbackPath="/auth">
+      <ProfileContent />
+    </ProtectedRoute>
+  )
+}
+
+function ProfileContent() {
+  const [authState, setAuthState] = React.useState(StorageService.getAuthState())
+  const [enrollments, setEnrollments] = React.useState([])
+  const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light')
+
+  React.useEffect(() => {
+    const handleUpdate = () => {
+      setAuthState(StorageService.getAuthState())
+      setEnrollments(StorageService.getEnrollments())
+    }
+    
+    handleUpdate()
+    window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+    return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+  }, [])
+
+  const user = authState.user || { name: "Guest", email: "guest@example.com" }
+  const favorites = new Set(StorageService.getFavorites())
+
+  const handleUpdatePassword = () => {
+    toast.success("Security configuration updated in local archives.")
+  }
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    localStorage.setItem('theme', newTheme)
+  }
+
+  return (
+    <main className="min-h-screen bg-surface relative overflow-hidden pt-8 pb-24">
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative max-w-6xl mx-auto px-6 text-on-surface">
+        <div className="mb-10 border-b border-surface-dim pb-8">
+          <h1 className="font-headline text-4xl font-extrabold mb-2 text-primary">My Account</h1>
+          <p className="text-secondary text-lg">Manage your credentials and platform preferences.</p>
+        </div>
+
+        {/* User Stats Card */}
+        <section className="mb-12 bg-surface-container-low border border-surface-dim rounded-[2.5rem] p-10 ambient-shadow flex flex-col md:flex-row items-center gap-8">
+          <div className="w-24 h-24 bg-primary text-on-primary rounded-full flex items-center justify-center text-4xl font-headline font-bold">
+            {user.name.substring(0, 2).toUpperCase()}
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-3xl font-headline font-extrabold text-primary mb-1">{user.name}</h2>
+            <p className="text-secondary font-medium mb-4">{user.email}</p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+              <span className="bg-surface-container-high px-4 py-1.5 rounded-full text-xs font-bold text-primary border border-surface-dim uppercase tracking-widest">{enrollments.length} Courses</span>
+              <span className="bg-surface-container-high px-4 py-1.5 rounded-full text-xs font-bold text-primary border border-surface-dim uppercase tracking-widest">Active Member</span>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Security */}
+          <div className="bg-white border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Shield className="w-6 h-6" /></div>
+              <h3 className="text-xl font-headline font-bold text-primary">Security Settings</h3>
+            </div>
+            <div className="space-y-5">
+              <input type="password" placeholder="Current Access Key" className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5" />
+              <input type="password" placeholder="New Access Key" className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5" />
+              <button onClick={handleUpdatePassword} className="w-full bg-primary text-on-primary font-bold rounded-xl py-4 hover:opacity-90 transition-all uppercase tracking-widest text-sm">Update Security</button>
+            </div>
+          </div>
+
+          {/* Preferences */}
+          <div className="flex flex-col gap-8">
+            <div className="bg-white border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Bell className="w-6 h-6" /></div>
+                <h3 className="text-xl font-headline font-bold text-primary">Platform Preferences</h3>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+                <div>
+                  <div className="font-bold text-primary">Visual Theme</div>
+                  <div className="text-xs text-secondary">Switch between Light and Dark interface.</div>
+                </div>
+                <button onClick={handleToggleTheme} className="p-2 bg-white rounded-xl border border-surface-dim">
+                  {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-primary" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="border border-error/20 bg-error/5 rounded-[2rem] p-8">
+              <h3 className="text-xl font-headline font-bold text-error mb-2">Danger Zone</h3>
+              <p className="text-xs text-secondary mb-6">Irreversible deletion of your entire academic record.</p>
+              <button className="w-full py-4 bg-white text-error font-bold rounded-xl border border-error/20 hover:bg-error hover:text-white transition-all uppercase tracking-widest text-xs">Delete Identity</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}

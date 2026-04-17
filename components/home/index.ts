@@ -1,5 +1,0 @@
-export { HeroSection } from "./hero-section"
-export { FeaturedCourses } from "./featured-courses"
-export { Testimonials } from "./testimonials"
-export { AboutSection } from "./about-section"
-export { AdvantagesBento } from "./advantages-bento"

@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import 'tw-animate-css';
+
+/* Fallback fonts if not loaded via HTML */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
+
+:root {
+  --background: #f7f9fc;
+  --foreground: #191c1e;
+  --card: rgba(255, 255, 255, 0.8);
+  --card-foreground: #191c1e;
+  --popover: #ffffff;
+  --popover-foreground: #191c1e;
+  --primary: #00020e;
+  --primary-foreground: #ffffff;
+  --secondary: #5e5e5f;
+  --secondary-foreground: #ffffff;
+  --muted: #e0e3e6;
+  --muted-foreground: #626363;
+  --accent: #dbe1ff;
+  --accent-foreground: #00020e;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: #c6c6cf;
+  --input: #e0e3e6;
+  --ring: #00020e;
+  --radius: 0.5rem;
+  
+  --font-manrope: 'Manrope', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+}
+
+.dark {
+  --background: #00020e;
+  --foreground: #f7f9fc;
+  --card: #0d1b3e;
+  --card-foreground: #f7f9fc;
+  --popover: #0d1b3e;
+  --popover-foreground: #f7f9fc;
+  --primary: #f7f9fc;
+  --primary-foreground: #00020e;
+  --secondary: #a3a3a3;
+  --secondary-foreground: #000000;
+  --muted: #1e1e1e;
+  --muted-foreground: #a3a3a3;
+  --accent: #1e1e1e;
+  --accent-foreground: #f7f9fc;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #ffffff;
+  --border: #1e1e1e;
+  --input: #1e1e1e;
+  --ring: #f7f9fc;
+}
+
+@theme {
+  --font-headline: var(--font-manrope);
+  --font-body: var(--font-inter);
+  --font-sans: var(--font-inter);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background font-body text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .signature-gradient {
+    background: linear-gradient(135deg, #00020e 0%, #0d1b3e 100%);
+  }
+  .ambient-shadow {
+    box-shadow: 0 10px 32px -4px rgba(25, 28, 30, 0.06);
+  }
+}
