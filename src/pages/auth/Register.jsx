@@ -1,133 +1,175 @@
 import * as React from "react"
-import { motion } from "framer-motion"
-import { toast } from "sonner"
-import { useNavigate, Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { Mail, Lock, User, ArrowRight, ShieldCheck, GraduationCap } from "lucide-react"
 import { StorageService } from "../../services/storage"
 
 export default function Register() {
+  const [formData, setFormData] = React.useState({ name: "", email: "", password: "", confirmPassword: "" })
+  const [error, setError] = React.useState("")
   const navigate = useNavigate()
-  const [name, setName] = React.useState("")
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [confirmPassword, setConfirmPassword] = React.useState("")
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [errors, setErrors] = React.useState({})
 
-  const validate = () => {
-    const newErrors = {}
-    if (!name || name.length < 2) newErrors.name = "Name must be at least 2 characters"
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Valid email required"
-    if (!password || password.length < 8) newErrors.password = "Password must be 8+ characters"
-    if (confirmPassword !== password) newErrors.confirmPassword = "Passwords do not match"
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    if (!validate()) return
+    setError("")
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passkeys do not match.")
+      return
+    }
 
-    setIsLoading(true)
-    await new Promise(r => setTimeout(r, 1000))
-
-    // LocalStorage signup simulation
-    toast.success("Account created! Please sign in with your credentials.")
-    navigate("/auth")
-    setIsLoading(false)
+    try {
+      StorageService.register({
+        id: `u${Date.now()}`,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: "student"
+      })
+      navigate("/auth")
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-surface">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }} 
-        animate={{ opacity: 1, scale: 1 }} 
-        className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest rounded-2xl overflow-hidden ambient-shadow border border-surface-dim"
-      >
-        <section className="hidden lg:flex flex-col justify-between p-12 signature-gradient text-white">
-          <div>
-            <span className="text-3xl font-bold tracking-tighter font-headline mb-12 block italic">ADHOC LMS</span>
-            <h1 className="text-6xl font-extrabold font-headline leading-none mb-6 italic tracking-tighter">JOIN THE <br/>MISSION.</h1>
-            <p className="text-xl font-light opacity-80 max-w-xs italic">Establish your profile in our high-end educational ecosystem.</p>
-          </div>
-          <div className="grid grid-cols-2 gap-8">
-            <div><div className="text-4xl font-extrabold font-headline">45k+</div><div className="text-[10px] uppercase tracking-widest opacity-70 font-bold">Agents Enrolled</div></div>
-            <div><div className="text-4xl font-extrabold font-headline">99%</div><div className="text-[10px] uppercase tracking-widest opacity-70 font-bold">Success Rate</div></div>
-          </div>
-        </section>
-        
-        <section className="p-8 md:p-16 flex flex-col justify-center bg-white">
-          <div className="mb-10">
-            <h2 className="text-4xl font-bold text-primary font-headline tracking-tighter italic mb-2">INITIALIZE ACCOUNT</h2>
-            <p className="text-secondary text-sm font-body font-medium">Configure your academic access parameters.</p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Full Name</label>
-              <input 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                className="w-full px-5 py-3.5 bg-surface-container-low border border-outline-variant/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-body text-on-surface"
-                placeholder="Commander Shepard"
-                required
-              />
-              {errors.name && <p className="text-xs text-error px-1">{errors.name}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Identity (Email)</label>
-              <input 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                className="w-full px-5 py-3.5 bg-surface-container-low border border-outline-variant/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-body text-on-surface"
-                placeholder="alex@protocol.com"
-                type="email"
-                required
-              />
-              {errors.email && <p className="text-xs text-error px-1">{errors.email}</p>}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Access Key</label>
-                <input 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  className="w-full px-5 py-3.5 bg-surface-container-low border border-outline-variant/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-body text-on-surface"
-                  placeholder="••••••••"
-                  type="password"
-                  required
-                />
-                {errors.password && <p className="text-xs text-error px-1">{errors.password}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-surface p-6 font-body">
+      <main className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-12 items-stretch min-h-[800px] rounded-[3rem] overflow-hidden ambient-shadow bg-surface-container-lowest border border-surface-dim/20">
+        {/* Left Side: Editorial Content */}
+        <section className="md:col-span-5 hidden md:flex flex-col justify-between p-16 signature-gradient relative overflow-hidden">
+          <div className="relative z-10">
+            <Link to="/" className="inline-flex items-center gap-3 mb-16 group">
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
+                <span className="text-white font-headline font-bold text-xl">A</span>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Confirm Key</label>
-                <input 
-                  value={confirmPassword} 
-                  onChange={(e) => setConfirmPassword(e.target.value)} 
-                  className="w-full px-5 py-3.5 bg-surface-container-low border border-outline-variant/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-body text-on-surface"
-                  placeholder="••••••••"
-                  type="password"
-                  required
-                />
-                {errors.confirmPassword && <p className="text-xs text-error px-1">{errors.confirmPassword}</p>}
-              </div>
-            </div>
-            <motion.button 
-              whileHover={{ scale: 1.01 }} 
-              whileTap={{ scale: 0.98 }} 
-              disabled={isLoading}
-              className="w-full py-5 signature-gradient text-on-primary rounded-2xl font-bold transition-all shadow-xl mt-4 disabled:opacity-50"
-              type="submit"
-            >
-              {isLoading ? "INITIALIZING..." : "CREATE ACCOUNT"}
-            </motion.button>
-          </form>
-          <div className="mt-8 text-center">
-            <p className="text-secondary text-sm">
-              Already registered? 
-              <Link to="/auth" className="text-primary font-bold hover:underline ml-1">Login Here</Link>
+              <span className="text-white font-headline font-bold tracking-tighter text-xl uppercase tracking-widest opacity-80">Adhoc Tech</span>
+            </Link>
+            <h1 className="text-5xl font-extrabold text-white font-headline tracking-tighter leading-[1.1] mb-8 italic">
+              Join the <br />Global Circle.
+            </h1>
+            <p className="text-primary-fixed opacity-70 text-lg max-w-md font-light leading-relaxed">
+              Access world-class educational content curated for the next generation of academic leaders and innovators.
             </p>
           </div>
+
+          <div className="relative z-10 flex gap-8">
+            <div className="flex flex-col">
+              <span className="text-3xl font-bold text-white font-headline">45k+</span>
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Learners</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-3xl font-bold text-white font-headline">98%</span>
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Completion</span>
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/20 to-transparent"></div>
         </section>
-      </motion.div>
+
+        {/* Right Side: Register Form */}
+        <section className="md:col-span-7 p-8 md:p-16 flex flex-col justify-center bg-white relative">
+          <div className="max-w-md mx-auto w-full">
+            <div className="mb-10">
+              <h2 className="text-4xl font-extrabold text-primary font-headline tracking-tighter mb-2">Create Account</h2>
+              <p className="text-on-surface-variant font-medium">Start your journey toward excellence today.</p>
+            </div>
+
+            {error && (
+              <div className="mb-6 p-4 bg-error/5 border border-error/10 text-error text-sm font-bold flex items-center gap-3 rounded-2xl">
+                <div className="w-2 h-2 bg-error rounded-full animate-pulse" />
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-outline uppercase tracking-widest px-1">Full Identity</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-outline">
+                    <User className="w-5 h-5 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/10 transition-all font-body text-primary font-semibold placeholder:opacity-30"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-outline uppercase tracking-widest px-1">Email Protocol</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-outline">
+                    <Mail className="w-5 h-5 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/10 transition-all font-body text-primary font-semibold placeholder:opacity-30"
+                    placeholder="operator@network.tech"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-outline uppercase tracking-widest px-1">Passkey</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-outline">
+                      <Lock className="w-5 h-5 group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/10 transition-all font-body text-primary font-semibold placeholder:opacity-30 text-sm"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-outline uppercase tracking-widest px-1">Verify</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-outline">
+                      <GraduationCap className="w-5 h-5 group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/10 transition-all font-body text-primary font-semibold placeholder:opacity-30 text-sm"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="submit"
+                  className="w-full signature-gradient text-white py-5 rounded-2xl font-headline font-bold text-lg shadow-xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+                >
+                  Create Profile
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-10 text-center">
+              <p className="text-on-surface-variant font-medium text-sm">
+                Already an Operator? 
+                <Link to="/auth" className="text-primary font-bold ml-2 underline underline-offset-4 hover:text-primary transition-colors italic">Initiate Portal</Link>
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   )
 }
