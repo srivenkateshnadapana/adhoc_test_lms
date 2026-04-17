@@ -1,4 +1,6 @@
-import { Search, ArrowRight, Star, ShieldCheck, Brain, History, Users, CheckCircle, ChevronRight, PlayCircle } from "lucide-react"
+import * as React from "react"
+import { Link } from "react-router-dom"
+import { Search, ArrowRight, Star, ShieldCheck, Brain, History, Users, CheckCircle, ChevronRight, PlayCircle, Globe, Award } from "lucide-react"
 import { CourseCard } from "../../components/course/CourseCard"
 import { SearchFilterBar } from "../../components/course/SearchFilterBar"
 import { StorageService } from "../../services/storage"
@@ -244,48 +246,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="w-full bg-surface-container-lowest border-t border-surface-dim/20 pt-24 pb-12 px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-16 mb-20">
-            <div className="col-span-2">
-              <Link to="/" className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 signature-gradient rounded-xl flex items-center justify-center">
-                  <span className="text-white font-headline font-bold">A</span>
-                </div>
-                <span className="text-2xl font-headline font-bold text-primary">Adhoc Network Tech</span>
-              </Link>
-              <p className="text-on-surface-variant text-lg max-w-sm leading-relaxed font-medium">
-                Curation of elite digital knowledge for the next generation of industry leaders and creative visionaries.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8">Navigation</h4>
-              <ul className="space-y-4 font-headline font-semibold text-secondary">
-                <li><Link to="/catalog" className="hover:text-primary transition-colors">Course Catalog</Link></li>
-                <li><Link to="/#about" className="hover:text-primary transition-colors">Our Mission</Link></li>
-                <li><Link to="/auth" className="hover:text-primary transition-colors">Member Access</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8">Contact</h4>
-              <ul className="space-y-4 font-headline font-semibold text-secondary">
-                <li><a href="mailto:hello@adhocnetwork.tech" className="hover:text-primary transition-colors">hello@adhocnetwork.tech</a></li>
-                <li className="flex gap-4 pt-4">
-                  <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center hover:bg-primary hover:text-white transition-all"><span className="material-symbols-outlined text-sm">public</span></div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-12 border-t border-surface-dim/20 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-[10px] font-bold text-outline uppercase tracking-widest">© 2024 Adhoc Network Tech • Excellence in Interaction</p>
-            <div className="flex gap-8 text-[10px] font-bold text-outline uppercase tracking-widest">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Protocol</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
