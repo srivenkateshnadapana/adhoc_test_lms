@@ -44,6 +44,40 @@
   --font-inter: 'Inter', sans-serif;
 }
 
+.dark {
+  --background: #00020e;
+  --foreground: #f7f9fc;
+  
+  --primary: #f7f9fc;
+  --primary-container: #1a2f6b;
+  --primary-fixed: #0d1b3e;
+  --on-primary-fixed: #dbe1ff;
+  --on-primary-fixed-variant: #b0bbf6;
+  
+  --secondary: #a3a3a3;
+  --secondary-fixed: #3d3d3d;
+  --on-secondary-fixed: #e3e2e2;
+  
+  --surface: #00020e;
+  --surface-bright: #050a1a;
+  --surface-dim: #05102a;
+  --surface-variant: #45464e;
+  --surface-container-lowest: #000108;
+  --surface-container-low: #030d25;
+  --surface-container: #05102a;
+  --surface-container-high: #0d1b3e;
+  --surface-container-highest: #1a2f6b;
+  
+  --on-surface: #f7f9fc;
+  --on-surface-variant: #c6c6cf;
+  
+  --outline: #76767f;
+  --outline-variant: #39456b;
+  
+  --error: #ff4d4d;
+  --error-container: #ba1a1a;
+}
+
 @theme {
   --font-headline: var(--font-manrope);
   --font-body: var(--font-inter);

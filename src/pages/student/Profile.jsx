@@ -25,7 +25,14 @@ function ProfileContent() {
     
     handleUpdate()
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-    return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+    
+    const syncTheme = () => setTheme(localStorage.getItem('theme') || 'light')
+    window.addEventListener('themeSync', syncTheme)
+    
+    return () => {
+      window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+      window.removeEventListener('themeSync', syncTheme)
+    }
   }, [])
 
   const user = authState.user || { name: "Guest", email: "guest@example.com" }
@@ -40,6 +47,7 @@ function ProfileContent() {
     setTheme(newTheme)
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
     localStorage.setItem('theme', newTheme)
+    window.dispatchEvent(new Event('themeSync'))
   }
 
   return (
@@ -69,7 +77,7 @@ function ProfileContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Security */}
-          <div className="bg-white border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+          <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Shield className="w-6 h-6" /></div>
               <h3 className="text-xl font-headline font-bold text-primary">Security Settings</h3>
@@ -83,7 +91,7 @@ function ProfileContent() {
 
           {/* Preferences */}
           <div className="flex flex-col gap-8">
-            <div className="bg-white border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+            <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Bell className="w-6 h-6" /></div>
                 <h3 className="text-xl font-headline font-bold text-primary">Platform Preferences</h3>
@@ -93,7 +101,7 @@ function ProfileContent() {
                   <div className="font-bold text-primary">Visual Theme</div>
                   <div className="text-xs text-secondary">Switch between Light and Dark interface.</div>
                 </div>
-                <button onClick={handleToggleTheme} className="p-2 bg-white rounded-xl border border-surface-dim">
+                <button onClick={handleToggleTheme} className="p-2 bg-surface-container-lowest rounded-xl border border-surface-dim">
                   {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-primary" />}
                 </button>
               </div>
@@ -102,7 +110,7 @@ function ProfileContent() {
             <div className="border border-error/20 bg-error/5 rounded-[2rem] p-8">
               <h3 className="text-xl font-headline font-bold text-error mb-2">Danger Zone</h3>
               <p className="text-xs text-secondary mb-6">Irreversible deletion of your entire academic record.</p>
-              <button className="w-full py-4 bg-white text-error font-bold rounded-xl border border-error/20 hover:bg-error hover:text-white transition-all uppercase tracking-widest text-xs">Delete Identity</button>
+              <button className="w-full py-4 bg-surface-container-lowest text-error font-bold rounded-xl border border-error/20 hover:bg-error hover:text-white transition-all uppercase tracking-widest text-xs">Delete Identity</button>
             </div>
           </div>
         </div>

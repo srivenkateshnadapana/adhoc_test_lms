@@ -91,7 +91,7 @@ function DashboardContent() {
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
              </div>
           ) : courses.length === 0 ? (
-            <div className="bg-white rounded-[3rem] p-16 text-center border-2 border-dashed border-surface-dim shadow-inner">
+            <div className="bg-surface-container-lowest rounded-[3rem] p-16 text-center border-2 border-dashed border-surface-dim shadow-inner">
               <BookOpen className="w-16 h-16 text-surface-dim mx-auto mb-6" />
               <h3 className="text-2xl font-headline font-bold text-primary mb-4">No Active Sessions</h3>
               <p className="text-on-surface-variant max-w-sm mx-auto mb-10 font-medium">Your learning profile is currently idle. Access the global catalog to initialize your first curriculum.</p>
@@ -105,7 +105,7 @@ function DashboardContent() {
               {courses.map((course) => (
                 <div 
                   key={course.id} 
-                  className="bg-white rounded-[3rem] overflow-hidden border border-surface-dim/20 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
+                  className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-surface-dim/20 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
                 >
                   <div className="w-full sm:w-48 h-48 sm:h-auto shrink-0 relative overflow-hidden">
                     <img src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={course.title} />

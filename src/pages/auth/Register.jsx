@@ -55,7 +55,7 @@ export default function Register() {
           </div>
         </section>
         
-        <section className="p-8 md:p-16 flex flex-col justify-center bg-white">
+        <section className="p-8 md:p-16 flex flex-col justify-center bg-surface-container-lowest">
           <div className="mb-10">
             <h2 className="text-4xl font-bold text-primary font-headline tracking-tighter italic mb-2">INITIALIZE ACCOUNT</h2>
             <p className="text-secondary text-sm font-body font-medium">Configure your academic access parameters.</p>

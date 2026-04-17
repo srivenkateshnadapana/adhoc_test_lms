@@ -109,7 +109,7 @@ export default function CourseDetail() {
             ))}
           </div>
 
-          <div className="bg-white p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20">
+          <div className="bg-surface-container-lowest p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20">
             <h2 className="text-3xl font-headline font-bold text-primary mb-8 italic">Curriculum Intent</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {(course.outcomes || [

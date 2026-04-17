@@ -51,7 +51,7 @@ function PlayerContent() {
     <div className="flex flex-col lg:flex-row min-h-screen bg-surface">
       {/* Sidebar: Premium Curriculum */}
       <aside className="w-full lg:w-[450px] bg-surface-container-low border-r border-surface-dim/20 flex flex-col h-screen relative z-30">
-        <div className="p-8 border-b border-surface-dim/20 bg-white">
+        <div className="p-8 border-b border-surface-dim/20 bg-surface-container-lowest">
           <Link to="/dashboard" className="inline-flex items-center gap-2 text-outline hover:text-primary transition-all font-bold text-[10px] uppercase tracking-[0.3em] mb-6">
             <ArrowLeft className="w-4 h-4" /> Operations Room
           </Link>
@@ -78,7 +78,7 @@ function PlayerContent() {
                   <button
                     key={lesson.id}
                     onClick={() => setActiveLesson(lesson)}
-                    className={`w-full text-left px-6 py-5 rounded-3xl flex items-center gap-4 transition-all group ${activeLesson?.id === lesson.id ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-1' : 'bg-white hover:bg-surface-container-high'}`}
+                    className={`w-full text-left px-6 py-5 rounded-3xl flex items-center gap-4 transition-all group ${activeLesson?.id === lesson.id ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-1' : 'bg-surface-container-lowest hover:bg-surface-container-high'}`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activeLesson?.id === lesson.id ? 'bg-white/20' : 'bg-surface-container-high'}`}>
                       {progress[lesson.id] === 'completed' ? (
@@ -107,7 +107,7 @@ function PlayerContent() {
       </aside>
 
       {/* Main Content: Premium Cinematic Player */}
-      <main className="flex-grow flex flex-col h-screen overflow-hidden bg-white">
+      <main className="flex-grow flex flex-col h-screen overflow-hidden bg-surface-container-lowest">
         {activeLesson ? (
           <div className="flex-grow flex flex-col p-8 lg:p-12 overflow-y-auto no-scrollbar">
             <div className="w-full max-w-6xl mx-auto flex flex-col h-full">

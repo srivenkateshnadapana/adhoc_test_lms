@@ -89,7 +89,7 @@ function AdminDashboardContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main Traffic Shard */}
           <div className="lg:col-span-2 space-y-12">
-            <div className="bg-white p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20 relative overflow-hidden h-[450px]">
+            <div className="bg-surface-container-lowest p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20 relative overflow-hidden h-[450px]">
               <div className="flex justify-between items-center mb-10 relative z-10">
                 <h3 className="text-2xl font-headline font-bold text-primary italic flex items-center gap-3">
                   <BarChart3 className="w-6 h-6" />
@@ -97,7 +97,7 @@ function AdminDashboardContent() {
                 </h3>
                 <div className="flex gap-2">
                   {['24H', '7D', '30D'].map(p => (
-                    <button key={p} className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all ${p === '7D' ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container'}`}>{p}</button>
+                    <button key={p} className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all ${p === '7D' ? 'bg-primary-container text-white' : 'text-secondary hover:bg-surface-container'}`}>{p}</button>
                   ))}
                 </div>
               </div>
@@ -113,7 +113,7 @@ function AdminDashboardContent() {
             </div>
 
             {/* Recent Protocols Table (Placeholder for content mgmt) */}
-            <div className="bg-white p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20">
+            <div className="bg-surface-container-lowest p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20">
                <div className="flex justify-between items-center mb-8">
                  <h3 className="text-2xl font-headline font-bold text-primary italic">Operational Nodes</h3>
                  <div className="relative group">
@@ -144,7 +144,7 @@ function AdminDashboardContent() {
 
           {/* Quick Stats Sidebar */}
           <div className="lg:col-span-1 space-y-8">
-             <div className="bg-primary p-10 rounded-[3rem] text-white shadow-2xl shadow-primary/20 relative overflow-hidden group">
+             <div className="bg-primary-container p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
                 <div className="relative z-10">
                    <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.4em] mb-4">Tactical Status</h4>
                    <p className="text-5xl font-headline font-extrabold italic tracking-tighter mb-4 leading-none">99.8%</p>

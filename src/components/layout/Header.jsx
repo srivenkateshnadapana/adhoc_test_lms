@@ -32,8 +32,19 @@ export function Header() {
 
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
-    localStorage.setItem('theme', theme)
-  }, [theme])
+    
+    const sync = () => setTheme(localStorage.getItem('theme') || 'light')
+    window.addEventListener('themeSync', sync)
+    return () => window.removeEventListener('themeSync', sync)
+  }, [])
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark"
+    setTheme(newTheme)
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    localStorage.setItem('theme', newTheme)
+    window.dispatchEvent(new Event('themeSync'))
+  }
 
   React.useEffect(() => {
     const update = () => setIsAtTop(window.scrollY === 0)
@@ -88,7 +99,7 @@ export function Header() {
                 <span className="text-[10px] text-secondary truncate max-w-[120px]">{user?.email}</span>
               </div>
               <button
-                onClick={() => setTheme(prev => prev === "dark" ? "light" : "dark")}
+                onClick={handleToggleTheme}
                 className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
               >
                 {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
