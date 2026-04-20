@@ -1,114 +1,96 @@
+// src/components/course/SortControls.jsx
 import * as React from "react"
-import { ChevronDown, SlidersHorizontal, Filter } from "lucide-react"
+import { ChevronDown, SlidersHorizontal } from "lucide-react"
 
-const sortOptions = [
-  { id: "popular", label: "Most Popular" },
-  { id: "newest", label: "Recently Initialized" },
-  { id: "price-low", label: "Price: Standard" },
-  { id: "price-high", label: "Price: Exclusive" },
-  { id: "rating", label: "Highest Clearance" },
-]
-
-const levelOptions = [
-  { id: "all", label: "Universal" },
-  { id: "beginner", label: "Fundamental" },
-  { id: "intermediate", label: "Operational" },
-  { id: "advanced", label: "Strategic" },
-]
-
-export function SortControls({
-  sortBy,
-  onSortChange,
-  level,
+export function SortControls({ 
+  sortBy, 
+  onSortChange, 
+  level, 
   onLevelChange,
+  priceRange,
+  onPriceRangeChange,
+  duration,
+  onDurationChange 
 }) {
-  const [sortOpen, setSortOpen] = React.useState(false)
-  const [levelOpen, setLevelOpen] = React.useState(false)
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false)
 
-  const currentSort = sortOptions.find((o) => o.id === sortBy)?.label || "Most Popular"
-  const currentLevel = levelOptions.find((o) => o.id === level)?.label || "Universal"
+  const sortOptions = [
+    { value: "popular", label: "Most Popular" },
+    { value: "newest", label: "Newest" },
+    { value: "rating", label: "Highest Rated" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+  ]
+
+  const levelOptions = [
+    { value: "all", label: "All Levels" },
+    { value: "beginner", label: "Beginner" },
+    { value: "intermediate", label: "Intermediate" },
+    { value: "advanced", label: "Advanced" },
+  ]
+
+  const durationOptions = [
+    { value: "all", label: "Any Duration" },
+    { value: "short", label: "Short (< 10 hrs)" },
+    { value: "medium", label: "Medium (10-30 hrs)" },
+    { value: "long", label: "Long (> 30 hrs)" },
+  ]
 
   return (
-    <div className="bg-surface pb-12 px-8">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-6">
-        
-        {/* Sort Node Dropdown */}
-        <div className="relative group min-w-[240px]">
+    <div className="relative">
+      {/* Sort Dropdown */}
+      <div className="flex items-center gap-3">
+        <div className="relative">
           <button
-            onClick={() => {
-              setSortOpen(!sortOpen)
-              setLevelOpen(false)
-            }}
-            className={`w-full flex items-center justify-between px-8 py-4 rounded-[1.5rem] border transition-all ${
-              sortOpen ? 'bg-surface-container-high border-primary ring-4 ring-primary/5' : 'bg-white border-surface-dim/20 hover:bg-surface-container-low'
-            }`}
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface hover:border-primary/50 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <SlidersHorizontal className="w-4 h-4 text-primary opacity-50" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{currentSort}</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-primary transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+            <SlidersHorizontal className="w-4 h-4" />
+            <span className="text-sm">Sort: {sortOptions.find(s => s.value === sortBy)?.label}</span>
+            <ChevronDown className="w-4 h-4" />
           </button>
-          
-          {sortOpen && (
-            <div className="absolute top-full left-0 mt-3 w-full bg-surface-container-low/80 backdrop-blur-2xl border border-white/20 rounded-[2rem] shadow-2xl z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+
+          {isFilterOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-surface-container rounded-xl shadow-lg border border-outline-variant overflow-hidden z-20">
               {sortOptions.map((option) => (
                 <button
-                  key={option.id}
+                  key={option.value}
                   onClick={() => {
-                    onSortChange(option.id)
-                    setSortOpen(false)
+                    onSortChange(option.value)
+                    setIsFilterOpen(false)
                   }}
-                  className={`w-full px-8 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group ${
-                    sortBy === option.id ? 'text-primary bg-primary/5' : 'text-secondary hover:bg-surface-container-high hover:text-primary'
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-surface-container-high transition ${
+                    sortBy === option.value ? "text-primary font-semibold" : "text-on-surface"
                   }`}
                 >
                   {option.label}
-                  {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Level Node Dropdown */}
-        <div className="relative group min-w-[200px]">
-          <button
-            onClick={() => {
-              setLevelOpen(!levelOpen)
-              setSortOpen(false)
-            }}
-            className={`w-full flex items-center justify-between px-8 py-4 rounded-[1.5rem] border transition-all ${
-              levelOpen ? 'bg-surface-container-high border-primary ring-4 ring-primary/5' : 'bg-white border-surface-dim/20 hover:bg-surface-container-low'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Filter className="w-4 h-4 text-primary opacity-50" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{currentLevel}</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-primary transition-transform ${levelOpen ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {levelOpen && (
-            <div className="absolute top-full left-0 mt-3 w-full bg-surface-container-low/80 backdrop-blur-2xl border border-white/20 rounded-[2rem] shadow-2xl z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-              {levelOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    onLevelChange(option.id)
-                    setLevelOpen(false)
-                  }}
-                  className={`w-full px-8 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group ${
-                    level === option.id ? 'text-primary bg-primary/5' : 'text-secondary hover:bg-surface-container-high hover:text-primary'
-                  }`}
-                >
-                  {option.label}
-                  {level === option.id && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Level Filter Dropdown */}
+        <select
+          value={level}
+          onChange={(e) => onLevelChange(e.target.value)}
+          className="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+        >
+          {levelOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+
+        {/* Duration Filter Dropdown */}
+        <select
+          value={duration}
+          onChange={(e) => onDurationChange(e.target.value)}
+          className="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+        >
+          {durationOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
     </div>
   )

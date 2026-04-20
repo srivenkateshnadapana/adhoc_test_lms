@@ -1,54 +1,103 @@
+// src/pages/public/Catalog.jsx
 import * as React from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { SearchFilterBar } from "../../components/course/SearchFilterBar"
 import { SortControls } from "../../components/course/SortControls"
 import { CourseCard } from "../../components/course/CourseCard"
 import { StorageService } from "../../services/storage"
+import { Loader2, FilterX } from "lucide-react"
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+}
 
 export default function Catalog() {
   const [courses, setCourses] = React.useState([])
+  const [filteredCourses, setFilteredCourses] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeCategory, setActiveCategory] = React.useState("all")
   const [sortBy, setSortBy] = React.useState("popular")
   const [level, setLevel] = React.useState("all")
+  const [priceRange, setPriceRange] = React.useState({ min: 0, max: 1000 })
+  const [duration, setDuration] = React.useState("all")
   const [favorites, setFavorites] = React.useState(new Set(StorageService.getFavorites()))
+  const [visibleCount, setVisibleCount] = React.useState(9)
+  const [hasMore, setHasMore] = React.useState(true)
 
+  // Load courses
   React.useEffect(() => {
-    const data = StorageService.getCourses()
+  const loadCourses = async () => {
+    setLoading(true)
+    const data = await StorageService.getCourses()
     setCourses(data)
-    
-    const handleUpdate = () => {
-      setFavorites(new Set(StorageService.getFavorites()))
-    }
-    
-    window.addEventListener(`storage-update-adhoc-lms-favorites`, handleUpdate)
-    return () => window.removeEventListener(`storage-update-adhoc-lms-favorites`, handleUpdate)
-  }, [])
-
-  const handleFavoriteToggle = (id) => {
-    StorageService.toggleFavorite(id)
+    setFilteredCourses(data)
+    setLoading(false)
   }
+  loadCourses()
+}, [])
 
-  // Filter courses based on search query, category, and level
-  const filteredCourses = React.useMemo(() => {
+  // Filter and sort courses
+  React.useEffect(() => {
     let result = [...courses]
 
+    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       result = result.filter(
         (course) =>
           course.title.toLowerCase().includes(query) ||
-          course.instructor.toLowerCase().includes(query)
+          course.instructor.toLowerCase().includes(query) ||
+          course.description?.toLowerCase().includes(query)
       )
     }
 
+    // Category filter
     if (activeCategory !== "all") {
       result = result.filter((course) => course.category === activeCategory)
     }
 
+    // Level filter
     if (level !== "all") {
       result = result.filter((course) => course.level === level)
     }
 
+    // Price range filter
+    result = result.filter(
+      (course) => course.price >= priceRange.min && course.price <= priceRange.max
+    )
+
+    // Duration filter
+    if (duration !== "all") {
+      switch (duration) {
+        case "short":
+          result = result.filter((course) => course.duration <= 10)
+          break
+        case "medium":
+          result = result.filter((course) => course.duration > 10 && course.duration <= 30)
+          break
+        case "long":
+          result = result.filter((course) => course.duration > 30)
+          break
+        default:
+          break
+      }
+    }
+
+    // Sorting
     switch (sortBy) {
       case "newest":
         result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -62,60 +111,190 @@ export default function Catalog() {
       case "rating":
         result = [...result].sort((a, b) => b.rating - a.rating)
         break
+      case "popular":
+        result = [...result].sort((a, b) => (b.enrolled || 0) - (a.enrolled || 0))
+        break
       default:
         break
     }
 
-    return result
-  }, [courses, searchQuery, activeCategory, level, sortBy])
+    setFilteredCourses(result)
+    setVisibleCount(9)
+    setHasMore(result.length > 9)
+  }, [courses, searchQuery, activeCategory, level, sortBy, priceRange, duration])
+
+  const handleFavoriteToggle = (id) => {
+    StorageService.toggleFavorite(id)
+    setFavorites(new Set(StorageService.getFavorites()))
+  }
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 9)
+    setHasMore(filteredCourses.length > visibleCount + 9)
+  }
+
+  const handleClearAllFilters = () => {
+    setSearchQuery("")
+    setActiveCategory("all")
+    setLevel("all")
+    setSortBy("popular")
+    setPriceRange({ min: 0, max: 1000 })
+    setDuration("all")
+  }
+
+  const hasActiveFilters = searchQuery || activeCategory !== "all" || level !== "all" || 
+                          priceRange.min > 0 || priceRange.max < 1000 || duration !== "all"
+
+  const visibleCourses = filteredCourses.slice(0, visibleCount)
+
+  // Categories for filter
+  const categories = [
+    { id: "all", label: "All", count: courses.length },
+    { id: "development", label: "Development", count: courses.filter(c => c.category === "development").length },
+    { id: "design", label: "Design", count: courses.filter(c => c.category === "design").length },
+    { id: "business", label: "Business", count: courses.filter(c => c.category === "business").length },
+    { id: "marketing", label: "Marketing", count: courses.filter(c => c.category === "marketing").length },
+  ]
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="pt-8 pb-4">
-          <h1 className="font-headline text-4xl font-bold text-primary">
+    <div className="min-h-screen bg-surface">
+      {/* Hero Banner */}
+      <div className="signature-gradient py-12 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl md:text-5xl font-headline font-bold text-white mb-4">
             Course Catalog
           </h1>
-          <div className="h-px bg-gradient-to-r from-primary/50 to-transparent mt-4" />
+          <p className="text-white/80 text-lg max-w-2xl">
+            Explore our curated collection of premium courses designed by industry experts.
+          </p>
+          <div className="h-px bg-white/20 w-24 mt-6" />
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Search & Filter Bar */}
         <SearchFilterBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
+          categories={categories}
         />
 
-        {/* Sort Controls */}
-        <SortControls
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          level={level}
-          onLevelChange={setLevel}
-        />
-
-        {/* Course Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
-          {filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={course.title}
-              instructor={course.instructor}
-              price={course.price}
-              isFavorite={favorites.has(course.id)}
-              onFavoriteToggle={handleFavoriteToggle}
+        {/* Results Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <p className="text-on-surface-variant text-sm">
+              Showing <span className="font-bold text-primary">{filteredCourses.length}</span> courses
+              {hasActiveFilters && <span className="text-xs ml-1">(filtered)</span>}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <SortControls
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              level={level}
+              onLevelChange={setLevel}
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              duration={duration}
+              onDurationChange={setDuration}
             />
-          ))}
+            
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearAllFilters}
+                className="flex items-center gap-1 px-3 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors"
+              >
+                <FilterX className="w-4 h-4" />
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Empty State */}
-        {filteredCourses.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No courses found matching your search.</p>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+            <p className="text-on-surface-variant">Loading courses...</p>
           </div>
+        )}
+
+        {/* Course Grid */}
+        {!loading && (
+          <>
+            {filteredCourses.length > 0 && (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={filteredCourses.length}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {visibleCourses.map((course) => (
+                    <motion.div key={course.id} variants={itemVariants}>
+                      <CourseCard 
+                        id={course.id}
+                        title={course.title}
+                        instructor={course.instructor}
+                        price={course.price}
+                        originalPrice={course.originalPrice}
+                        rating={course.rating}
+                        reviewCount={course.reviewCount}
+                        image={course.image}
+                        isFavorite={favorites.has(course.id)}
+                        onFavoriteToggle={handleFavoriteToggle}
+                        duration={course.duration}
+                        level={course.level}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            )}
+
+            {/* Load More Button */}
+            {hasMore && visibleCourses.length < filteredCourses.length && (
+              <div className="text-center mt-12">
+                <button
+                  onClick={handleLoadMore}
+                  className="px-6 py-3 border border-primary/30 text-primary rounded-xl font-medium hover:bg-primary/5 transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  Load More Courses
+                </button>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {filteredCourses.length === 0 && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-20 bg-surface-container-lowest rounded-2xl border border-surface-dim/20"
+              >
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-headline font-bold text-on-surface mb-2">No courses found</h3>
+                <p className="text-on-surface-variant max-w-md mx-auto">
+                  We couldn't find any courses matching your search criteria. Try adjusting your filters or search term.
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleClearAllFilters}
+                    className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition"
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </>
         )}
       </div>
     </div>

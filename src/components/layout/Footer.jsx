@@ -1,6 +1,7 @@
+// src/components/layout/Footer.jsx
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { Github, Twitter, Linkedin, Mail, MapPin, Phone } from "lucide-react"
+import { Github, Twitter, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -8,20 +9,23 @@ export function Footer() {
   const links = {
     platform: [
       { name: "Curriculum", href: "/catalog" },
-      { name: "Global Dashboard", href: "/dashboard" },
+      { name: "My Courses", href: "/my-courses" },
+      { name: "Dashboard", href: "/dashboard" },
+      { name: "Certificates", href: "/certificates" },
       { name: "Instructor Portal", href: "/admin" },
-      { name: "Certification Pool", href: "#" },
     ],
     company: [
       { name: "About Adhoc", href: "/#about" },
       { name: "Operational Status", href: "#" },
       { name: "Security Protocol", href: "#" },
       { name: "Contact Base", href: "#" },
+      { name: "Careers", href: "#" },
     ],
     legal: [
       { name: "Terms of Engagement", href: "#" },
       { name: "Privacy Protocol", href: "#" },
       { name: "Cookie Policy", href: "#" },
+      { name: "Data Processing", href: "#" },
     ]
   }
 
@@ -29,6 +33,7 @@ export function Footer() {
     <footer className="bg-surface-container-lowest border-t border-surface-dim/20 pt-20 pb-12 font-body relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-primary/2 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
@@ -44,50 +49,77 @@ export function Footer() {
               Empowering the next generation of academic leaders through sophisticated learning ecosystems and decentralized knowledge protocols.
             </p>
             <div className="flex items-center gap-4">
-              {[Twitter, Github, Linkedin].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all shadow-sm">
-                  <Icon className="w-5 h-5" />
+              {[
+                { Icon: Twitter, href: "#", label: "Twitter" },
+                { Icon: Github, href: "#", label: "GitHub" },
+                { Icon: Linkedin, href: "#", label: "LinkedIn" }
+              ].map((social, i) => (
+                <a 
+                  key={i} 
+                  href={social.href} 
+                  className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all shadow-sm"
+                  aria-label={social.label}
+                >
+                  <social.Icon className="w-5 h-5" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Links */}
+          {/* Newsletter Signup */}
+          <div className="lg:col-span-3">
+            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Neural Dispatch</h4>
+            <p className="text-sm text-on-surface-variant mb-4 leading-relaxed">
+              Subscribe to receive tactical insights, curriculum updates, and exclusive content.
+            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="flex-1 px-4 py-2.5 bg-surface-container border border-outline-variant rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                />
+                <button className="px-4 py-2.5 signature-gradient text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Subscribe
+                </button>
+              </div>
+              <p className="text-[10px] text-on-surface-variant opacity-60">
+                No spam. Unsubscribe anytime.
+              </p>
+            </div>
+          </div>
+
+          {/* Platform Links */}
           <div className="lg:col-span-2">
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Platform</h4>
             <ul className="space-y-4">
               {links.platform.map(link => (
                 <li key={link.name}>
-                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors">{link.name}</Link>
+                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors text-sm">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Company Links */}
           <div className="lg:col-span-2">
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Academy</h4>
             <ul className="space-y-4">
               {links.company.map(link => (
                 <li key={link.name}>
-                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors">{link.name}</Link>
+                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors text-sm">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="lg:col-span-2">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Protocol</h4>
-            <ul className="space-y-4">
-              {links.legal.map(link => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors">{link.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Location Shard */}
-          <div className="lg:col-span-2">
+          {/* Contact & Legal */}
+          <div className="lg:col-span-1">
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Base</h4>
             <ul className="space-y-6">
               <li className="flex items-start gap-3">
@@ -100,18 +132,37 @@ export function Footer() {
                 <Phone className="w-5 h-5 text-primary shrink-0" />
                 <span className="text-xs font-medium text-on-surface-variant opacity-70">+1 (800) ADHOC-NET</span>
               </li>
+              <li className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-primary shrink-0" />
+                <span className="text-xs font-medium text-on-surface-variant opacity-70">hello@adhoc.network</span>
+              </li>
             </ul>
           </div>
         </div>
 
+        {/* Legal Links Row (Mobile Friendly) */}
+        <div className="pt-8 pb-6 border-t border-surface-dim/20">
+          <div className="flex flex-wrap justify-center gap-6 mb-6">
+            {links.legal.map(link => (
+              <Link key={link.name} to={link.href} className="text-xs text-on-surface-variant hover:text-primary transition-colors">
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* Bottom Shard */}
-        <div className="pt-12 border-t border-surface-dim/20 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-4 border-t border-surface-dim/20 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs font-bold text-outline uppercase tracking-widest leading-none">
             &copy; {currentYear} Adhoc Network Tech. All Security Protocols Active.
           </p>
           <div className="flex items-center gap-6">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em]">Operational Status: Optimum</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em]">Operational Status: Optimum</span>
+            </div>
+            <div className="w-px h-4 bg-outline-variant" />
+            <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em]">v2.0.0</span>
           </div>
         </div>
       </div>

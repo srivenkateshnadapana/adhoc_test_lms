@@ -1,8 +1,9 @@
 import * as React from "react"
 import { AdminProtectedRoute } from "../../context/AdminProtectedRoute"
 import { StorageService } from "../../services/storage"
-import { Users, BookOpen, IndianRupee, TrendingUp, BarChart3, Layout, ShieldCheck, Activity, Plus, ArrowUpRight, Search } from "lucide-react"
+import { Users, BookOpen, IndianRupee, TrendingUp, BarChart3, Layout, ShieldCheck, Activity, Plus, ArrowUpRight, Search, MessageCircle } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
+import { api } from "../../services/api"
 
 export default function AdminDashboard() {
   return (
@@ -17,17 +18,35 @@ function AdminDashboardContent() {
   const [loading, setLoading] = React.useState(true)
   const navigate = useNavigate()
 
+  const [analytics, setAnalytics] = React.useState(null)
+  const [ticketStats, setTicketStats] = React.useState(null)
+
   React.useEffect(() => {
-    // Pure frontend stats calculation
-    const courses = StorageService.getCourses()
-    const enrollments = StorageService.getEnrollments()
-    
-    setStats({
-      users: { students: 14202, admins: 12 },
-      revenue: { total: enrollments.length * 499 },
-      content: { courses: courses.length }
-    })
-    setLoading(false)
+    const fetchData = async () => {
+      try {
+        const token = StorageService.getToken()
+        const [statsData, analyticsData, ticketsData] = await Promise.all([
+          api.admin.getStats(token),
+          api.admin.getAnalytics(token),
+          api.tickets.getStats(token)
+        ])
+        
+        if (statsData?.success) {
+          setStats(statsData.data)
+        }
+        if (analyticsData?.success) {
+          setAnalytics(analyticsData.data)
+        }
+        if (ticketsData?.success) {
+          setTicketStats(ticketsData.data)
+        }
+      } catch (err) {
+        console.error("Failed to load admin stats", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
   if (loading) return (
@@ -37,10 +56,10 @@ function AdminDashboardContent() {
   )
 
   const metrics = [
-    { label: "Active Learners", value: stats?.users?.students.toLocaleString(), icon: Users, trend: "+12.4%", color: "primary" },
-    { label: "Operational Revenue", value: `₹${stats?.revenue?.total.toLocaleString()}`, icon: IndianRupee, trend: "+8.2%", color: "secondary" },
-    { label: "Curriculum Assets", value: stats?.content?.courses, icon: BookOpen, trend: "+3", color: "primary" },
-    { label: "Security Nodes", value: stats?.users?.admins, icon: ShieldCheck, trend: "Status 1.0", color: "secondary" },
+    { label: "Active Learners", value: (stats?.users?.students || 0).toLocaleString(), icon: Users, trend: "+12.4%", color: "primary" },
+    { label: "Operational Revenue", value: `₹${(stats?.revenue?.total || 0).toLocaleString()}`, icon: IndianRupee, trend: "+8.2%", color: "secondary" },
+    { label: "Curriculum Assets", value: stats?.content?.courses || 0, icon: BookOpen, trend: "+3", color: "primary" },
+    { label: "Active Doubts", value: ticketStats?.open || 0, icon: MessageCircle, trend: `${ticketStats?.resolved || 0} Resolved`, color: "secondary" },
   ]
 
   return (
@@ -59,10 +78,10 @@ function AdminDashboardContent() {
             <p className="text-on-surface-variant text-lg font-medium opacity-60 mt-2">Overseeing global operational metrics and curriculum health.</p>
           </div>
           <div className="flex gap-4">
-            <button className="px-8 py-4 bg-surface-container-low border border-surface-dim/20 rounded-2xl font-bold text-secondary text-sm hover:bg-surface-container transition-all flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Diagnostics
-            </button>
+            <Link to="/admin/doubts" className="px-8 py-4 bg-surface-container-low border border-surface-dim/20 rounded-2xl font-bold text-secondary text-sm hover:bg-surface-container transition-all flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Student Doubts
+            </Link>
             <Link to="/admin/courses" className="px-8 py-4 signature-gradient text-white rounded-2xl font-bold text-sm shadow-xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2">
               <Plus className="w-4 h-4" />
               New Asset
@@ -102,11 +121,31 @@ function AdminDashboardContent() {
                 </div>
               </div>
               
-              <div className="flex-grow flex items-center justify-center h-64 border-2 border-dashed border-surface-dim/30 rounded-[2.5rem] relative">
-                <div className="text-center opacity-30 group">
-                  <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                  <p className="text-xs font-bold uppercase tracking-widest">Real-time Visualizer Initializing...</p>
-                </div>
+              <div className="flex-grow flex items-end justify-between h-64 border-b-2 border-dashed border-surface-dim/30 pb-4 relative z-10 px-4">
+                {analytics?.monthlyRevenue ? (
+                  analytics.monthlyRevenue.map((data, index) => {
+                    const maxRevenue = Math.max(...analytics.monthlyRevenue.map(d => d.revenue)) || 1000;
+                    const heightPercent = Math.max((data.revenue / maxRevenue) * 100, 5);
+                    return (
+                      <div key={index} className="flex flex-col items-center gap-2 group w-1/12">
+                        <div 
+                          className="w-full bg-primary/20 group-hover:bg-primary transition-colors rounded-t-md relative"
+                          style={{ height: `${heightPercent}%` }}
+                        >
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-surface-container-high px-2 py-1 rounded text-xs font-bold text-primary transition-opacity whitespace-nowrap">
+                            ₹{data.revenue}
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-secondary uppercase">{data.month}</span>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="w-full text-center opacity-30 group h-full flex flex-col justify-center">
+                    <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-bold uppercase tracking-widest">Real-time Visualizer Initializing...</p>
+                  </div>
+                )}
               </div>
               
               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"></div>
@@ -122,22 +161,26 @@ function AdminDashboardContent() {
                  </div>
                </div>
                <div className="space-y-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center justify-between p-6 bg-surface-container-low/50 rounded-2xl hover:bg-surface-container-low transition-all group">
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
-                             <Layout className="w-5 h-5" />
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold text-primary">Advanced Security Protocol v.{i}.2</p>
-                             <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-0.5">Updated 4h ago</p>
-                          </div>
-                       </div>
-                       <button className="p-3 text-secondary hover:text-primary transition-colors">
-                          <ArrowUpRight className="w-5 h-5" />
-                       </button>
-                    </div>
-                  ))}
+                  {analytics?.popularCourses && analytics.popularCourses.length > 0 ? (
+                    analytics.popularCourses.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-6 bg-surface-container-low/50 rounded-2xl hover:bg-surface-container-low transition-all group">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                               <Layout className="w-5 h-5" />
+                            </div>
+                            <div>
+                               <p className="text-sm font-bold text-primary">{item.course ? item.course.title : `Course Node ${item.courseId}`}</p>
+                               <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-0.5">{item.enrollmentCount} Active Deployments</p>
+                            </div>
+                         </div>
+                         <button className="p-3 text-secondary hover:text-primary transition-colors">
+                            <ArrowUpRight className="w-5 h-5" />
+                         </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-secondary text-sm">No operational nodes active.</div>
+                  )}
                </div>
             </div>
           </div>
@@ -159,21 +202,33 @@ function AdminDashboardContent() {
 
              <div className="bg-surface-container-lowest p-10 rounded-[3rem] border border-surface-dim/20 shadow-xl shadow-primary/5">
                 <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-8 italic">Recent Logs</h4>
-                <div className="space-y-6">
-                   {[
-                     { label: 'Asset Node', detail: 'Cloud Sec v3 deployed', time: '12m ago' },
-                     { label: 'Security', detail: 'Admin login detected', time: '45m ago' },
-                     { label: 'Intel', detail: 'Revenue protocol run', time: '1h ago' },
-                   ].map((log, i) => (
-                     <div key={i} className="flex justify-between items-start border-l-2 border-primary/20 pl-4 py-1">
-                        <div>
-                           <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">{log.label}</p>
-                           <p className="text-xs font-bold text-primary">{log.detail}</p>
-                        </div>
-                        <span className="text-[10px] font-medium opacity-40 italic">{log.time}</span>
-                     </div>
-                   ))}
-                </div>
+                 <div className="space-y-6">
+                   {analytics?.popularCourses && analytics.popularCourses.length > 0 ? (
+                     analytics.popularCourses.slice(0,3).map((item, i) => (
+                       <div key={i} className="flex justify-between items-start border-l-2 border-primary/20 pl-4 py-1">
+                          <div>
+                             <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">Asset Node</p>
+                             <p className="text-xs font-bold text-primary">{item.course ? item.course.title : `Node ${item.courseId}`} deployed</p>
+                          </div>
+                          <span className="text-[10px] font-medium opacity-40 italic">Recent</span>
+                       </div>
+                     ))
+                   ) : (
+                     [
+                       { label: 'Asset Node', detail: 'Cloud Sec v3 deployed', time: '12m ago' },
+                       { label: 'Security', detail: 'Admin login detected', time: '45m ago' },
+                       { label: 'Intel', detail: 'Revenue protocol run', time: '1h ago' },
+                     ].map((log, i) => (
+                       <div key={i} className="flex justify-between items-start border-l-2 border-primary/20 pl-4 py-1">
+                          <div>
+                             <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">{log.label}</p>
+                             <p className="text-xs font-bold text-primary">{log.detail}</p>
+                          </div>
+                          <span className="text-[10px] font-medium opacity-40 italic">{log.time}</span>
+                       </div>
+                     ))
+                   )}
+                 </div>
              </div>
           </div>
         </div>
