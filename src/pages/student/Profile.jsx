@@ -57,6 +57,14 @@ function ProfileContent() {
     }
   }
 
+  const handleCopyLink = () => {
+    if (user.referralCode) {
+      const link = `${window.location.origin}/register?ref=${user.referralCode}`
+      navigator.clipboard.writeText(link)
+      toast.success("Referral link copied to clipboard!")
+    }
+  }
+
   return (
     <main className="min-h-screen bg-surface relative overflow-hidden pt-8 pb-24">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
@@ -117,6 +125,18 @@ function ProfileContent() {
                     </div>
                     <button onClick={handleCopyReferral} className="p-3 bg-surface-container-high rounded-xl text-primary hover:bg-primary/10 transition-colors" title="Copy Code">
                       <Copy className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="bg-surface-container border border-surface-dim/30 p-4 rounded-xl flex items-center justify-between">
+                    <div className="flex-1 overflow-hidden mr-4">
+                      <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Your Referral Link</p>
+                      <p className="text-xs font-medium text-primary truncate opacity-70">
+                        {`${window.location.origin}/register?ref=${user.referralCode}`}
+                      </p>
+                    </div>
+                    <button onClick={handleCopyLink} className="p-3 bg-primary text-on-primary rounded-xl hover:opacity-90 transition-all flex items-center gap-2 text-xs font-bold shrink-0" title="Copy Link">
+                      <Copy className="w-4 h-4" />
+                      Copy Link
                     </button>
                   </div>
                   <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">

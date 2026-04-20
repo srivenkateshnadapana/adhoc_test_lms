@@ -1,11 +1,12 @@
 // src/pages/auth/Register.jsx
 import * as React from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { User, Mail, Lock, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react"
 import { StorageService } from "../../services/storage"
 
 export default function Register() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -13,6 +14,14 @@ export default function Register() {
     confirmPassword: "",
     referralCode: ""
   })
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const ref = params.get('ref')
+    if (ref) {
+      setFormData(prev => ({ ...prev, referralCode: ref }))
+    }
+  }, [location])
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
