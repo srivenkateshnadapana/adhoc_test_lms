@@ -1,6 +1,6 @@
 // src/pages/public/Catalog.jsx
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, color } from "framer-motion"
 import { SearchFilterBar } from "../../components/course/SearchFilterBar"
 import { SortControls } from "../../components/course/SortControls"
 import { CourseCard } from "../../components/course/CourseCard"
@@ -149,7 +149,7 @@ export default function Catalog() {
 
   // Categories for filter
   const categories = [
-    { id: "all", label: "All", count: courses.length },
+    { id: "all", label: "All",count: courses.length },
     { id: "development", label: "Development", count: courses.filter(c => c.category === "development").length },
     { id: "design", label: "Design", count: courses.filter(c => c.category === "design").length },
     { id: "business", label: "Business", count: courses.filter(c => c.category === "business").length },
@@ -171,7 +171,7 @@ export default function Catalog() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 text-white">
         {/* Search & Filter Bar */}
         <SearchFilterBar
           searchQuery={searchQuery}
@@ -205,7 +205,7 @@ export default function Catalog() {
             {hasActiveFilters && (
               <button
                 onClick={handleClearAllFilters}
-                className="flex items-center gap-1 px-3 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                className="flex items-center gap-1 px-3 py-2 text-white text-primary hover:bg-primary/10 rounded-lg transition-colors"
               >
                 <FilterX className="w-4 h-4" />
                 Clear filters

@@ -25,7 +25,7 @@ export const StorageService = {
     if (data.success) {
       StorageService.setToken(data.token)
       StorageService.setUser(data.user)
-      window.dispatchEvent(new Event('storage-update-adhoc-lms-auth'))
+      window.dispatchEvent(new Event('adhoc-lms-auth-update'))
     }
     return data
   },
@@ -35,7 +35,7 @@ export const StorageService = {
     if (data.success) {
       StorageService.setToken(data.token)
       StorageService.setUser(data.user)
-      window.dispatchEvent(new Event('storage-update-adhoc-lms-auth'))
+      window.dispatchEvent(new Event('adhoc-lms-auth-update'))
     }
     return data
   },
@@ -43,7 +43,7 @@ export const StorageService = {
   logout: () => {
     StorageService.removeToken()
     StorageService.removeUser()
-    window.dispatchEvent(new Event('storage-update-adhoc-lms-auth'))
+    window.dispatchEvent(new Event('adhoc-lms-auth-update'))
   },
   
   getAuthState: () => ({

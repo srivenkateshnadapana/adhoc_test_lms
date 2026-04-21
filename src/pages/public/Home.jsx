@@ -79,21 +79,21 @@ export default function Home() {
   ]
 
   return (
-    <div className="bg-surface text-on-surface">
+    <div className="bg-surface text-on-surface w-full overflow-x-hidden">
       {/* Hero Section with Animation */}
       <motion.section 
         ref={heroRef}
         initial="hidden"
         animate={isHeroInView ? "visible" : "hidden"}
         variants={fadeUp}
-        className="relative overflow-hidden py-24 px-8 lg:py-32"
+        className="relative overflow-hidden py-16 px-6 sm:px-8 lg:py-32"
       >
         {/* Background Gradient */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div className="relative z-10 space-y-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="relative z-10 space-y-6 lg:space-y-8 text-center md:text-left">
             <motion.span 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -107,7 +107,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl lg:text-7xl font-headline font-extrabold text-primary tracking-tight leading-[1.1]"
+              className="text-4xl sm:text-5xl lg:text-7xl font-headline font-extrabold text-primary tracking-tight leading-[1.1]"
             >
               Elevate Your <br />
               <span className="opacity-80 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -115,20 +115,20 @@ export default function Home() {
               </span>
             </motion.h1>
             
-            <motion.p 
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-lg text-secondary font-medium max-w-lg leading-relaxed"
+              className="text-base sm:text-lg text-secondary font-medium max-w-lg leading-relaxed mx-auto md:mx-0"
             >
               Access premium courses designed by industry experts. Experience a sophisticated curriculum structured for modern professionals.
-            </motion.p>
+            </motion.div>
             
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 pt-4"
+              className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start"
             >
               <Link
                 to="/catalog"
@@ -151,14 +151,14 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap gap-6 pt-4"
+              className="flex flex-wrap gap-4 sm:gap-6 pt-4 justify-center md:justify-start"
             >
               {stats.map((stat, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <stat.icon className="w-5 h-5 text-primary/60" />
+                <div key={idx} className="flex items-center gap-2 sm:gap-3">
+                  <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary/60" />
                   <div>
-                    <p className="text-xl font-bold text-primary">{stat.value}</p>
-                    <p className="text-[10px] font-bold text-secondary uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-lg sm:text-xl font-bold text-primary">{stat.value}</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold text-secondary uppercase tracking-wider">{stat.label}</p>
                   </div>
                 </div>
               ))}
@@ -178,6 +178,8 @@ export default function Home() {
                     src={`https://i.pravatar.cc/150?img=${i + 10}`}
                     className="w-10 h-10 rounded-full border-2 border-surface shadow-sm object-cover"
                     alt="Learner"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ))}
               </div>
@@ -197,11 +199,13 @@ export default function Home() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="relative rounded-[2rem] overflow-hidden bg-surface-container-low border border-surface-dim/20 p-2 ambient-shadow"
           >
-            <div className="relative rounded-3xl overflow-hidden h-[500px]">
+            <div className="relative rounded-3xl overflow-hidden h-[350px] sm:h-[450px] lg:h-[500px]">
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60"
+                loading="eager"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface/90 backdrop-blur-md rounded-2xl border border-white/20 flex justify-between items-center">
@@ -224,22 +228,22 @@ export default function Home() {
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="py-24 px-8 bg-surface-container-lowest border-y border-surface-dim/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-          <div className="md:w-1/2 space-y-8">
-            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
-            <p className="text-secondary text-lg leading-relaxed">
+      <section className="py-16 px-6 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 lg:gap-16">
+          <div className="md:w-1/2 space-y-6 lg:space-y-8 text-center md:text-left">
+            <h2 className="text-3xl sm:text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
+            <p className="text-secondary text-base sm:text-lg leading-relaxed">
               We reject the generic "boxed-in" aesthetic of traditional educational platforms. Instead, we embrace intentional asymmetry, deep navy tones, and clean typography to guide your eye effortlessly through complex knowledge material.
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 text-left inline-block md:block">
               {[
                 "150+ Expert Mentors from Global Firms",
                 "Certifications recognized across the tech industry",
                 "Lifetime access to premium course assets",
                 "24/7 Mentor Support & Community Access"
               ].map((text, i) => (
-                <li key={i} className="flex items-center gap-3 text-on-surface font-medium group">
-                  <ShieldCheck className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                <li key={i} className="flex items-center gap-3 text-on-surface font-medium group text-sm sm:text-base">
+                  <ShieldCheck className="w-5 h-5 text-primary shrink-0 group-hover:scale-110 transition-transform" />
                   {text}
                 </li>
               ))}
@@ -249,26 +253,26 @@ export default function Home() {
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-          <div className="md:w-1/2 grid grid-cols-2 gap-4">
-            <div className="h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1523240715630-991f2e811347?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Campus Life" />
+          <div className="md:w-1/2 grid grid-cols-2 gap-4 w-full">
+            <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
+              <img src="https://images.unsplash.com/photo-1523240715630-991f2e811347?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Campus Life" loading="lazy" decoding="async" />
             </div>
-            <div className="h-72 mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" />
+            <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" loading="lazy" decoding="async" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Courses Section (NEW) */}
-      <section className="py-24 px-8 bg-surface">
+      {/* Featured Courses Section */}
+      <section className="py-16 px-6 sm:px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-16 text-center max-w-2xl mx-auto">
+          <div className="mb-12 sm:mb-16 text-center max-w-2xl mx-auto">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest mb-4">
               Featured Curriculum
             </span>
-            <h2 className="text-4xl font-headline font-bold text-primary mb-4">Most Popular Pathways</h2>
-            <p className="text-secondary">Join thousands of professionals accelerating their careers with our flagship programs.</p>
+            <h2 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-4">Most Popular Pathways</h2>
+            <p className="text-secondary text-sm sm:text-base">Join thousands of professionals accelerating their careers with our flagship programs.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -319,13 +323,13 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="flex flex-col md:grid md:grid-cols-3 gap-6"
           >
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-low p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group md:col-span-2 relative overflow-hidden"
+              className="w-full md:col-span-2 bg-surface-container-low p-8 sm:p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
               <Award className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-headline font-bold mb-4">Industry Accreditation</h3>
               <p className="text-secondary max-w-md">Our certs are designed directly with enterprise CTOs, providing immediate professional legitimacy.</p>
@@ -337,7 +341,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="bg-primary text-primary-foreground p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
+              className="w-full md:col-span-1 bg-primary text-primary-foreground p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
             >
               <Brain className="w-12 h-12 mb-6 group-hover:rotate-6 transition-transform" />
               <div>
@@ -366,7 +370,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8 col-span-2"
+              className="w-full md:col-span-2 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
             >
               <div>
                 <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
@@ -407,6 +411,8 @@ export default function Home() {
                     src={testimonial.avatar} 
                     alt={testimonial.name}
                     className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div>
                     <p className="font-bold text-sm">{testimonial.name}</p>
@@ -426,11 +432,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section (NEW) */}
-      <section className="py-20 px-8 signature-gradient">
+      {/* CTA Section */}
+      <section className="py-16 px-6 sm:px-8 signature-gradient">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-4xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
-          <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
+          <p className="text-base sm:text-lg opacity-90 mb-8 max-w-2xl mx-auto">
             Join thousands of professionals who have transformed their careers with our premium courses.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

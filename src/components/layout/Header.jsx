@@ -48,8 +48,8 @@ export function Header() {
       })
     }
     
-    window.addEventListener('storage-update-lms_auth', handleAuthUpdate)
-    return () => window.removeEventListener('storage-update-lms_auth', handleAuthUpdate)
+    window.addEventListener('adhoc-lms-auth-update', handleAuthUpdate)
+    return () => window.removeEventListener('adhoc-lms-auth-update', handleAuthUpdate)
   }, [])
 
   React.useEffect(() => {

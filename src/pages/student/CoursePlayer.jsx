@@ -390,7 +390,7 @@ function PlayerContent() {
               <div className="relative aspect-video bg-primary rounded-[3rem] overflow-hidden shadow-2xl group flex items-center justify-center border-8 border-surface-container-low">
                 {activeItem.videoUrl ? (
                   getVideoType(activeItem.videoUrl) === 'mp4' ? (
-                    <video src={activeItem.videoUrl} className="absolute inset-0 w-full h-full object-cover bg-black" controls autoPlay />
+                    <video src={activeItem.videoUrl} className="absolute inset-0 w-full h-full object-cover bg-black" controls autoPlay preload="auto" />
                   ) : (
                     <iframe
                       key={activeItem.id}
