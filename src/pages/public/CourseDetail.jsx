@@ -1,39 +1,103 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { CheckCircle2, PlayCircle, Clock, BarChart, Shield, Globe, ArrowLeft, ArrowRight, Loader2, Star, TrendingUp } from "lucide-react"
+import { 
+  CheckCircle2, 
+  PlayCircle, 
+  Clock, 
+  BarChart, 
+  Shield, 
+  Globe, 
+  ArrowLeft, 
+  ArrowRight, 
+  Loader2, 
+  Star, 
+  BookOpen,
+  Users,
+  Award,
+  ChevronRight,
+  Video,
+  FileText,
+  ThumbsUp,
+  Share2,
+  Bookmark
+} from "lucide-react"
 import { StorageService } from "../../services/storage"
+import { motion } from "framer-motion"
 
 export default function CourseDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  
+  // ALL HOOKS MUST BE AT THE TOP
   const [course, setCourse] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
   const [isEnrolled, setIsEnrolled] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState("curriculum")
+  const [isBookmarked, setIsBookmarked] = React.useState(false)
+  const [enrolling, setEnrolling] = React.useState(false)
+  const [selectedPlan, setSelectedPlan] = React.useState('3months')
 
+  // Fetch course data
   React.useEffect(() => {
-    const fetchCourse = () => {
-      // Ensure ID is handled correctly for both string and number lookups
-      const data = StorageService.getCourseById(String(id))
-      console.log('Fetching course data:', data)
-      if (data) {
-        setCourse(data)
-        setIsEnrolled(StorageService.isEnrolled(String(id)))
+    const fetchCourse = async () => {
+      setLoading(true)
+      try {
+        const courseId = parseInt(id)
+        const data = await StorageService.getCourseById(courseId)
+        
+        if (data) {
+          setCourse(data)
+          const enrolled = await StorageService.isEnrolled(courseId)
+          setIsEnrolled(enrolled)
+          setIsBookmarked(StorageService.isBookmarked(courseId))
+        }
+      } catch (error) {
+        console.error('Error fetching course:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchCourse()
   }, [id])
 
-  const handleEnroll = () => {
+  // HANDLE FUNCTIONS
+  const handlePlanSelect = (planId) => {
+    setSelectedPlan(planId)
+  }
+
+  const handleEnroll = async () => {
     const auth = StorageService.getAuthState()
     if (!auth.isAuthenticated) {
       navigate("/auth")
       return
     }
-    StorageService.enroll(String(id))
-    setIsEnrolled(true)
+    
+    setEnrolling(true)
+    try {
+      const result = await StorageService.enroll(parseInt(id), selectedPlan)
+      if (result.success) {
+        setIsEnrolled(true)
+        alert('Successfully enrolled in the course!')
+      } else if (result.message === 'You already have an active subscription for this course') {
+        setIsEnrolled(true)
+        alert('You already have access to this course!')
+      } else {
+        alert(result.message || 'Enrollment failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      alert('Network error. Please try again.')
+    } finally {
+      setEnrolling(false)
+    }
   }
 
+  const handleBookmark = () => {
+    StorageService.toggleFavorite(parseInt(id))
+    setIsBookmarked(!isBookmarked)
+  }
+
+  // EARLY RETURNS
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
@@ -45,124 +109,373 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-surface p-8 text-center">
-        <h1 className="text-4xl font-headline font-bold text-primary mb-4">Course Protocol Missing</h1>
-        <p className="text-secondary max-w-sm mx-auto mb-8 font-medium">The requested identifier does not match any current active curriculum in our archives.</p>
-        <Link to="/catalog" className="px-8 py-3 signature-gradient text-white rounded-xl font-bold">Return to Catalog</Link>
+        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+          <BookOpen className="w-12 h-12 text-primary" />
+        </div>
+        <h1 className="text-4xl font-headline font-bold text-primary mb-4">Course Not Found</h1>
+        <p className="text-secondary max-w-sm mx-auto mb-8 font-medium">
+          The requested course could not be found in our catalog.
+        </p>
+        <Link to="/catalog" className="px-8 py-3 signature-gradient text-white rounded-xl font-bold hover:scale-105 transition-transform">
+          Browse All Courses
+        </Link>
       </div>
     )
   }
 
+  const user = StorageService.getUser()
+  const hasDiscount = user && user.availableDiscounts > 0
+
+  const planMap = {
+    '1month': { name: '1 Month', days: 30 },
+    '3months': { name: '3 Months', days: 90 },
+    '6months': { name: '6 Months', days: 180 }
+  }
+
+  const allowedPlanId = course.allowed_plan || '1month'
+  const planInfo = planMap[allowedPlanId] || planMap['1month']
+  const originalPrice = course.prices ? course.prices[allowedPlanId] : (course.price_1month || course.price || 599)
+  const selectedPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+
+  React.useEffect(() => {
+    if (course) {
+      setSelectedPlan(course.allowed_plan || '1month')
+    }
+  }, [course])
+
+  const modules = course.modules || [
+    { id: 1, title: "Foundation & Core Concepts", duration: "2.5 hours", lessons: 6 },
+    { id: 2, title: "Advanced Implementation", duration: "4 hours", lessons: 8 },
+    { id: 3, title: "Practical Labs & Case Studies", duration: "3.5 hours", lessons: 5 },
+    { id: 4, title: "Capstone Project", duration: "5 hours", lessons: 4 },
+  ]
+
+  const stats = [
+    { label: "Duration", value: `${course.durationHours || 20} hours`, icon: Clock },
+    { label: "Level", value: course.level || "Intermediate", icon: BarChart },
+    { label: "Students", value: course.studentsCount || "2,500+", icon: Users },
+    { label: "Lessons", value: course.lessonsCount || "24", icon: Video },
+  ]
+
   return (
     <main className="min-h-screen bg-surface">
-      {/* Dynamic Hero Section */}
-      <section className="relative h-[600px] lg:h-[700px] overflow-hidden">
+      <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
         <img 
-          src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
-          className="w-full h-full object-cover" 
+          src={course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
+          className="w-full h-full object-cover scale-105" 
           alt={course.title} 
         />
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
         
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-8 w-full mt-24 lg:mt-32">
-            <Link to="/catalog" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-all font-bold text-xs uppercase tracking-[0.2em] mb-8">
-              <ArrowLeft className="w-4 h-4" /> Back to Curriculum
+        <div className="absolute bottom-0 left-0 right-0 pb-16">
+          <div className="max-w-7xl mx-auto px-8">
+            <Link to="/catalog" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all font-bold text-sm mb-6 group">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Catalog
             </Link>
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-4 mb-6">
-                <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/20">
-                  {course.category || "Professional Development"}
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <span className="bg-primary/10 backdrop-blur-md text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-primary/20">
+                {course.category || "Professional Development"}
+              </span>
+              <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${course.course_type === 'mini' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'}`}>
+                {course.course_type === 'mini' ? 'Mini Course' : 'Mega Course'}
+              </span>
+              <span className="flex items-center gap-1.5 text-primary font-bold text-sm">
+                <Star className="w-4 h-4 fill-current" />
+                {course.rating || "4.9"} ({course.reviewCount || "2.4k"} reviews)
+              </span>
+              {isBookmarked && (
+                <span className="bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full text-xs font-medium">
+                  Saved
                 </span>
-                <span className="flex items-center gap-1.5 text-primary-fixed font-bold text-sm">
-                  <Star className="w-4 h-4 fill-current" />
-                  {course.rating || "4.9"} (2.4k Reviews)
-                </span>
-              </div>
-              <h1 className="text-5xl lg:text-7xl font-headline font-extrabold text-white mb-8 tracking-tighter leading-[1.1] italic">
-                {course.title}
-              </h1>
-              <p className="text-xl text-white/70 leading-relaxed font-medium max-w-2xl line-clamp-3">
-                {course.description}
-              </p>
+              )}
             </div>
+            
+            <h1 className="text-4xl lg:text-6xl font-headline font-extrabold text-primary mb-4 tracking-tighter leading-[1.1] max-w-3xl">
+              {course.title}
+            </h1>
+            <p className="text-lg text-on-surface-variant leading-relaxed font-medium max-w-2xl">
+              {course.description}
+            </p>
           </div>
         </div>
       </section>
 
       {/* Main Content & Sidebar */}
-      <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-16 -mt-24 lg:-mt-32 relative z-20 pb-24">
-        {/* Course Details */}
-        <div className="lg:col-span-8 space-y-12">
-          {/* Metrics Card */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Clock, label: "Duration", value: `${course.durationHours || 20} Hours` },
-              { icon: BarChart, label: "Experience", value: course.level || "Intermediate" },
-              { icon: Shield, label: "Certification", value: "Verified Profile" },
-              { icon: TrendingUp, label: "ROI", value: "Career Acceleration" }
-            ].map((metric, i) => (
-              <div key={metric.label} className="bg-surface-container-lowest p-6 rounded-[2rem] border border-surface-dim/20 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${i * 100}ms` }}>
-                <metric.icon className="w-6 h-6 text-primary mb-4" />
-                <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">{metric.label}</p>
-                <p className="text-primary font-headline font-bold text-sm leading-tight">{metric.value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-surface-container-lowest p-10 rounded-[3rem] shadow-xl shadow-primary/5 border border-surface-dim/20">
-            <h2 className="text-3xl font-headline font-bold text-primary mb-8 italic">Curriculum Intent</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {(course.outcomes || [
-                "Master industry-standard frameworks",
-                "Execute practical labs under guidance",
-                "Optimize workflow for scale",
-                "Produce professional-grade deliverables"
-              ]).map((outcome, i) => (
-                <div key={i} className="flex gap-4 items-start group">
-                  <div className="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center shrink-0 mt-1 group-hover:bg-primary transition-colors">
-                    <CheckCircle2 className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
-                  </div>
-                  <p className="text-on-surface-variant font-medium leading-relaxed">{outcome}</p>
-                </div>
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {stats.map((stat, i) => (
+                <motion.div 
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-surface-container-lowest p-4 rounded-2xl border border-surface-dim/20"
+                >
+                  <stat.icon className="w-5 h-5 text-primary mb-2" />
+                  <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-0.5">{stat.label}</p>
+                  <p className="text-primary font-headline font-bold text-sm">{stat.value}</p>
+                </motion.div>
               ))}
             </div>
-          </div>
-        </div>
 
-        {/* Action Sidebar */}
-        <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-          <div className="bg-surface-container-lowest/80 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/40 shadow-2xl ambient-shadow">
-            <div className="mb-8">
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em] block mb-2">Access Investment</span>
-              <div className="text-6xl font-headline font-extrabold text-primary tracking-tighter leading-none mb-4 italic">₹{course.price}</div>
-              <p className="text-on-surface-variant text-sm font-medium leading-relaxed opacity-70 italic">
-                Secure the entire curriculum profile. Complete with future protocol updates.
-              </p>
+            {/* Tabs */}
+            <div className="border-b border-surface-dim/20">
+              <div className="flex gap-6">
+                {["curriculum", "instructor", "reviews"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all ${
+                      activeTab === tab 
+                        ? "text-primary border-b-2 border-primary" 
+                        : "text-secondary hover:text-primary"
+                    }`}
+                  >
+                    {tab === "curriculum" ? "Curriculum" : tab === "instructor" ? "Instructor" : "Reviews"}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {isEnrolled ? (
-              <button 
-                onClick={() => navigate(`/student/course/${id}`)}
-                className="w-full py-5 rounded-2xl bg-primary text-white font-headline font-bold text-lg hover:bg-primary/90 transition-all shadow-xl flex items-center justify-center gap-3 active:scale-[0.98]"
+            {/* Curriculum Tab */}
+            {activeTab === "curriculum" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
               >
-                Enter Classroom
-                <PlayCircle className="w-6 h-6" />
-              </button>
-            ) : (
-              <button 
-                onClick={handleEnroll}
-                className="w-full py-5 rounded-2xl signature-gradient text-white font-headline font-bold text-lg hover:opacity-90 transition-all shadow-xl flex items-center justify-center gap-3 active:scale-[0.98]"
-              >
-                Initiate Enrollment
-                <ArrowRight className="w-6 h-6" />
-              </button>
+                <h2 className="text-2xl font-headline font-bold text-primary">Course Modules</h2>
+                <div className="space-y-3">
+                  {modules.map((module, idx) => (
+                    <div key={module.id} className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden">
+                      <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                            {idx + 1}
+                          </div>
+                          <div>
+                            <h3 className="font-headline font-bold text-on-surface">{module.title}</h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-secondary flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> {module.duration}
+                              </span>
+                              <span className="text-xs text-secondary flex items-center gap-1">
+                                <FileText className="w-3 h-3" /> {module.lessons} lessons
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-secondary" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* What You'll Learn */}
+                <div className="bg-primary/5 rounded-3xl p-8 mt-8">
+                  <h3 className="text-xl font-headline font-bold text-primary mb-6">What You'll Learn</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      "Master industry-standard frameworks and best practices",
+                      "Execute practical labs under expert guidance",
+                      "Optimize workflows for enterprise scale",
+                      "Produce professional-grade deliverables",
+                      "Build a portfolio of real-world projects",
+                      "Earn a verifiable certificate of completion"
+                    ].map((outcome, i) => (
+                      <div key={i} className="flex gap-3 items-start">
+                        <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <span className="text-on-surface-variant text-sm">{outcome}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             )}
 
-            <div className="mt-8 pt-8 border-t border-surface-dim/20 flex items-center gap-4">
-              <img src={`https://i.pravatar.cc/100?u=${course.instructor}`} className="w-12 h-12 rounded-2xl object-cover shadow-sm" alt="Instructor" />
-              <div>
-                <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">Lead Mentor</p>
-                <p className="text-primary font-headline font-extrabold text-sm">{course.instructor}</p>
+            {/* Instructor Tab */}
+            {activeTab === "instructor" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex flex-col sm:flex-row gap-6 p-6 bg-surface-container-lowest rounded-3xl border border-surface-dim/20">
+                  <img 
+                    src={`https://i.pravatar.cc/150?u=${course.instructor}`} 
+                    className="w-24 h-24 rounded-2xl object-cover shadow-lg" 
+                    alt={course.instructor} 
+                  />
+                  <div>
+                    <h2 className="text-2xl font-headline font-bold text-primary mb-2">{course.instructor}</h2>
+                    <p className="text-secondary text-sm mb-4">Lead Instructor & Industry Expert</p>
+                    <p className="text-on-surface-variant leading-relaxed">
+                      {course.instructorBio || "A seasoned professional with over 15 years of experience in the industry, specializing in cutting-edge technologies and methodologies. Has trained thousands of students worldwide and helped them accelerate their careers."}
+                    </p>
+                    <div className="flex items-center gap-4 mt-4">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-bold">4.9</span>
+                        <span className="text-xs text-secondary">(2,500+ ratings)</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4 text-primary" />
+                        <span className="text-sm">15,000+ students</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Reviews Tab */}
+            {activeTab === "reviews" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-headline font-bold text-primary">Student Reviews</h2>
+                  <button className="text-primary text-sm font-medium flex items-center gap-1">
+                    Write a Review <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {[
+                    { id: 1, name: "Sarah Chen", role: "CTO", rating: 5, comment: "Excellent course! The curriculum is well-structured and the instructor is highly knowledgeable.", date: "2 weeks ago", avatar: "https://i.pravatar.cc/100?img=1" },
+                    { id: 2, name: "Michael Rodriguez", role: "Lead Architect", rating: 5, comment: "This course transformed my approach to system design. Highly recommended!", date: "1 month ago", avatar: "https://i.pravatar.cc/100?img=2" },
+                  ].map((review) => (
+                    <div key={review.id} className="bg-surface-container-lowest p-5 rounded-2xl border border-surface-dim/20">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <img src={review.avatar} className="w-10 h-10 rounded-full object-cover" alt={review.name} />
+                          <div>
+                            <p className="font-bold text-on-surface">{review.name}</p>
+                            <p className="text-xs text-secondary">{review.role}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-on-surface-variant text-sm leading-relaxed mb-2">{review.comment}</p>
+                      <div className="flex items-center gap-4">
+                        <button className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition">
+                          <ThumbsUp className="w-3 h-3" /> Helpful
+                        </button>
+                        <span className="text-xs text-secondary">{review.date}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <button className="w-full py-3 text-primary border border-primary/30 rounded-xl font-medium hover:bg-primary/5 transition">
+                  Load More Reviews
+                </button>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Sidebar - Enrollment Card */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-24">
+              <div className="bg-surface-container-lowest rounded-3xl p-6 border border-surface-dim/20 shadow-xl">
+                {isEnrolled ? (
+                  <>
+                    <div className="mb-6 text-center">
+                      <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle2 className="w-8 h-8 text-green-500" />
+                      </div>
+                      <h3 className="text-xl font-headline font-bold text-primary mb-2">You're Enrolled!</h3>
+                      <p className="text-secondary text-sm">You have access to this course.</p>
+                    </div>
+                    <button 
+                      onClick={() => navigate(`/student/course/${id}`)}
+                      className="w-full py-4 rounded-2xl bg-primary text-white font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
+                    >
+                      Continue Learning
+                      <PlayCircle className="w-5 h-5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-6">
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em] block mb-2">Selected Plan</span>
+                      <div className="w-full p-4 rounded-xl border-2 border-primary bg-primary/5 text-left">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-headline font-bold text-primary">{planInfo.name}</p>
+                            <p className="text-xs text-secondary">{planInfo.days} days access</p>
+                          </div>
+                          <div className="text-right">
+                             {hasDiscount && <div className="text-xs text-secondary line-through">₹{originalPrice}</div>}
+                             <div className="text-2xl font-headline font-bold text-primary">₹{selectedPrice}</div>
+                          </div>
+                        </div>
+                        {hasDiscount && (
+                           <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
+                             10% Referral Discount Applied
+                           </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                      className="w-full py-4 rounded-2xl signature-gradient text-white font-headline font-bold text-base hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                    >
+                      {enrolling ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          Enroll Now - ₹{selectedPrice}
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
+                    </button>
+
+                    <div className="mt-6 pt-6 border-t border-surface-dim/20 space-y-3">
+                      <div className="flex items-center gap-3 text-sm text-secondary">
+                        <Shield className="w-4 h-4" />
+                        <span>30-day money-back guarantee</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-secondary">
+                        <Globe className="w-4 h-4" />
+                        <span>Access from anywhere</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-secondary">
+                        <Award className="w-4 h-4" />
+                        <span>Certificate of completion</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <button 
+                  onClick={handleBookmark}
+                  className="w-full mt-4 py-3 rounded-xl border border-surface-dim/20 text-secondary font-medium hover:bg-surface-container-high transition-all flex items-center justify-center gap-2"
+                >
+                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-primary text-primary' : ''}`} />
+                  {isBookmarked ? "Saved to Wishlist" : "Save to Wishlist"}
+                </button>
+
+                <button className="w-full mt-2 py-3 text-secondary text-sm flex items-center justify-center gap-2 hover:text-primary transition">
+                  <Share2 className="w-4 h-4" />
+                  Share this course
+                </button>
               </div>
             </div>
           </div>

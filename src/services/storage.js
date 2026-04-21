@@ -1,123 +1,306 @@
-import { getStorage, setStorage, removeStorage } from '../utils/storage'
-import { INITIAL_COURSES } from './initialData'
+// src/services/storage.js
+const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
 
-// --- Keys ---
-export const AUTH_KEY = "adhoc-lms-auth"
-export const TOKEN_KEY = "adhoc-lms-token"
-export const ENROLLMENTS_KEY = "adhoc-lms-enrollments"
-export const FAVORITES_KEY = "adhoc-lms-favorites"
-export const PROGRESS_KEY = "adhoc-lms-progress"
-export const COURSES_KEY = "adhoc-lms-courses"
+// Keys for localStorage
+export const TOKEN_KEY = 'lms_token'
+export const USER_KEY = 'lms_user'
+export const FAVORITES_KEY = 'lms_favorites'
+export const AUTH_KEY = 'lms_auth'
+export const ENROLLMENTS_KEY = 'lms_enrollments'
 
-/**
- * Domain-specific storage service (Pure Frontend implementation)
- */
 export const StorageService = {
-  // --- Authentication ---
-  getAuthState: () => getStorage(AUTH_KEY, { isAuthenticated: false, user: null }),
+  // ============ AUTHENTICATION ============
   
-  setAuthState: (state) => setStorage(AUTH_KEY, state),
-  
-  getToken: () => getStorage(TOKEN_KEY),
-  
-  setToken: (token) => setStorage(TOKEN_KEY, token),
-  
-  login: (email, password) => {
-    // Pure frontend mock login
-    const state = {
-      isAuthenticated: true,
-      user: {
-        name: email.split('@')[0],
-        email,
-        role: email.toLowerCase().includes('admin') ? 'admin' : 'student'
-      }
-    }
-    StorageService.setAuthState(state)
-    StorageService.setToken("mock-jwt-token")
-    window.dispatchEvent(new Event('auth-change'))
-    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
-    return true
+  setToken: (token) => {
+    if (token) localStorage.setItem(TOKEN_KEY, token)
   },
-
-  logout: () => {
-    removeStorage(TOKEN_KEY)
-    removeStorage(AUTH_KEY)
-    window.dispatchEvent(new Event('auth-change'))
-    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+  
+  getToken: () => localStorage.getItem(TOKEN_KEY),
+  
+  removeToken: () => localStorage.removeItem(TOKEN_KEY),
+  
+  setUser: (user) => {
+    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
   },
-
+  
   getUser: () => {
-    const state = StorageService.getAuthState()
-    return state.user
+    const user = localStorage.getItem(USER_KEY)
+    return user ? JSON.parse(user) : null
   },
-
-  register: (userData) => {
-    // Pure frontend registration (mock)
-    const state = {
-      isAuthenticated: true,
-      user: {
-        ...userData,
-        role: userData.email?.includes('admin') ? 'admin' : 'student'
+  
+  removeUser: () => localStorage.removeItem(USER_KEY),
+  
+  isAuthenticated: () => {
+    return !!StorageService.getToken()
+  },
+  
+  getAuthState: () => ({
+    isAuthenticated: StorageService.isAuthenticated(),
+    user: StorageService.getUser()
+  }),
+  
+  // Login user
+  login: async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        StorageService.setToken(data.token)
+        StorageService.setUser(data.user)
+        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        return { success: true, user: data.user }
+      } else {
+        return { success: false, message: data.message || 'Login failed' }
       }
+    } catch (error) {
+      console.error('Login error:', error)
+      return { success: false, message: 'Network error. Please try again.' }
     }
-    StorageService.setAuthState(state)
-    StorageService.setToken("mock-jwt-token")
-    window.dispatchEvent(new Event('auth-change'))
+  },
+  
+  // Register user
+  register: async (userData) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userData.name,
+          email: userData.email,
+          password: userData.password,
+          role: userData.role || 'student',
+          referralCode: userData.referralCode
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        StorageService.setToken(data.token)
+        StorageService.setUser(data.user)
+        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        return { success: true, user: data.user }
+      } else {
+        return { success: false, message: data.message || 'Registration failed' }
+      }
+    } catch (error) {
+      console.error('Register error:', error)
+      return { success: false, message: 'Network error. Please try again.' }
+    }
+  },
+  
+  // Logout
+  logout: () => {
+    StorageService.removeToken()
+    StorageService.removeUser()
     window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
-    return state
   },
-
-  // --- Courses ---
-  getCourses: () => {
-    const existing = getStorage(COURSES_KEY)
-    if (!existing || existing.length === 0) {
-      setStorage(COURSES_KEY, INITIAL_COURSES)
-      return INITIAL_COURSES
+  
+  // ============ COURSES ============
+  
+  getCourses: async () => {
+    try {
+      const response = await fetch(`${API_URL}/courses`)
+      const data = await response.json()
+      return data.data || []
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+      return []
     }
-    return existing
   },
   
-  saveCourses: (courses) => setStorage(COURSES_KEY, courses),
-  
-  getCourseById: (id) => {
-    const courses = StorageService.getCourses()
-    return courses.find(c => c.id === id || c.id === Number(id))
+  getCourseById: async (id) => {
+    try {
+      const token = StorageService.getToken()
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
+      const response = await fetch(`${API_URL}/courses/${id}`, { headers })
+      const data = await response.json()
+      return data.data
+    } catch (error) {
+      console.error('Error fetching course:', error)
+      return null
+    }
   },
-
-  // --- Enrollments ---
-  getEnrollments: () => getStorage(ENROLLMENTS_KEY, []),
   
-  enroll: (courseId) => {
+  getEnrolledCourses: async () => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return []
+      const response = await fetch(`${API_URL}/courses/my-courses`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      return data.data || []
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error)
+      return []
+    }
+  },
+  
+  isEnrolled: async (courseId) => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return false
+      const response = await fetch(`${API_URL}/subscriptions/course/${courseId}/access`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      return data.hasAccess || false
+    } catch (error) {
+      console.error('Error checking enrollment:', error)
+      return false
+    }
+  },
+  // In storage.js
+enroll: async (courseId, plan = '3months') => {
+  try {
+    const token = StorageService.getToken()
+    if (!token) return { success: false, message: 'Please login first' }
+    
+    const response = await fetch(`${API_URL}/payments/mock-purchase`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        courseId: parseInt(courseId), 
+        plan: plan, 
+        paymentId: 'web_' + Date.now() 
+      })
+    })
+    
+    const data = await response.json()
+    
+    if (data.success) {
+      window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+    }
+    return data
+  } catch (error) {
+    console.error('Enrollment error:', error)
+    return { success: false, message: 'Network error' }
+  }
+},
+  
+  // ============ PROGRESS ============
+  
+  getProgress: async (courseId) => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return {}
+      const response = await fetch(`${API_URL}/progress/course/${courseId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      
+      const progressMap = {}
+      if (data.data?.lessons) {
+        data.data.lessons.forEach(lesson => {
+          if (lesson.completed) progressMap[lesson.id] = 'completed'
+        })
+      }
+      return progressMap
+    } catch (error) {
+      console.error('Error fetching progress:', error)
+      return {}
+    }
+  },
+  
+  updateProgress: async (courseId, lessonId) => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return null
+      
+      const response = await fetch(`${API_URL}/progress/lesson/${lessonId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      return await response.json()
+    } catch (error) {
+      console.error('Error updating progress:', error)
+      return null
+    }
+  },
+  
+  // ============ FAVORITES (Local only) ============
+  
+  getFavorites: () => {
+    const favs = localStorage.getItem(FAVORITES_KEY)
+    return favs ? JSON.parse(favs) : []
+  },
+  
+  toggleFavorite: (courseId) => {
+    const favs = StorageService.getFavorites()
+    const index = favs.indexOf(courseId)
+    if (index === -1) {
+      favs.push(courseId)
+    } else {
+      favs.splice(index, 1)
+    }
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs))
+    window.dispatchEvent(new Event(`storage-update-${FAVORITES_KEY}`))
+  },
+  
+  isBookmarked: (courseId) => {
+    const favs = StorageService.getFavorites()
+    return favs.includes(courseId)
+  },
+  
+  // ============ ENROLLMENT ============
+  
+  enroll: async (courseId, plan = '3months') => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return { success: false, message: 'Please login first' }
+      
+      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ courseId: parseInt(courseId), plan, paymentId: 'web_' + Date.now() })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      }
+      return data
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      return { success: false, message: 'Network error' }
+    }
+  },
+  
+  // Get enrollments (IDs only)
+  getEnrollments: () => {
+    const enrolled = localStorage.getItem(ENROLLMENTS_KEY)
+    return enrolled ? JSON.parse(enrolled) : []
+  },
+  
+  // Add enrollment ID
+  addEnrollment: (courseId) => {
     const enrollments = StorageService.getEnrollments()
     if (!enrollments.includes(courseId)) {
       enrollments.push(courseId)
-      setStorage(ENROLLMENTS_KEY, enrollments)
+      localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments))
     }
-  },
-  
-  isEnrolled: (courseId) => StorageService.getEnrollments().includes(courseId),
-
-  // --- Favorites ---
-  getFavorites: () => getStorage(FAVORITES_KEY, []),
-  
-  toggleFavorite: (courseId) => {
-    const favorites = StorageService.getFavorites()
-    const index = favorites.indexOf(courseId)
-    if (index === -1) {
-      favorites.push(courseId)
-    } else {
-      favorites.splice(index, 1)
-    }
-    setStorage(FAVORITES_KEY, favorites)
-  },
-
-  // --- Progress ---
-  getProgress: () => getStorage(PROGRESS_KEY, {}),
-  
-  updateProgress: (courseId, lessonId, status = 'completed') => {
-    const progress = StorageService.getProgress()
-    if (!progress[courseId]) progress[courseId] = {}
-    progress[courseId][lessonId] = status
-    setStorage(PROGRESS_KEY, progress)
   }
 }
+
+// Export individual items for direct imports
+export const getToken = () => StorageService.getToken()
+export const getUser = () => StorageService.getUser()
+export const isAuthenticated = () => StorageService.isAuthenticated()
+export const logout = () => StorageService.logout()
