@@ -6,7 +6,7 @@ import { api } from "../../services/api"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { toast } from "sonner"
 import confetti from "canvas-confetti"
-import { getEmbedUrl, getVideoType } from "../../utils/videoUtils"
+import VideoPlayer from "../../components/course/VideoPlayer"
 
 export default function CoursePlayer() {
   return (
@@ -387,28 +387,13 @@ function PlayerContent() {
           // LESSON PLAYER
           <div className="flex-grow flex flex-col p-8 lg:p-12 overflow-y-auto no-scrollbar">
             <div className="w-full max-w-6xl mx-auto flex flex-col h-full">
-              <div className="relative aspect-video bg-primary rounded-[3rem] overflow-hidden shadow-2xl group flex items-center justify-center border-8 border-surface-container-low">
-                {activeItem.videoUrl ? (
-                  getVideoType(activeItem.videoUrl) === 'mp4' ? (
-                    <video src={activeItem.videoUrl} className="absolute inset-0 w-full h-full object-cover bg-black" controls autoPlay />
-                  ) : (
-                    <iframe
-                      key={activeItem.id}
-                      src={getEmbedUrl(activeItem.videoUrl)}
-                      className="absolute inset-0 w-full h-full bg-black"
-                      frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                    />
-                  )
-                ) : (
-                  <>
-                    <img src={course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600"} className="absolute inset-0 w-full h-full object-cover opacity-60 blur-[2px] scale-105" alt="Video Static" />
-                    <div className="relative z-10 w-24 h-24 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white cursor-pointer">
-                      <PlayCircle className="w-10 h-10 fill-current" />
-                    </div>
-                  </>
-                )}
+              <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-8 border-surface-container-low mb-12">
+                <VideoPlayer 
+                  url={activeItem.videoUrl} 
+                  title={activeItem.title} 
+                  lessonId={activeItem.id}
+                  onComplete={handleLessonComplete}
+                />
               </div>
               
               <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-8 bg-surface-container-lowest p-10 rounded-[3rem] border border-surface-dim/20 shadow-xl shadow-primary/5">

@@ -32,29 +32,36 @@ function App() {
     <Router>
       <div className="min-h-screen bg-surface font-body text-on-surface transition-colors duration-300 flex flex-col">
         <Header />
-        <main className="flex-1 pt-16 pb-16 md:pb-0">
+        <main className="flex-1 pt-16 pb-24 md:pb-0">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/course/:id" element={<CourseDetail />} />
             <Route path="/verify-certificate" element={<VerifyCertificate />} />
             <Route path="/verify-certificate/:code" element={<VerifyCertificate />} />
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
+            
+            {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/auth/register" element={<Navigate to="/register" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/student/course/:id" element={<CoursePlayer />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/my-courses" element={<MyCourses />} />
-            <Route path="/certificates" element={<Certificates />} />
-            <Route path="/my-doubts" element={<MyDoubts />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/referral" element={<Referral />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/courses" element={<AdminCourses />} />
-            <Route path="/admin/courses/:id" element={<AdminCourseManager />} />
-            <Route path="/admin/doubts" element={<AdminDoubts />} />
+            
+            {/* Student Protected Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/student/course/:id" element={<ProtectedRoute><CoursePlayer /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
+            <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+            <Route path="/my-doubts" element={<ProtectedRoute><MyDoubts /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/referral" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
+            
+            {/* Admin Protected Routes */}
+            <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+            <Route path="/admin/courses" element={<AdminProtectedRoute><AdminCourses /></AdminProtectedRoute>} />
+            <Route path="/admin/courses/:id" element={<AdminProtectedRoute><AdminCourseManager /></AdminProtectedRoute>} />
+            <Route path="/admin/doubts" element={<AdminProtectedRoute><AdminDoubts /></AdminProtectedRoute>} />
+            
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />

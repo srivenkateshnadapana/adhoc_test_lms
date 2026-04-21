@@ -23,6 +23,7 @@
 |---|---|
 | **Framework** | React 19 |
 | **Build Tool** | Vite 6.4 |
+| **Backend** | Node.js (Primary Source of Truth) |
 | **Styling** | Tailwind CSS v4 (CSS Variables) |
 | **Routing** | React Router DOM v7 |
 | **Animations** | Framer Motion v12 |
@@ -214,25 +215,27 @@ The app will be available at **http://localhost:5173/** (or the next available p
 
 ---
 
-## Access Credentials
+### Access Credentials
 
-> ⚠️ This is a **frontend-only prototype**. Authentication is fully simulated using `localStorage`. No backend or database is required.
+> Use the following credentials for testing. Authentication and data management are handled by the backend API.
 
 ### Student Account
-Any valid email + password combination works:
+Use the following credentials for testing:
 
 | Field | Value |
 |---|---|
-| **Email** | `student@example.com` *(or any valid email)* |
-| **Password** | `password123` *(or any 8+ character string)* |
+| **Email** | `student@example.com` |
+| **Password** | `student123` |
 
 ### Admin Account
-To unlock the **Proctor Console** (`/admin`) and the admin navigation button, include `admin` anywhere in the email address:
+Use the following credentials to unlock the **Proctor Console** (`/admin`):
 
 | Field | Value |
 |---|---|
-| **Email** | `admin@adhoclms.com` |
-| **Password** | `password123` |
+| **Email** | `admin@example.com` |
+| **Password** | `admin123` |
+
+> **Note**: You can also create a new account via the Register page. The system will automatically grant Admin privileges if the email contains the string `"admin"`.
 
 > **Role Detection Logic**: The system checks if the email string contains `"admin"`. If true, the user is granted the `admin` role automatically on login.
 
@@ -248,11 +251,11 @@ npm run build
 Output is generated in the `dist/` directory. The build is fully static and can be deployed to any CDN or static hosting provider.
 
 ### Deploy to Vercel
-```bash
-vercel deploy --prod
-```
-
-Or simply connect the GitHub repository to a Vercel project. The build command is `npm run build` and the output directory is `dist`.
+1. Push your changes to GitHub.
+2. Connect the repository to Vercel.
+3. **Important**: Add the following Environment Variable in Vercel:
+   - `VITE_API_URL`: Your backend API URL (e.g., `https://lms-backend-g1cy.onrender.com/api`)
+4. The build command is `npm run build` and the output directory is `dist`.
 
 ### Build Output (Reference)
 ```

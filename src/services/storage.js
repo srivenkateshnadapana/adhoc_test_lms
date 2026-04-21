@@ -1,12 +1,12 @@
 // src/services/storage.js
-const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
+import { api } from './api'
 
 // Keys for localStorage
-export const TOKEN_KEY = 'lms_token'
-export const USER_KEY = 'lms_user'
-export const FAVORITES_KEY = 'lms_favorites'
-export const AUTH_KEY = 'lms_auth'
-export const ENROLLMENTS_KEY = 'lms_enrollments'
+export const TOKEN_KEY = 'adhoc_token'
+export const USER_KEY = 'adhoc_user'
+export const FAVORITES_KEY = 'adhoc_favorites'
+export const ENROLLMENTS_KEY = 'adhoc_enrollments'
+export const AUTH_UPDATE_EVENT = 'storage-update-adhoc-lms-auth'
 
 export const StorageService = {
   // ============ AUTHENTICATION ============
@@ -39,21 +39,14 @@ export const StorageService = {
     user: StorageService.getUser()
   }),
   
-  // Login user
   login: async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      
-      const data = await response.json()
+      const data = await api.auth.login(email, password)
       
       if (data.success) {
         StorageService.setToken(data.token)
         StorageService.setUser(data.user)
-        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        window.dispatchEvent(new Event(AUTH_UPDATE_EVENT))
         return { success: true, user: data.user }
       } else {
         return { success: false, message: data.message || 'Login failed' }
@@ -64,27 +57,14 @@ export const StorageService = {
     }
   },
   
-  // Register user
   register: async (userData) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: userData.name,
-          email: userData.email,
-          password: userData.password,
-          role: userData.role || 'student',
-          referralCode: userData.referralCode
-        })
-      })
-      
-      const data = await response.json()
+      const data = await api.auth.register(userData)
       
       if (data.success) {
         StorageService.setToken(data.token)
         StorageService.setUser(data.user)
-        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        window.dispatchEvent(new Event(AUTH_UPDATE_EVENT))
         return { success: true, user: data.user }
       } else {
         return { success: false, message: data.message || 'Registration failed' }
@@ -95,19 +75,17 @@ export const StorageService = {
     }
   },
   
-  // Logout
   logout: () => {
     StorageService.removeToken()
     StorageService.removeUser()
-    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+    window.dispatchEvent(new Event(AUTH_UPDATE_EVENT))
   },
   
   // ============ COURSES ============
   
   getCourses: async () => {
     try {
-      const response = await fetch(`${API_URL}/courses`)
-      const data = await response.json()
+      const data = await api.courses.getAll()
       return data.data || []
     } catch (error) {
       console.error('Error fetching courses:', error)
@@ -118,9 +96,7 @@ export const StorageService = {
   getCourseById: async (id) => {
     try {
       const token = StorageService.getToken()
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
-      const response = await fetch(`${API_URL}/courses/${id}`, { headers })
-      const data = await response.json()
+      const data = await api.courses.getById(id, token)
       return data.data
     } catch (error) {
       console.error('Error fetching course:', error)
@@ -132,10 +108,7 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return []
-      const response = await fetch(`${API_URL}/courses/my-courses`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.courses.getMyCourses(token)
       return data.data || []
     } catch (error) {
       console.error('Error fetching enrolled courses:', error)
@@ -147,46 +120,30 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return false
-      const response = await fetch(`${API_URL}/subscriptions/course/${courseId}/access`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.enrollments.checkAccess(courseId, token)
       return data.hasAccess || false
     } catch (error) {
       console.error('Error checking enrollment:', error)
       return false
     }
   },
-  // In storage.js
-enroll: async (courseId, plan = '3months') => {
-  try {
-    const token = StorageService.getToken()
-    if (!token) return { success: false, message: 'Please login first' }
-    
-    const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        courseId: parseInt(courseId), 
-        plan: plan, 
-        paymentId: 'web_' + Date.now() 
-      })
-    })
-    
-    const data = await response.json()
-    
-    if (data.success) {
-      window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+
+  enroll: async (courseId, plan = '3months') => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return { success: false, message: 'Please login first' }
+      
+      const data = await api.enrollments.purchase(courseId, plan, token)
+      
+      if (data.success) {
+        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      }
+      return data
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      return { success: false, message: 'Network error' }
     }
-    return data
-  } catch (error) {
-    console.error('Enrollment error:', error)
-    return { success: false, message: 'Network error' }
-  }
-},
+  },
   
   // ============ PROGRESS ============
   
@@ -194,10 +151,7 @@ enroll: async (courseId, plan = '3months') => {
     try {
       const token = StorageService.getToken()
       if (!token) return {}
-      const response = await fetch(`${API_URL}/progress/course/${courseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.progress.getCourseProgress(courseId, token)
       
       const progressMap = {}
       if (data.data?.lessons) {
@@ -217,14 +171,7 @@ enroll: async (courseId, plan = '3months') => {
       const token = StorageService.getToken()
       if (!token) return null
       
-      const response = await fetch(`${API_URL}/progress/lesson/${lessonId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      return await response.json()
+      return await api.progress.markComplete(lessonId, token)
     } catch (error) {
       console.error('Error updating progress:', error)
       return null
@@ -253,54 +200,12 @@ enroll: async (courseId, plan = '3months') => {
   isBookmarked: (courseId) => {
     const favs = StorageService.getFavorites()
     return favs.includes(courseId)
-  },
-  
-  // ============ ENROLLMENT ============
-  
-  enroll: async (courseId, plan = '3months') => {
-    try {
-      const token = StorageService.getToken()
-      if (!token) return { success: false, message: 'Please login first' }
-      
-      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ courseId: parseInt(courseId), plan, paymentId: 'web_' + Date.now() })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
-      }
-      return data
-    } catch (error) {
-      console.error('Enrollment error:', error)
-      return { success: false, message: 'Network error' }
-    }
-  },
-  
-  // Get enrollments (IDs only)
-  getEnrollments: () => {
-    const enrolled = localStorage.getItem(ENROLLMENTS_KEY)
-    return enrolled ? JSON.parse(enrolled) : []
-  },
-  
-  // Add enrollment ID
-  addEnrollment: (courseId) => {
-    const enrollments = StorageService.getEnrollments()
-    if (!enrollments.includes(courseId)) {
-      enrollments.push(courseId)
-      localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments))
-    }
   }
 }
 
-// Export individual items for direct imports
+// Export individual items for compatibility
 export const getToken = () => StorageService.getToken()
 export const getUser = () => StorageService.getUser()
 export const isAuthenticated = () => StorageService.isAuthenticated()
 export const logout = () => StorageService.logout()
+export const AUTH_KEY = AUTH_UPDATE_EVENT 
