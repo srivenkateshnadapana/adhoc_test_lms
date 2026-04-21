@@ -26,6 +26,8 @@ import AdminCourses from './pages/admin/AdminCourses'
 import AdminCourseManager from './pages/admin/AdminCourseManager'
 import AdminDoubts from './pages/admin/AdminDoubts'
 import VerifyCertificate from './pages/public/VerifyCertificate'
+import { ProtectedRoute } from './context/ProtectedRoute'
+import { AdminProtectedRoute } from './context/AdminProtectedRoute'
 
 function App() {
   return (

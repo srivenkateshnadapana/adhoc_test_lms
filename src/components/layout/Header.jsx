@@ -3,7 +3,7 @@ import * as React from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Menu, X, LogOut, Sun, Moon, User, BookOpen, Award, Settings, Gift, MessageCircle, ChevronDown, LayoutDashboard } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
-import { StorageService } from "../../services/storage"
+import { StorageService, AUTH_KEY } from "../../services/storage"
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
@@ -48,8 +48,8 @@ export function Header() {
       })
     }
     
-    window.addEventListener('storage-update-lms_auth', handleAuthUpdate)
-    return () => window.removeEventListener('storage-update-lms_auth', handleAuthUpdate)
+    window.addEventListener(`storage-update-${AUTH_KEY}`, handleAuthUpdate)
+    return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleAuthUpdate)
   }, [])
 
   React.useEffect(() => {
