@@ -345,10 +345,11 @@ export default function Home() {
                 <p className="opacity-80 text-sm text-white">Mentors leading deep technical pathways from FAANG and Fortune 500.</p>
               </div>
             </motion.div>
-
+            
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
+              className="w-full bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
             >
               <History className="w-10 h-10 text-primary mb-6" />
               <h3 className="text-xl font-headline font-bold mb-2">Lifetime Access</h3>
@@ -357,16 +358,16 @@ export default function Home() {
 
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
+              className="w-full bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
             >
               <Globe className="w-10 h-10 text-primary mb-6" />
               <h3 className="text-xl font-headline font-bold mb-2">Global Network</h3>
               <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
             </motion.div>
-            
+            </div>
             <motion.div 
               variants={fadeUp}
-              className="w-full md:col-span-2 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
+              className="w-full md:col-span-3 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
             >
               <div>
                 <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
