@@ -20,8 +20,8 @@ export function BottomNav({ customItems = null }) {
   const navItems = customItems || BOTTOM_NAV_ITEMS.filter(item => item.active)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-surface-container border-t border-outline-variant md:hidden z-40 safe-bottom">
-      <div className="flex justify-around items-center h-16 px-2">
+    <div className="fixed bottom-0 left-0 right-0 bg-surface-container/95 backdrop-blur-md border-t border-outline-variant md:hidden z-50 safe-bottom">
+      <div className="flex justify-around items-center h-16 px-1 lg:px-4">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href || 
                           (item.href !== "/" && location.pathname.startsWith(item.href))
@@ -30,7 +30,7 @@ export function BottomNav({ customItems = null }) {
             <Link
               key={item.href}
               to={item.href}
-              className="relative flex flex-col items-center justify-center flex-1 h-full group"
+              className="relative flex flex-col items-center justify-center flex-1 h-full py-1 group min-w-0"
             >
               {isActive && (
                 <motion.div
@@ -40,13 +40,13 @@ export function BottomNav({ customItems = null }) {
                 />
               )}
               <item.icon 
-                className={`w-5 h-5 transition-all duration-200 ${
+                className={`w-5 h-5 transition-all duration-200 shrink-0 ${
                   isActive 
                     ? 'text-primary scale-110' 
                     : 'text-on-surface-variant group-hover:text-primary/70'
                 }`}
               />
-              <span className={`text-[10px] font-medium mt-1 transition-colors ${
+              <span className={`text-[9px] sm:text-[10px] font-bold mt-1 transition-colors truncate w-full text-center px-0.5 ${
                 isActive ? 'text-primary' : 'text-on-surface-variant'
               }`}>
                 {item.label}
