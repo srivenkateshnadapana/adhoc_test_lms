@@ -32,7 +32,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-surface font-body text-on-surface transition-colors duration-300 flex flex-col">
         <Header />
-        <main className="pt-16 pb-16 md:pb-0">
+        <main className="flex-1 pt-16 pb-16 md:pb-0">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
@@ -59,8 +59,8 @@ function App() {
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
+          <Footer />
         </main>
-        <Footer />
         <BottomNav />
         <Toaster position="top-right" />
       </div>
