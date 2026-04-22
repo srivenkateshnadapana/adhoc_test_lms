@@ -4,25 +4,23 @@ import { StorageService, AUTH_KEY } from "../services/storage"
 
 export function AdminProtectedRoute({ children }) {
   const navigate = useNavigate()
-  const [isHydrated, setIsHydrated] = React.useState(false)
-  const [authState, setAuthState] = React.useState(StorageService.getAuthState())
+  const authState = StorageService.getAuthState()
 
   React.useEffect(() => {
     const checkAuth = () => {
       const state = StorageService.getAuthState()
-      setAuthState(state)
       if (!state.isAuthenticated || state.user?.role !== 'admin') {
         navigate("/")
       }
     }
 
-    checkAuth()
-    setIsHydrated(true)
+    if (!authState.isAuthenticated || authState.user?.role !== 'admin') {
+      navigate("/")
+    }
+
     window.addEventListener(`storage-update-${AUTH_KEY}`, checkAuth)
     return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, checkAuth)
-  }, [navigate])
-
-  if (!isHydrated) return null
+  }, [navigate, authState.isAuthenticated, authState.user?.role])
 
   if (authState.isAuthenticated && authState.user?.role === 'admin') {
     return <>{children}</>

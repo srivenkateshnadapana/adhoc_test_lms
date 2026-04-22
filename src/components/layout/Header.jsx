@@ -113,6 +113,15 @@ export function Header() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
+          {/* Theme Toggle (Always Visible) */}
+          <button
+            onClick={handleToggleTheme}
+            className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
+          </button>
+
           {!isAuthenticated ? (
             <>
               <Link to="/auth" className="px-5 py-2 text-primary font-semibold hover:opacity-80 transition-all duration-200 active:scale-95">Login</Link>
@@ -126,14 +135,6 @@ export function Header() {
                 </Link>
               )}
               
-              {/* Theme Toggle */}
-              <button
-                onClick={handleToggleTheme}
-                className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
-              </button>
-
               {/* User Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button

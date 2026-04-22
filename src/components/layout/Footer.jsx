@@ -30,7 +30,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-surface-container-lowest border-t border-surface-dim/20 pt-20 pb-12 max-md:pb-32 font-body relative overflow-hidden">
+    <footer className="bg-surface-container-lowest border-t border-surface-dim/20 pt-20 pb-12 max-md:pb-40 font-body relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-primary/2 rounded-full blur-[100px] pointer-events-none" />
