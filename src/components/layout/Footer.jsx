@@ -30,22 +30,22 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-surface-container-lowest border-t border-surface-dim/20 pt-20 pb-12 font-body relative overflow-hidden">
+    <footer className="bg-surface-container-lowest border-t border-surface-dim/20 pt-20 pb-12 max-md:pb-32 font-body relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-primary/2 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-y-16 lg:gap-x-12 lg:gap-y-8 mb-20">
           {/* Brand Shard */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <Link to="/" className="inline-flex items-center gap-3 mb-8 group">
               <div className="w-10 h-10 signature-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <span className="text-white font-headline font-bold text-xl">A</span>
               </div>
               <span className="text-xl font-headline font-bold tracking-tighter text-primary">Adhoc Tech</span>
             </Link>
-            <p className="text-on-surface-variant text-lg font-medium leading-relaxed max-w-sm mb-8 opacity-70 italic">
+            <p className="text-on-surface-variant text-sm font-medium leading-relaxed max-w-sm mb-8 opacity-70 italic">
               Empowering the next generation of academic leaders through sophisticated learning ecosystems and decentralized knowledge protocols.
             </p>
             <div className="flex items-center gap-4">
@@ -73,13 +73,13 @@ export function Footer() {
               Subscribe to receive tactical insights, curriculum updates, and exclusive content.
             </p>
             <div className="flex flex-col gap-3">
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <input
                   type="email"
                   placeholder="your@email.com"
-                  className="flex-1 px-4 py-2.5 bg-surface-container border border-outline-variant rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full px-4 py-2.5 bg-surface-container border border-outline-variant rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                 />
-                <button className="px-4 py-2.5 signature-gradient text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+                <button className="w-full px-4 py-2.5 signature-gradient text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2">
                   <Send className="w-4 h-4" />
                   Subscribe
                 </button>
@@ -118,23 +118,23 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact & Legal */}
-          <div className="lg:col-span-1">
+          {/* Contact Base */}
+          <div className="lg:col-span-2">
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Base</h4>
             <ul className="space-y-6">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-xs font-medium text-on-surface-variant leading-relaxed opacity-70">
-                  Global HQ / Sector 7<br />Adhoc Innovation Terminal
+                <span className="text-sm font-medium text-on-surface-variant leading-relaxed opacity-70 whitespace-nowrap">
+                  Global HQ / Sector 7<br />Adhoc Terminal
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-xs font-medium text-on-surface-variant opacity-70">+1 (800) ADHOC-NET</span>
+                <span className="text-sm font-medium text-on-surface-variant opacity-70 whitespace-nowrap">+1 ADHOC-NET</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-xs font-medium text-on-surface-variant opacity-70">hello@adhoc.network</span>
+                <span className="text-sm font-medium text-on-surface-variant opacity-70 whitespace-nowrap">hello@adhoc.network</span>
               </li>
             </ul>
           </div>
@@ -144,7 +144,7 @@ export function Footer() {
         <div className="pt-8 pb-6 border-t border-surface-dim/20">
           <div className="flex flex-wrap justify-center gap-6 mb-6">
             {links.legal.map(link => (
-              <Link key={link.name} to={link.href} className="text-xs text-on-surface-variant hover:text-primary transition-colors">
+              <Link key={link.name} to={link.href} className="text-sm text-on-surface-variant hover:text-primary transition-colors">
                 {link.name}
               </Link>
             ))}
@@ -159,10 +159,10 @@ export function Footer() {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em]">Operational Status: Optimum</span>
+              <span className="text-xs font-bold text-secondary uppercase tracking-[0.3em]">Operational Status: Optimum</span>
             </div>
             <div className="w-px h-4 bg-outline-variant" />
-            <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.3em]">v2.0.0</span>
+            <span className="text-xs font-bold text-secondary uppercase tracking-[0.3em]">v2.0.0</span>
           </div>
         </div>
       </div>
