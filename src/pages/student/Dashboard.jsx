@@ -118,7 +118,7 @@ function DashboardContent() {
   }
 
   return (
-    <main className="min-h-screen bg-surface pt-24 pb-20 px-8">
+    <main className="min-h-screen bg-surface pt-24 pb-20 px-4 sm:px-8 transition-all duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Welcome Header */}
         <motion.section 
@@ -126,37 +126,37 @@ function DashboardContent() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-16"
         >
-          <div className="flex flex-col md:flex-row justify-between items-end gap-8">
-            <div>
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+            <div className="w-full">
               <span className="text-[10px] font-bold text-outline uppercase tracking-[0.4em] block mb-2">
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
               </span>
-              <h1 className="text-5xl lg:text-6xl font-headline font-extrabold text-primary tracking-tighter italic">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-headline font-extrabold text-primary tracking-tighter italic leading-tight">
                 Welcome, {user?.name?.split(' ')[0] || "Operator"}
               </h1>
-              <p className="text-on-surface-variant text-lg font-medium opacity-60 mt-2">
+              <p className="text-on-surface-variant text-base sm:text-lg font-medium opacity-60 mt-2">
                 Your tactical learning dashboard is ready.
               </p>
             </div>
             
             {/* Streak Badge */}
-            <div className="flex gap-3">
-              <div className="bg-surface-container-low px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                  <Flame className="w-6 h-6 text-orange-500" />
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              <div className="flex-1 bg-surface-container-low px-4 sm:px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">Learning Streak</p>
-                  <p className="text-primary font-headline font-bold text-2xl">{streak} days</p>
+                  <p className="text-primary font-headline font-bold text-xl sm:text-2xl">{streak} days</p>
                 </div>
               </div>
-              <div className="bg-surface-container-low px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full signature-gradient flex items-center justify-center text-white shadow-lg">
-                  <Target className="w-6 h-6" />
+              <div className="flex-1 bg-surface-container-low px-4 sm:px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full signature-gradient flex items-center justify-center text-white shadow-lg">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none mb-1">Global Standing</p>
-                  <p className="text-primary font-headline font-bold">Top 5% of Scholars</p>
+                  <p className="text-primary font-headline font-bold text-sm sm:text-base">Top 5% of Scholars</p>
                 </div>
               </div>
             </div>
@@ -168,18 +168,18 @@ function DashboardContent() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16"
         >
           {stats.map((stat, i) => {
             const Icon = stat.icon
             return (
-              <motion.div key={stat.label} variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-surface-container-lowest p-8 rounded-[2.5rem] border border-surface-dim/20 shadow-xl shadow-primary/5 transition-all group">
-                <div className={`w-12 h-12 rounded-2xl ${stat.accent === 'primary' ? 'bg-primary-fixed text-primary' : 'bg-surface-container-high text-secondary'} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6" />
+              <motion.div key={stat.label} variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-surface-container-lowest p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-surface-dim/20 shadow-xl shadow-primary/5 transition-all group">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl ${stat.accent === 'primary' ? 'bg-primary-fixed text-primary' : 'bg-surface-container-high text-secondary'} flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <p className="text-[10px] font-bold text-outline uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-                <p className="text-4xl font-headline font-extrabold text-primary tracking-tighter">{stat.value}</p>
-                <p className="text-xs text-on-surface-variant mt-2">{stat.trend}</p>
+                <p className="text-[8px] sm:text-[10px] font-bold text-outline uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                <p className="text-2xl sm:text-4xl font-headline font-extrabold text-primary tracking-tighter">{stat.value}</p>
+                <p className="hidden sm:block text-xs text-on-surface-variant mt-2">{stat.trend}</p>
               </motion.div>
             )
           })}
@@ -278,13 +278,14 @@ function DashboardContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="mb-12"
         >
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
-              <h2 className="text-3xl font-headline font-bold text-primary italic">Active Protocols</h2>
-              <p className="text-on-surface-variant text-sm mt-1">Continue where you left off</p>
+              <h2 className="text-2xl sm:text-3xl font-headline font-bold text-primary italic">Active Protocols</h2>
+              <p className="text-on-surface-variant text-xs sm:text-sm mt-1">Continue where you left off</p>
             </div>
-            <Link to="/catalog" className="text-xs font-bold text-primary uppercase tracking-[0.2em] border-b-2 border-primary pb-1 hover:opacity-70 transition-all flex items-center gap-1">
+            <Link to="/catalog" className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-[0.2em] border-b-2 border-primary pb-1 hover:opacity-70 transition-all flex items-center gap-1">
               Explore More <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -319,7 +320,7 @@ function DashboardContent() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ y: -4 }}
-                    className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-surface-dim/20 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
+                    className="bg-surface-container-lowest rounded-3xl sm:rounded-[3rem] overflow-hidden border border-surface-dim/20 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
                   >
                     <div className="w-full sm:w-48 h-48 sm:h-auto shrink-0 relative overflow-hidden">
                       <img 
@@ -334,7 +335,7 @@ function DashboardContent() {
                         </div>
                       )}
                     </div>
-                    <div className="p-8 flex flex-col justify-between flex-1">
+                    <div className="p-6 sm:p-8 flex flex-col justify-between flex-1">
                       <div>
                         <div className="flex justify-between items-start mb-4">
                           <span className="bg-surface-container-high text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
@@ -344,10 +345,10 @@ function DashboardContent() {
                             {course.level} Level
                           </span>
                         </div>
-                        <h3 className="text-2xl font-headline font-bold text-primary mb-4 leading-tight group-hover:text-primary-container transition-colors">
+                        <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-3 sm:mb-4 leading-tight group-hover:text-primary-container transition-colors">
                           {course.title}
                         </h3>
-                        <p className="text-on-surface-variant text-sm line-clamp-2 mb-4">
+                        <p className="text-on-surface-variant text-xs sm:text-sm line-clamp-2 mb-4">
                           {course.description || "Master the fundamentals and advanced concepts of this subject with hands-on projects."}
                         </p>
                       </div>
@@ -399,7 +400,7 @@ function DashboardContent() {
                 <p className="text-on-surface-variant text-sm">Based on your learning history</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="bg-surface-container-lowest rounded-2xl p-5 border border-surface-dim/20 hover:border-primary/30 transition-all">
                   <div className="flex items-center gap-3 mb-3">

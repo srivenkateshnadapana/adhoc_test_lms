@@ -7,10 +7,8 @@ import { motion } from "framer-motion"
 const BOTTOM_NAV_ITEMS = [
   { href: "/", icon: Home, label: "Home", active: true },
   { href: "/catalog", icon: BookOpen, label: "Courses", active: true },
-  { href: "/my-courses", icon: LayoutDashboard, label: "My Courses", active: true },
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
   { href: "/certificates", icon: Award, label: "Cert", active: true },
-  { href: "/my-doubts", icon: MessageCircle, label: "Doubts", active: false },
   { href: "/profile", icon: User, label: "Profile", active: true },
 ]
 

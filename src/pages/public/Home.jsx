@@ -86,13 +86,13 @@ export default function Home() {
         initial="hidden"
         animate={isHeroInView ? "visible" : "hidden"}
         variants={fadeUp}
-        className="relative overflow-hidden py-24 px-8 lg:py-32"
+        className="relative overflow-hidden py-16 px-4 sm:px-8 lg:py-28"
       >
         {/* Background Gradient */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="relative z-10 space-y-8">
             <motion.span 
               initial={{ opacity: 0, x: -20 }}
@@ -107,7 +107,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl lg:text-7xl font-headline font-extrabold text-primary tracking-tight leading-[1.1]"
+              className="text-4xl sm:text-5xl lg:text-7xl font-headline font-extrabold text-primary tracking-tight leading-[1.1]"
             >
               Elevate Your <br />
               <span className="opacity-80 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -195,9 +195,9 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="relative rounded-[2rem] overflow-hidden bg-surface-container-low border border-surface-dim/20 p-2 ambient-shadow"
+            className="relative rounded-[2rem] overflow-hidden bg-surface-container-low border border-surface-dim/20 p-1.5 sm:p-2 ambient-shadow hidden sm:block"
           >
-            <div className="relative rounded-3xl overflow-hidden h-[500px]">
+            <div className="relative rounded-3xl overflow-hidden h-[300px] sm:h-[400px] lg:h-[500px]">
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
@@ -224,9 +224,9 @@ export default function Home() {
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="py-24 px-8 bg-surface-container-lowest border-y border-surface-dim/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-          <div className="md:w-1/2 space-y-8">
+      <section className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="lg:w-1/2 space-y-8">
             <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
             <p className="text-secondary text-lg leading-relaxed">
               We reject the generic "boxed-in" aesthetic of traditional educational platforms. Instead, we embrace intentional asymmetry, deep navy tones, and clean typography to guide your eye effortlessly through complex knowledge material.
@@ -249,11 +249,11 @@ export default function Home() {
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-          <div className="md:w-1/2 grid grid-cols-2 gap-4">
-            <div className="h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
+          <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
+            <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
               <img src="https://images.unsplash.com/photo-1523240715630-991f2e811347?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Campus Life" />
             </div>
-            <div className="h-72 mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
+            <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
               <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" />
             </div>
           </div>
@@ -271,7 +271,7 @@ export default function Home() {
             <p className="text-secondary">Join thousands of professionals accelerating their careers with our flagship programs.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((course, idx) => (
               <div 
                 key={idx}
@@ -319,11 +319,11 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="flex flex-col md:grid md:grid-cols-3 gap-6"
+            className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             <motion.div 
               variants={fadeUp}
-              className="w-full md:col-span-2 bg-surface-container-low p-8 sm:p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group relative overflow-hidden"
+              className="w-full sm:col-span-2 bg-surface-container-low p-6 sm:p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
               <Award className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
@@ -337,7 +337,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="w-full md:col-span-1 bg-primary text-primary-foreground p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
+              className="w-full sm:col-span-1 bg-primary text-primary-foreground p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
             >
               <Brain className="w-12 h-12 mb-6 group-hover:rotate-6 transition-transform" />
               <div>
@@ -366,7 +366,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="m-screen md:col-span-2 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
+              className="w-full sm:col-span-2 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8 gap-6"
             >
               <div>
                 <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
@@ -392,7 +392,7 @@ export default function Home() {
             <p className="text-secondary">Trusted by professionals from leading companies worldwide.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((testimonial, idx) => (
               <div 
                 key={idx}
@@ -436,7 +436,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               to="/catalog" 
-              className="px-8 py-4 bg-white text-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
+              className="px-8 py-4 bg-white text-[#1a365d] rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
             >
               Browse All Courses
             </Link>

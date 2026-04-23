@@ -97,7 +97,7 @@ function AdminDashboardContent() {
                 <div className={`w-12 h-12 rounded-2xl ${m.color === 'primary' ? 'bg-primary-fixed text-primary' : 'bg-surface-container-high text-secondary'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                   <m.icon className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">{m.trend}</span>
+                <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full">{m.trend}</span>
               </div>
               <p className="text-[10px] font-bold text-outline uppercase tracking-[0.2em] mb-1">{m.label}</p>
               <p className="text-4xl font-headline font-extrabold text-primary tracking-tighter">{m.value}</p>
@@ -165,7 +165,7 @@ function AdminDashboardContent() {
                     analytics.popularCourses.map((item, index) => (
                       <div key={index} className="flex items-center justify-between p-6 bg-surface-container-low/50 rounded-2xl hover:bg-surface-container-low transition-all group">
                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                            <div className="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-dim/20 flex items-center justify-center text-primary shadow-sm">
                                <Layout className="w-5 h-5" />
                             </div>
                             <div>

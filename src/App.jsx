@@ -5,35 +5,40 @@ import { Footer } from './components/layout/Footer'
 import { Toaster } from 'sonner'
 import { BottomNav } from './components/layout/BottomNav'
 
-// Pages
-import Home from './pages/public/Home'
-import Catalog from './pages/public/Catalog'
-import Login from './pages/auth/Login'
-import Register from './pages/auth/Register'
-import CourseDetail from './pages/public/CourseDetail'
-import NotFound from './pages/public/NotFound'
-import Unauthorized from './pages/public/Unauthorized'
-import Dashboard from './pages/student/Dashboard'
-import Profile from './pages/student/Profile'
-import CoursePlayer from './pages/student/CoursePlayer'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import MyCourses from './pages/student/MyCourses'
-import Certificates from './pages/student/Certificates'
-import MyDoubts from './pages/student/MyDoubts'
-import Settings from './pages/student/Settings'
-import Referral from './pages/student/Referral'
-import AdminCourses from './pages/admin/AdminCourses'
-import AdminCourseManager from './pages/admin/AdminCourseManager'
-import AdminDoubts from './pages/admin/AdminDoubts'
-import VerifyCertificate from './pages/public/VerifyCertificate'
+// Lazy Pages
+const Home = React.lazy(() => import('./pages/public/Home'))
+const Catalog = React.lazy(() => import('./pages/public/Catalog'))
+const Login = React.lazy(() => import('./pages/auth/Login'))
+const Register = React.lazy(() => import('./pages/auth/Register'))
+const CourseDetail = React.lazy(() => import('./pages/public/CourseDetail'))
+const NotFound = React.lazy(() => import('./pages/public/NotFound'))
+const Unauthorized = React.lazy(() => import('./pages/public/Unauthorized'))
+const Dashboard = React.lazy(() => import('./pages/student/Dashboard'))
+const Profile = React.lazy(() => import('./pages/student/Profile'))
+const CoursePlayer = React.lazy(() => import('./pages/student/CoursePlayer'))
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'))
+const MyCourses = React.lazy(() => import('./pages/student/MyCourses'))
+const Certificates = React.lazy(() => import('./pages/student/Certificates'))
+const MyDoubts = React.lazy(() => import('./pages/student/MyDoubts'))
+const Settings = React.lazy(() => import('./pages/student/Settings'))
+const Referral = React.lazy(() => import('./pages/student/Referral'))
+const AdminCourses = React.lazy(() => import('./pages/admin/AdminCourses'))
+const AdminCourseManager = React.lazy(() => import('./pages/admin/AdminCourseManager'))
+const AdminDoubts = React.lazy(() => import('./pages/admin/AdminDoubts'))
+const VerifyCertificate = React.lazy(() => import('./pages/public/VerifyCertificate'))
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-surface font-body text-on-surface transition-colors duration-300 flex flex-col">
         <Header />
-        <main className="pt-16 pb-16 md:pb-0">
-          <Routes>
+        <main className="flex-grow pt-20 pb-20 md:pb-8 w-full max-w-[1920px] mx-auto transition-all duration-300">
+          <React.Suspense fallback={
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+          }>
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/course/:id" element={<CourseDetail />} />
@@ -59,6 +64,7 @@ function App() {
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
+          </React.Suspense>
         </main>
         <Footer />
         <BottomNav />

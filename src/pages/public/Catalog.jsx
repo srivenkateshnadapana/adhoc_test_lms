@@ -159,15 +159,28 @@ export default function Catalog() {
   return (
     <div className="min-h-screen bg-surface">
       {/* Hero Banner */}
-      <div className="signature-gradient py-12 mb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-white mb-4">
+      <div className="signature-gradient py-12 sm:py-16 md:py-20 mb-8 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-headline font-bold text-white mb-4"
+          >
             Course Catalog
-          </h1>
-          <p className="text-white/80 text-lg max-w-2xl">
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-white/80 text-base sm:text-lg max-w-2xl leading-relaxed"
+          >
             Explore our curated collection of premium courses designed by industry experts.
-          </p>
-          <div className="h-px bg-white/20 w-24 mt-6" />
+          </motion.p>
+          <motion.div 
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            className="h-px bg-white/20 w-24 mt-6 origin-left" 
+          />
         </div>
       </div>
 
@@ -182,15 +195,15 @@ export default function Catalog() {
         />
 
         {/* Results Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
-            <p className="text-on-surface-variant text-sm">
+            <p className="text-on-surface-variant text-sm font-medium">
               Showing <span className="font-bold text-primary">{filteredCourses.length}</span> courses
-              {hasActiveFilters && <span className="text-xs ml-1">(filtered)</span>}
+              {hasActiveFilters && <span className="text-xs ml-2 text-primary/60 font-bold bg-primary/5 px-2 py-0.5 rounded-full">FILTERED</span>}
             </p>
           </div>
           
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <SortControls
               sortBy={sortBy}
               onSortChange={setSortBy}
@@ -205,10 +218,10 @@ export default function Catalog() {
             {hasActiveFilters && (
               <button
                 onClick={handleClearAllFilters}
-                className="flex items-center gap-1 px-3 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-xl transition-all border border-primary/20"
               >
                 <FilterX className="w-4 h-4" />
-                Clear filters
+                Clear All
               </button>
             )}
           </div>
@@ -232,7 +245,7 @@ export default function Catalog() {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8"
                 >
                   {visibleCourses.map((course) => (
                     <motion.div key={course.id} variants={itemVariants}>

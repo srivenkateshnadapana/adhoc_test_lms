@@ -91,28 +91,34 @@ export function Header() {
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isAtTop ? 'bg-surface/90' : 'bg-surface shadow-sm border-b border-surface-dim'}`}>
       <div className="flex justify-between items-center w-full px-4 sm:px-8 py-4 max-w-7xl mx-auto">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-4 group">
-          <div className="w-9 h-9 signature-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <span className="text-white font-headline font-bold text-lg">A</span>
+        <Link to="/" className="flex items-center gap-2 sm:gap-4 group">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 signature-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <span className="text-white font-headline font-bold text-base sm:text-xl">A</span>
           </div>
-          <span className="text-xl font-bold tracking-tighter text-primary font-headline">ADHOC LMS</span>
+          <span className="text-lg sm:text-2xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">ADHOC LMS</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6 font-headline font-semibold tracking-tight">
+        <div className="hidden lg:flex items-center gap-8 font-headline font-semibold tracking-tight">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               to={item.href}
-              className={`text-secondary hover:text-primary transition-colors ${location.pathname === item.href ? 'text-primary border-b-2 border-primary pb-1' : ''}`}
+              className={`text-secondary hover:text-primary transition-colors relative py-1 ${location.pathname === item.href ? 'text-primary' : ''}`}
             >
               {item.label}
+              {location.pathname === item.href && (
+                <motion.div 
+                  layoutId="nav-underline"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+                />
+              )}
             </Link>
           ))}
         </div>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           {!isAuthenticated ? (
             <>
               <Link to="/auth" className="px-5 py-2 text-primary font-semibold hover:opacity-80 transition-all duration-200 active:scale-95">Login</Link>
@@ -188,7 +194,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-on-surface hover:bg-surface-dim md:hidden"
+          className="inline-flex items-center justify-center rounded-md p-2 text-on-surface hover:bg-surface-dim lg:hidden"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -199,7 +205,7 @@ export function Header() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="md:hidden bg-surface border-t border-surface-dim"
+            className="lg:hidden bg-surface border-t border-surface-dim"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
