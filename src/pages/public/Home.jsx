@@ -141,7 +141,7 @@ export default function Home() {
                 to="/catalog"
                 className="px-8 py-4 border border-primary/30 text-primary rounded-xl font-bold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group"
               >
-                <PlayCircle className="w-5 h-5" />
+                <Play className="w-5 h-5" />
                 Watch Demo
               </Link>
             </motion.div>

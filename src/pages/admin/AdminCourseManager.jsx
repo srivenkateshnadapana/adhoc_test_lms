@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom"
 import { AdminProtectedRoute } from "../../context/AdminProtectedRoute"
 import { api } from "../../services/api"
 import { StorageService } from "../../services/storage"
-import { Layers, PlayCircle, Plus, Edit, Trash2, ArrowLeft, HelpCircle, Loader2, X, GripVertical } from "lucide-react"
+import { Layers, Play, Plus, Edit, Trash2, ArrowLeft, HelpCircle, Loader2, X, GripVertical } from "lucide-react"
 import { toast } from "sonner"
 
 // DnD Kit imports
@@ -527,7 +527,7 @@ function SortableLesson({ lesson, moduleId, lIdx, openModal, handleDelete }) {
           <GripVertical className="w-4 h-4" />
         </div>
         <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-primary shrink-0">
-          <PlayCircle className="w-5 h-5" />
+          <Play className="w-5 h-5" />
         </div>
         <div>
           <p className="font-bold text-primary">{lesson.title}</p>

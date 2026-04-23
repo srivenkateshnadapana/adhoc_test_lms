@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { PlayCircle, CheckCircle, ArrowLeft, Loader2, Layers, ShieldCheck, HelpCircle, Award, Lock, MessageCircle, Send, Plus, Clock, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react"
+import { Play, CheckCircle, ArrowLeft, Loader2, Layers, ShieldCheck, HelpCircle, Award, Lock, MessageCircle, Send, Plus, Clock, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
@@ -295,7 +295,7 @@ function PlayerContent() {
                         {progress[lesson.id] === 'completed' ? (
                           <CheckCircle className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-emerald-500'}`} />
                         ) : (
-                          <PlayCircle className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-secondary opacity-60'}`} />
+                          <Play className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-secondary opacity-60'}`} />
                         )}
                       </div>
                       <div className="flex-1">
@@ -378,7 +378,7 @@ function PlayerContent() {
         {!activeItem ? (
            <div className="flex-grow flex flex-col items-center justify-center text-center p-12">
             <div className="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-primary/20 mb-8 border border-surface-dim/20">
-              <PlayCircle className="w-12 h-12" />
+              <Play className="w-12 h-12" />
             </div>
             <h3 className="text-3xl font-headline font-bold text-primary italic">Select a Lesson</h3>
             <p className="text-outline text-lg font-medium mt-4 max-w-sm">Choose a lesson or quiz from the sidebar to begin.</p>
@@ -405,7 +405,7 @@ function PlayerContent() {
                   <>
                     <img src={course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600"} className="absolute inset-0 w-full h-full object-cover opacity-60 blur-[2px] scale-105" alt="Video Static" />
                     <div className="relative z-10 w-24 h-24 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white cursor-pointer">
-                      <PlayCircle className="w-10 h-10 fill-current" />
+                      <Play className="w-10 h-10 fill-current" />
                     </div>
                   </>
                 )}

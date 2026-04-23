@@ -5,7 +5,7 @@ import {
   BookOpen, 
   GraduationCap, 
   Clock, 
-  PlayCircle, 
+  Play, 
   Trophy, 
   Target, 
   ArrowRight, 
@@ -214,7 +214,7 @@ function DashboardContent() {
                       activity.type === 'started' ? 'bg-blue-500/10' : 'bg-yellow-500/10'
                     }`}>
                       {activity.type === 'completed' ? <Trophy className="w-4 h-4 text-green-500" /> :
-                       activity.type === 'started' ? <PlayCircle className="w-4 h-4 text-blue-500" /> :
+                       activity.type === 'started' ? <Play className="w-4 h-4 text-blue-500" /> :
                        <Award className="w-4 h-4 text-yellow-500" />}
                     </div>
                     <div className="flex-1">
@@ -369,7 +369,7 @@ function DashboardContent() {
                             className="flex-1 py-4 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                           >
                             {progress[course.id] === 100 ? 'Review Course' : 'Resume Operation'}
-                            <PlayCircle className="w-5 h-5" />
+                            <Play className="w-5 h-5" />
                           </button>
                           {progress[course.id] < 100 && (
                             <button className="px-4 py-4 bg-surface-container-high rounded-2xl hover:bg-surface-container transition-all">

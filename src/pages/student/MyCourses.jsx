@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { StorageService } from "../../services/storage"
-import { BookOpen, PlayCircle, Loader2, Award, ChevronRight, Sparkles } from "lucide-react"
+import { BookOpen, Play, Loader2, Award, ChevronRight, Sparkles } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { api } from "../../services/api"
@@ -132,7 +132,7 @@ function MyCoursesContent() {
                         onClick={() => navigate(`/student/course/${course.id}`)}
                         className="w-full py-3 bg-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                       >
-                        Resume Course <PlayCircle className="w-4 h-4" />
+                        Resume Course <Play className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

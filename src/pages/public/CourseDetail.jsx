@@ -2,7 +2,7 @@ import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { 
   CheckCircle2, 
-  PlayCircle, 
+  Play, 
   Clock, 
   BarChart, 
   Shield, 
@@ -403,7 +403,7 @@ export default function CourseDetail() {
                       className="w-full py-4 rounded-2xl bg-primary text-white font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
                     >
                       Continue Learning
-                      <PlayCircle className="w-5 h-5" />
+                      <Play className="w-5 h-5" />
                     </button>
                   </>
                 ) : (
