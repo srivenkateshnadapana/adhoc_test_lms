@@ -251,7 +251,7 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
             <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1523240715630-991f2e811347?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Campus Life" />
+              <img src="https://thumbs.dreamstime.com/b/high-school-students-laptop-classroom-education-people-technology-learning-concept-happy-computer-library-72257218.jpg" className="w-full h-full object-cover" alt="Campus Life" />
             </div>
             <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
               <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" />
@@ -345,7 +345,7 @@ export default function Home() {
                 <p className="opacity-80 text-sm">Mentors leading deep technical pathways from FAANG and Fortune 500.</p>
               </div>
             </motion.div>
-
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             <motion.div 
               variants={fadeUp}
               className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
@@ -363,10 +363,10 @@ export default function Home() {
               <h3 className="text-xl font-headline font-bold mb-2">Global Network</h3>
               <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
             </motion.div>
-            
-            <motion.div 
+            </div>
+              <motion.div 
               variants={fadeUp}
-              className="w-full sm:col-span-2 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8 gap-6"
+              className="w-full md:col-span-3 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
             >
               <div>
                 <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
@@ -374,7 +374,7 @@ export default function Home() {
               </div>
               <Link 
                 to="/register" 
-                className="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
               >
                 Join Today 
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
