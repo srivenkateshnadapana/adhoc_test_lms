@@ -2,8 +2,8 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { 
-  ArrowRight, 
-  PlayCircle, 
+  ArrowRight,
+  Play,
   ShieldCheck, 
   Star, 
   Brain, 
@@ -204,13 +204,13 @@ export default function Home() {
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface/90 backdrop-blur-md rounded-2xl border border-white/20 flex justify-between items-center">
+              <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface-container/80 backdrop-blur-xl rounded-2xl border border-surface-dim/20 flex justify-between items-center shadow-2xl">
                 <div>
                   <p className="text-3xl font-headline font-bold text-primary leading-none mb-1">98%</p>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Success Rate</p>
                 </div>
-                <button className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform">
-                  <PlayCircle className="w-5 h-5 fill-current text-white" />
+                <button className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                  <Play className="w-5 h-5 fill-current" />
                 </button>
               </div>
             </div>
