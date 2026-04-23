@@ -210,13 +210,13 @@ export default function Home() {
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Success Rate</p>
                 </div>
                 <button className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform">
-                  <PlayCircle className="w-6 h-6 fill-current" />
+                  <PlayCircle className="w-5 h-5 fill-current text-white" />
                 </button>
               </div>
             </div>
             
             {/* Floating badge */}
-            <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+           <div className="absolute top-5 right-5 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg text-orange-400">
               Limited Spots
             </div>
           </motion.div>
@@ -307,7 +307,7 @@ export default function Home() {
       </section>
 
       {/* Bento Grid Features (Enhanced) */}
-      <section className="py-24 px-8 bg-surface-container-lowest">
+         <section className="py-24 px-8 bg-surface-container-lowest">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">The Editorial Experience</h2>
@@ -319,13 +319,13 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="flex flex-col md:grid md:grid-cols-3 gap-6"
           >
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-low p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group md:col-span-2 relative overflow-hidden"
+              className="w-full md:col-span-2 bg-surface-container-low p-8 sm:p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
               <Award className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-headline font-bold mb-4">Industry Accreditation</h3>
               <p className="text-secondary max-w-md">Our certs are designed directly with enterprise CTOs, providing immediate professional legitimacy.</p>
@@ -337,7 +337,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="bg-primary text-primary-foreground p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
+              className="w-full md:col-span-1 bg-primary text-primary-foreground p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
             >
               <Brain className="w-12 h-12 mb-6 group-hover:rotate-6 transition-transform" />
               <div>
@@ -366,7 +366,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8 col-span-2"
+              className="m-screen md:col-span-2 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
             >
               <div>
                 <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
