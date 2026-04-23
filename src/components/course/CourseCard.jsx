@@ -92,7 +92,7 @@ export function CourseCard({
           </div>
           <Link
             to={`/course/${id}`}
-            className="px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-all"
+            className="px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary hover:text-on-primary transition-all"
           >
             Learn More
           </Link>

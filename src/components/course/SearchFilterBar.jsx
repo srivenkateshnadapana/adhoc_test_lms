@@ -31,7 +31,7 @@ export function SearchFilterBar({
             onClick={() => onCategoryChange(category.id)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               activeCategory === category.id
-                ? "bg-primary text-primary-foreground shadow-md"
+                ? "bg-primary text-on-primary shadow-md"
                 : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
             }`}
           >

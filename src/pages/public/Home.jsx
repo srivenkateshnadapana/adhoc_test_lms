@@ -132,7 +132,7 @@ export default function Home() {
             >
               <Link
                 to="/catalog"
-                className="px-8 py-4 signature-gradient text-primary-foreground rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
+                className="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
               >
                 Explore Courses
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -209,14 +209,14 @@ export default function Home() {
                   <p className="text-3xl font-headline font-bold text-primary leading-none mb-1">98%</p>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Success Rate</p>
                 </div>
-                <button className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform">
+                <button className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform">
                   <PlayCircle className="w-5 h-5 fill-current text-white" />
                 </button>
               </div>
             </div>
             
             {/* Floating badge */}
-           <div className="absolute top-5 right-5 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg text-orange-400">
+           <div className="absolute top-5 right-5 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold shadow-lg">
               Limited Spots
             </div>
           </motion.div>
@@ -337,7 +337,7 @@ export default function Home() {
             
             <motion.div 
               variants={fadeUp}
-              className="w-full sm:col-span-1 bg-primary text-primary-foreground p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
+              className="w-full sm:col-span-1 bg-primary text-on-primary p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
             >
               <Brain className="w-12 h-12 mb-6 group-hover:rotate-6 transition-transform" />
               <div>
@@ -374,7 +374,7 @@ export default function Home() {
               </div>
               <Link 
                 to="/register" 
-                className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-on-primary font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
               >
                 Join Today 
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -436,7 +436,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               to="/catalog" 
-              className="px-8 py-4 bg-white text-[#1a365d] rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
+              className="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
             >
               Browse All Courses
             </Link>

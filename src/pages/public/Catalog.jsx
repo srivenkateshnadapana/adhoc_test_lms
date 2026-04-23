@@ -300,7 +300,7 @@ export default function Catalog() {
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearAllFilters}
-                    className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition"
+                    className="mt-6 px-6 py-2 bg-primary text-on-primary rounded-lg font-medium hover:opacity-90 transition"
                   >
                     Clear all filters
                   </button>
