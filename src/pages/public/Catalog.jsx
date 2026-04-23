@@ -32,7 +32,7 @@ export default function Catalog() {
   const [activeCategory, setActiveCategory] = React.useState("all")
   const [sortBy, setSortBy] = React.useState("popular")
   const [level, setLevel] = React.useState("all")
-  const [priceRange, setPriceRange] = React.useState({ min: 0, max: 1000 })
+  const [priceRange, setPriceRange] = React.useState({ min: 0, max: 5000 })
   const [duration, setDuration] = React.useState("all")
   const [favorites, setFavorites] = React.useState(new Set(StorageService.getFavorites()))
   const [visibleCount, setVisibleCount] = React.useState(9)
@@ -138,12 +138,12 @@ export default function Catalog() {
     setActiveCategory("all")
     setLevel("all")
     setSortBy("popular")
-    setPriceRange({ min: 0, max: 1000 })
+    setPriceRange({ min: 0, max: 5000 })
     setDuration("all")
   }
 
   const hasActiveFilters = searchQuery || activeCategory !== "all" || level !== "all" || 
-                          priceRange.min > 0 || priceRange.max < 1000 || duration !== "all"
+                          priceRange.min > 0 || priceRange.max < 5000 || duration !== "all"
 
   const visibleCourses = filteredCourses.slice(0, visibleCount)
 

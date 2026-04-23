@@ -8,6 +8,17 @@ export const FAVORITES_KEY = 'lms_favorites'
 export const AUTH_KEY = 'lms_auth'
 export const ENROLLMENTS_KEY = 'lms_enrollments'
 
+// Helper: map backend course_type to frontend category
+function mapCourseTypeToCategory(courseType) {
+  const map = {
+    mega: 'development',
+    mini: 'design',
+    crash: 'business',
+    bootcamp: 'development',
+  }
+  return map[courseType] || 'development'
+}
+
 export const StorageService = {
   // ============ AUTHENTICATION ============
   
@@ -108,7 +119,36 @@ export const StorageService = {
     try {
       const response = await fetch(`${API_URL}/courses`)
       const data = await response.json()
-      return data.data || []
+      const raw = data.data || []
+
+      // Map backend fields → frontend-expected fields
+      return raw.map(course => ({
+        id: course.id,
+        title: course.title || 'Untitled Course',
+        description: course.description || '',
+        // Use thumbnail as image; fallback to placeholder
+        image: course.thumbnail || null,
+        // Backend has no instructor field; default gracefully
+        instructor: course.instructor || 'Expert Instructor',
+        // Use 3-month price as default display price
+        price: parseFloat(course.price_3months) || parseFloat(course.price_1month) || 0,
+        originalPrice: parseFloat(course.price_6months) || null,
+        price_1month: parseFloat(course.price_1month) || 0,
+        price_3months: parseFloat(course.price_3months) || 0,
+        price_6months: parseFloat(course.price_6months) || 0,
+        // Map course_type to category (mega → development, etc.)
+        category: course.category || mapCourseTypeToCategory(course.course_type),
+        course_type: course.course_type,
+        allowed_plan: course.allowed_plan,
+        // Defaults for fields not stored in backend yet
+        level: course.level || 'intermediate',
+        duration: course.duration || 20,
+        rating: course.rating || 4.5,
+        reviewCount: course.review_count || 0,
+        enrolled: course.enrolled || 0,
+        createdAt: course.createdAt,
+        userAccess: course.userAccess || { hasAccess: false }
+      }))
     } catch (error) {
       console.error('Error fetching courses:', error)
       return []
