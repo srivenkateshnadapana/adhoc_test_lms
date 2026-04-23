@@ -146,8 +146,8 @@ export function Header() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2 p-1 rounded-full hover:bg-surface-container-high transition"
                 >
-                  <div className="w-9 h-9 bg-primary-container rounded-full flex items-center justify-center">
-                    <span className="text-on-primary-fixed text-sm font-bold">
+                  <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-on-primary text-sm font-bold">
                       {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
                   </div>
