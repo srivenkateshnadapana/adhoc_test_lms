@@ -4,6 +4,7 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { Toaster } from 'sonner'
 import { BottomNav } from './components/layout/BottomNav'
+import { ScrollToTop } from './components/layout/ScrollToTop'
 
 // Lazy Pages
 const Home = React.lazy(() => import('./pages/public/Home'))
@@ -30,6 +31,7 @@ const VerifyCertificate = React.lazy(() => import('./pages/public/VerifyCertific
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-surface font-body text-on-surface transition-colors duration-300 flex flex-col">
         <Header />
         <main className="flex-grow pt-20 pb-20 md:pb-8 w-full max-w-[1920px] mx-auto transition-all duration-300">
