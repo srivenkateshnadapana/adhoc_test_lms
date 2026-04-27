@@ -50,13 +50,9 @@ function DashboardContent() {
       const token = StorageService.getToken()
       
       // Load progress and full course data
-      const progressData = {}
-      let totalCompletedLessons = 0;
-      
-      for (const course of enrolled) {
+      const progressPromises = enrolled.map(async (course) => {
         const prog = await StorageService.getProgress(course.id)
         const completedLessonsCount = Object.values(prog).filter(p => p === 'completed').length
-        totalCompletedLessons += completedLessonsCount
         
         const courseData = await api.courses.getById(course.id, token)
         let totalLessons = 0;
@@ -65,8 +61,22 @@ function DashboardContent() {
         }
         totalLessons = totalLessons > 0 ? totalLessons : 1;
         
-        progressData[course.id] = Math.round((completedLessonsCount / totalLessons) * 100)
-      }
+        return {
+          id: course.id,
+          percent: Math.round((completedLessonsCount / totalLessons) * 100),
+          completedLessons: completedLessonsCount
+        }
+      })
+
+      const progressResults = await Promise.all(progressPromises)
+      
+      const progressData = {}
+      let totalCompletedLessons = 0;
+      
+      progressResults.forEach(res => {
+        progressData[res.id] = res.percent
+        totalCompletedLessons += res.completedLessons
+      })
       
       setProgress(progressData)
       
@@ -341,7 +351,7 @@ function DashboardContent() {
                           <span className="bg-surface-container-high text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                             {course.category}
                           </span>
-                          <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">
+                          <span className="text-[10px] font-bold text-primary opacity-40 uppercase tracking-widest">
                             {course.level} Level
                           </span>
                         </div>
@@ -366,7 +376,7 @@ function DashboardContent() {
                         <div className="flex gap-3">
                           <button 
                             onClick={() => navigate(`/student/course/${course.id}`)}
-                            className="flex-1 py-4 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                            className="flex-1 py-4 bg-primary text-on-primary rounded-2xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                           >
                             {progress[course.id] === 100 ? 'Review Course' : 'Resume Operation'}
                             <Play className="w-5 h-5" />

@@ -25,13 +25,13 @@ function MyCoursesContent() {
       const enrolled = await StorageService.getEnrolledCourses()
       setCourses(enrolled)
       
-      const progressData = {}
-      for (const course of enrolled) {
+      const token = StorageService.getToken()
+      
+      const progressPromises = enrolled.map(async (course) => {
         const prog = await StorageService.getProgress(course.id)
         const completedLessons = Object.values(prog).filter(p => p === 'completed').length
         
         // Fetch full course details to get total lessons
-        const token = StorageService.getToken()
         const courseData = await api.courses.getById(course.id, token)
         
         let totalLessons = 0;
@@ -40,8 +40,16 @@ function MyCoursesContent() {
         }
         totalLessons = totalLessons > 0 ? totalLessons : 1 // Avoid division by zero
         
-        progressData[course.id] = Math.round((completedLessons / totalLessons) * 100)
-      }
+        return { id: course.id, percent: Math.round((completedLessons / totalLessons) * 100) }
+      })
+
+      const progressResults = await Promise.all(progressPromises)
+      
+      const progressData = {}
+      progressResults.forEach(res => {
+        progressData[res.id] = res.percent
+      })
+      
       setProgress(progressData)
       setLoading(false)
     }
@@ -130,7 +138,7 @@ function MyCoursesContent() {
                       </div>
                       <button 
                         onClick={() => navigate(`/student/course/${course.id}`)}
-                        className="w-full py-3 bg-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-primary text-on-primary rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                       >
                         Resume Course <Play className="w-4 h-4" />
                       </button>

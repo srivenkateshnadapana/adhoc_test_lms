@@ -281,7 +281,7 @@ function PlayerContent() {
             return (
               <div key={module.id} className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
-                  <span className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.4em]">Section {i+1} •</span>
+                  <span className="text-[10px] font-bold text-primary opacity-40 uppercase tracking-[0.4em]">Section {i+1} •</span>
                   <span className="text-[10px] font-bold text-primary uppercase tracking-[0.1em]">{module.title}</span>
                 </div>
                 <div className="space-y-2">
@@ -291,16 +291,16 @@ function PlayerContent() {
                       onClick={() => handleSelectItem(lesson, 'lesson')}
                       className={`w-full text-left px-6 py-5 rounded-3xl flex items-center gap-4 transition-all group ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-1' : 'bg-surface-container-lowest hover:bg-surface-container-high'}`}
                     >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'bg-white/20' : 'bg-surface-container-high'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'bg-on-primary' : 'bg-surface-container-high'}`}>
                         {progress[lesson.id] === 'completed' ? (
-                          <CheckCircle className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-emerald-500'}`} />
+                          <CheckCircle className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-primary' : 'text-emerald-500'}`} />
                         ) : (
-                          <Play className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-secondary opacity-60'}`} />
+                          <Play className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-primary' : 'text-secondary opacity-60'}`} />
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className={`text-xs font-bold leading-tight ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-primary'}`}>{lesson.title}</p>
-                        <p className={`text-[10px] uppercase font-bold tracking-widest mt-1 opacity-60 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-white' : 'text-secondary'}`}>
+                        <p className={`text-xs font-bold leading-tight ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-primary'}`}>{lesson.title}</p>
+                        <p className={`text-[10px] uppercase font-bold tracking-widest mt-1 opacity-60 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-secondary'}`}>
                           {lesson.duration} mins • Video
                         </p>
                       </div>
