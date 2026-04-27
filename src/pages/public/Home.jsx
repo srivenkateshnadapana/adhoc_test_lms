@@ -229,7 +229,7 @@ export default function Home() {
           <div className="lg:w-1/2 space-y-8">
             <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
             <p className="text-secondary text-lg leading-relaxed">
-              We reject the generic "boxed-in" aesthetic of traditional educational platforms. Instead, we embrace intentional asymmetry, deep navy tones, and clean typography to guide your eye effortlessly through complex knowledge material.
+                  The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
             </p>
             <ul className="space-y-4">
               {[
