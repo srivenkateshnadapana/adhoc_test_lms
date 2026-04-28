@@ -8,16 +8,12 @@ export const FAVORITES_KEY = 'lms_favorites'
 export const AUTH_KEY = 'lms_auth'
 export const ENROLLMENTS_KEY = 'lms_enrollments'
 
-// Helper: map backend course_type to frontend category
-function mapCourseTypeToCategory(courseType) {
-  const map = {
-    mega: 'development',
-    mini: 'design',
-    crash: 'business',
-    bootcamp: 'development',
-  }
-  return map[courseType] || 'development'
+const _cache = {
+  courses: null,
+  courseDetails: {}, // Cache for individual course details
+  lastFetched: 0
 }
+const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
 
 export const StorageService = {
   // ============ AUTHENTICATION ============
@@ -50,7 +46,6 @@ export const StorageService = {
     user: StorageService.getUser()
   }),
   
-  // Login user
   login: async (email, password) => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -75,7 +70,6 @@ export const StorageService = {
     }
   },
   
-  // Register user
   register: async (userData) => {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
@@ -106,41 +100,41 @@ export const StorageService = {
     }
   },
   
-  // Logout
   logout: () => {
     StorageService.removeToken()
     StorageService.removeUser()
     window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
   },
-  
+
   // ============ COURSES ============
   
-  getCourses: async () => {
+  getCourses: async (forceRefresh = false) => {
     try {
+      const now = Date.now()
+      if (!forceRefresh && _cache.courses && (now - _cache.lastFetched < CACHE_DURATION)) {
+        return _cache.courses
+      }
+
       const response = await fetch(`${API_URL}/courses`)
+      if (!response.ok) throw new Error('Network response was not ok')
+      
       const data = await response.json()
       const raw = data.data || []
 
-      // Map backend fields → frontend-expected fields
-      return raw.map(course => ({
+      const mappedCourses = raw.map(course => ({
         id: course.id,
         title: course.title || 'Untitled Course',
         description: course.description || '',
-        // Use thumbnail as image; fallback to placeholder
         image: course.thumbnail || null,
-        // Backend has no instructor field; default gracefully
         instructor: course.instructor || 'Expert Instructor',
-        // Use 3-month price as default display price
         price: parseFloat(course.price_3months) || parseFloat(course.price_1month) || 0,
         originalPrice: parseFloat(course.price_6months) || null,
         price_1month: parseFloat(course.price_1month) || 0,
         price_3months: parseFloat(course.price_3months) || 0,
         price_6months: parseFloat(course.price_6months) || 0,
-        // Map course_type to category (mega → development, etc.)
-        category: course.category || mapCourseTypeToCategory(course.course_type),
+        category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
         course_type: course.course_type,
         allowed_plan: course.allowed_plan,
-        // Defaults for fields not stored in backend yet
         level: course.level || 'intermediate',
         duration: course.duration || 20,
         rating: course.rating || 4.5,
@@ -149,36 +143,52 @@ export const StorageService = {
         createdAt: course.createdAt,
         userAccess: course.userAccess || { hasAccess: false }
       }))
+
+      _cache.courses = mappedCourses
+      _cache.lastFetched = now
+      return mappedCourses
     } catch (error) {
       console.error('Error fetching courses:', error)
-      return []
+      return _cache.courses || []
     }
   },
   
   getCourseById: async (id) => {
+    const courseId = parseInt(id)
+    
+    if (_cache.courseDetails[courseId]) {
+      return _cache.courseDetails[courseId]
+    }
+
+    if (_cache.courses) {
+      const cached = _cache.courses.find(c => c.id === courseId)
+      if (cached) return cached
+    }
+
     try {
       const token = StorageService.getToken()
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
-      const response = await fetch(`${API_URL}/courses/${id}`, { headers })
+      const response = await fetch(`${API_URL}/courses/${courseId}`, { headers })
       
       if (response.ok) {
         const data = await response.json()
         if (data && data.data) {
+          _cache.courseDetails[courseId] = data.data
           return data.data
         }
       }
       
-      // Fallback: If 401 or not found, try to find it in the public courses list
-      const courses = await StorageService.getCourses()
-      return courses.find(c => c.id === parseInt(id)) || null
+      const courses = await StorageService.getCourses(true)
+      const found = courses.find(c => c.id === courseId)
+      if (found) {
+        _cache.courseDetails[courseId] = found
+        return found
+      }
+      
+      return null
     } catch (error) {
       console.error('Error fetching course:', error)
-      try {
-        const courses = await StorageService.getCourses()
-        return courses.find(c => c.id === parseInt(id)) || null
-      } catch (fallbackError) {
-        return null
-      }
+      return _cache.courses?.find(c => c.id === courseId) || null
     }
   },
   
@@ -211,36 +221,36 @@ export const StorageService = {
       return false
     }
   },
-  // In storage.js
-enroll: async (courseId, plan = '3months') => {
-  try {
-    const token = StorageService.getToken()
-    if (!token) return { success: false, message: 'Please login first' }
-    
-    const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        courseId: parseInt(courseId), 
-        plan: plan, 
-        paymentId: 'web_' + Date.now() 
+
+  enroll: async (courseId, plan = '3months') => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return { success: false, message: 'Please login first' }
+      
+      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          courseId: parseInt(courseId), 
+          plan: plan, 
+          paymentId: 'web_' + Date.now() 
+        })
       })
-    })
-    
-    const data = await response.json()
-    
-    if (data.success) {
-      window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      }
+      return data
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      return { success: false, message: 'Network error' }
     }
-    return data
-  } catch (error) {
-    console.error('Enrollment error:', error)
-    return { success: false, message: 'Network error' }
-  }
-},
+  },
   
   // ============ PROGRESS ============
   
@@ -310,32 +320,6 @@ enroll: async (courseId, plan = '3months') => {
   },
   
   // ============ ENROLLMENT ============
-  
-  enroll: async (courseId, plan = '3months') => {
-    try {
-      const token = StorageService.getToken()
-      if (!token) return { success: false, message: 'Please login first' }
-      
-      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ courseId: parseInt(courseId), plan, paymentId: 'web_' + Date.now() })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
-      }
-      return data
-    } catch (error) {
-      console.error('Enrollment error:', error)
-      return { success: false, message: 'Network error' }
-    }
-  },
   
   // Get enrollments (IDs only)
   getEnrollments: () => {

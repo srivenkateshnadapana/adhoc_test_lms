@@ -1,16 +1,16 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { 
-  CheckCircle2, 
-  Play, 
-  Clock, 
-  BarChart, 
-  Shield, 
-  Globe, 
-  ArrowLeft, 
-  ArrowRight, 
-  Loader2, 
-  Star, 
+import {
+  CheckCircle2,
+  Play,
+  Clock,
+  BarChart,
+  Shield,
+  Globe,
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  Star,
   BookOpen,
   Users,
   Award,
@@ -23,12 +23,21 @@ import {
 } from "lucide-react"
 import { StorageService } from "../../services/storage"
 import { motion } from "framer-motion"
+import { toast } from "sonner"
 
 export default function CourseDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   // ALL HOOKS MUST BE AT THE TOP
+  // Try to get initial data from cache synchronously to avoid flicker
+  const initialCourse = React.useMemo(() => {
+    const courseId = parseInt(id)
+    // Accessing internal cache is tricky, but getCourseById is async.
+    // However, if we just set loading to true, it will always show loader.
+    return null
+  }, [id])
+
   const [course, setCourse] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
   const [isEnrolled, setIsEnrolled] = React.useState(false)
@@ -40,21 +49,36 @@ export default function CourseDetail() {
   // Fetch course data
   React.useEffect(() => {
     const fetchCourse = async () => {
-      setLoading(true)
-      try {
-        const courseId = parseInt(id)
-        const data = await StorageService.getCourseById(courseId)
-        
-        if (data) {
-          setCourse(data)
-          const enrolled = await StorageService.isEnrolled(courseId)
-          setIsEnrolled(enrolled)
-          setIsBookmarked(StorageService.isBookmarked(courseId))
+      const courseId = parseInt(id)
+
+      // Check cache first to potentially skip loading state
+      const cachedCourse = await StorageService.getCourseById(courseId)
+      if (cachedCourse) {
+        setCourse(cachedCourse)
+        setLoading(false) // Data is ready, show it!
+
+        // Background updates for dynamic data
+        const [enrolled, bookmarked] = await Promise.all([
+          StorageService.isEnrolled(courseId),
+          StorageService.isBookmarked(courseId)
+        ])
+        setIsEnrolled(enrolled)
+        setIsBookmarked(bookmarked)
+      } else {
+        setLoading(true)
+        try {
+          const data = await StorageService.getCourseById(courseId)
+          if (data) {
+            setCourse(data)
+            const enrolled = await StorageService.isEnrolled(courseId)
+            setIsEnrolled(enrolled)
+            setIsBookmarked(StorageService.isBookmarked(courseId))
+          }
+        } catch (error) {
+          console.error('Error fetching course:', error)
+        } finally {
+          setLoading(false)
         }
-      } catch (error) {
-        console.error('Error fetching course:', error)
-      } finally {
-        setLoading(false)
       }
     }
     fetchCourse()
@@ -71,22 +95,22 @@ export default function CourseDetail() {
       navigate("/auth")
       return
     }
-    
+
     setEnrolling(true)
     try {
       const result = await StorageService.enroll(parseInt(id), selectedPlan)
       if (result.success) {
         setIsEnrolled(true)
-        alert('Successfully enrolled in the course!')
+        toast.success('Successfully enrolled in the course!')
       } else if (result.message === 'You already have an active subscription for this course') {
         setIsEnrolled(true)
-        alert('You already have access to this course!')
+        toast.info('You already have access to this course!')
       } else {
-        alert(result.message || 'Enrollment failed. Please try again.')
+        toast.error(result.message || 'Enrollment failed. Please try again.')
       }
     } catch (error) {
       console.error('Enrollment error:', error)
-      alert('Network error. Please try again.')
+      toast.error('Network error. Please try again.')
     } finally {
       setEnrolling(false)
     }
@@ -95,6 +119,16 @@ export default function CourseDetail() {
   const handleBookmark = () => {
     StorageService.toggleFavorite(parseInt(id))
     setIsBookmarked(!isBookmarked)
+    toast.success(isBookmarked ? "Removed from wishlist" : "Saved to wishlist")
+  }
+
+  const handlePlaceholder = (feature) => {
+    toast.info(`${feature} feature coming soon!`)
+  }
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href)
+    toast.success("Link copied to clipboard!")
   }
 
   React.useEffect(() => {
@@ -161,19 +195,19 @@ export default function CourseDetail() {
   return (
     <main className="min-h-screen bg-surface">
       <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
-        <img 
-          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
-          className="w-full h-full object-cover scale-105" 
-          alt={course.title} 
+        <img
+          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80"}
+          className="w-full h-full object-cover scale-105"
+          alt={course.title}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
-        
+
         <div className="absolute bottom-0 left-0 right-0 pb-16">
           <div className="max-w-7xl mx-auto px-8">
             <Link to="/catalog" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all font-bold text-sm mb-6 group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Catalog
             </Link>
-            
+
             <div className="flex flex-wrap gap-3 mb-4">
               <span className="bg-primary/10 backdrop-blur-md text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-primary/20">
                 {course.category || "Professional Development"}
@@ -191,7 +225,7 @@ export default function CourseDetail() {
                 </span>
               )}
             </div>
-            
+
             <h1 className="text-4xl lg:text-6xl font-headline font-extrabold text-primary mb-4 tracking-tighter leading-[1.1] max-w-3xl">
               {course.title}
             </h1>
@@ -210,7 +244,7 @@ export default function CourseDetail() {
             {/* Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {stats.map((stat, i) => (
-                <motion.div 
+                <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -231,11 +265,10 @@ export default function CourseDetail() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all ${
-                      activeTab === tab 
-                        ? "text-primary border-b-2 border-primary" 
+                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all ${activeTab === tab
+                        ? "text-primary border-b-2 border-primary"
                         : "text-secondary hover:text-primary"
-                    }`}
+                      }`}
                   >
                     {tab === "curriculum" ? "Curriculum" : tab === "instructor" ? "Instructor" : "Reviews"}
                   </button>
@@ -253,14 +286,24 @@ export default function CourseDetail() {
                 <h2 className="text-2xl font-headline font-bold text-primary">Course Modules</h2>
                 <div className="space-y-3">
                   {modules.map((module, idx) => (
-                    <div key={module.id} className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden">
+                    <div 
+                      key={module.id} 
+                      onClick={() => {
+                        if (isEnrolled) {
+                          navigate(`/student/course/${id}`)
+                        } else {
+                          toast.info("Please enroll in the course to access the curriculum.")
+                        }
+                      }}
+                      className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer group/module"
+                    >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm group-hover/module:bg-primary group-hover/module:text-on-primary transition-colors">
                             {idx + 1}
                           </div>
                           <div>
-                            <h3 className="font-headline font-bold text-on-surface">{module.title}</h3>
+                            <h3 className="font-headline font-bold text-on-surface group-hover/module:text-primary transition-colors">{module.title}</h3>
                             <div className="flex items-center gap-3 mt-1">
                               <span className="text-xs text-secondary flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> {module.duration}
@@ -271,7 +314,9 @@ export default function CourseDetail() {
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-secondary" />
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container-high text-secondary group-hover/module:bg-primary group-hover/module:text-on-primary transition-all duration-300 shadow-sm group-hover/module:shadow-md active:scale-95">
+                          <ChevronRight className="w-5 h-5 transition-transform group-hover/module:translate-x-0.5" />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -307,10 +352,10 @@ export default function CourseDetail() {
                 className="space-y-6"
               >
                 <div className="flex flex-col sm:flex-row gap-6 p-6 bg-surface-container-lowest rounded-3xl border border-surface-dim/20">
-                  <img 
-                    src={`https://i.pravatar.cc/150?u=${course.instructor}`} 
-                    className="w-24 h-24 rounded-2xl object-cover shadow-lg" 
-                    alt={course.instructor} 
+                  <img
+                    src={`https://i.pravatar.cc/150?u=${course.instructor}`}
+                    className="w-24 h-24 rounded-2xl object-cover shadow-lg"
+                    alt={course.instructor}
                   />
                   <div>
                     <h2 className="text-2xl font-headline font-bold text-primary mb-2">{course.instructor}</h2>
@@ -343,11 +388,11 @@ export default function CourseDetail() {
               >
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-headline font-bold text-primary">Student Reviews</h2>
-                  <button className="text-primary text-sm font-medium flex items-center gap-1">
+                  <button onClick={() => handlePlaceholder("Review writing")} className="text-primary text-sm font-medium flex items-center gap-1">
                     Write a Review <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-4">
                   {[
                     { id: 1, name: "Sarah Chen", role: "CTO", rating: 5, comment: "Excellent course! The curriculum is well-structured and the instructor is highly knowledgeable.", date: "2 weeks ago", avatar: "https://i.pravatar.cc/100?img=1" },
@@ -370,7 +415,7 @@ export default function CourseDetail() {
                       </div>
                       <p className="text-on-surface-variant text-sm leading-relaxed mb-2">{review.comment}</p>
                       <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition">
+                        <button onClick={() => handlePlaceholder("Review helpfulness voting")} className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition">
                           <ThumbsUp className="w-3 h-3" /> Helpful
                         </button>
                         <span className="text-xs text-secondary">{review.date}</span>
@@ -378,8 +423,8 @@ export default function CourseDetail() {
                     </div>
                   ))}
                 </div>
-                
-                <button className="w-full py-3 text-primary border border-primary/30 rounded-xl font-medium hover:bg-primary/5 transition">
+
+                <button onClick={() => handlePlaceholder("Review pagination")} className="w-full py-3 text-primary border border-primary/30 rounded-xl font-medium hover:bg-primary/5 transition">
                   Load More Reviews
                 </button>
               </motion.div>
@@ -399,7 +444,7 @@ export default function CourseDetail() {
                       <h3 className="text-xl font-headline font-bold text-primary mb-2">You're Enrolled!</h3>
                       <p className="text-secondary text-sm">You have access to this course.</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => navigate(`/student/course/${id}`)}
                       className="w-full py-4 rounded-2xl bg-primary text-on-primary font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
                     >
@@ -418,19 +463,19 @@ export default function CourseDetail() {
                             <p className="text-xs text-secondary">{planInfo.days} days access</p>
                           </div>
                           <div className="text-right">
-                             {hasDiscount && <div className="text-xs text-secondary line-through">₹{originalPrice}</div>}
-                             <div className="text-2xl font-headline font-bold text-primary">₹{selectedPrice}</div>
+                            {hasDiscount && <div className="text-xs text-secondary line-through">₹{originalPrice}</div>}
+                            <div className="text-2xl font-headline font-bold text-primary">₹{selectedPrice}</div>
                           </div>
                         </div>
                         {hasDiscount && (
-                           <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
-                             10% Referral Discount Applied
-                           </div>
+                          <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
+                            10% Referral Discount Applied
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleEnroll}
                       disabled={enrolling}
                       className="w-full py-4 rounded-2xl signature-gradient text-white font-headline font-bold text-base hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
@@ -465,7 +510,7 @@ export default function CourseDetail() {
                   </>
                 )}
 
-                <button 
+                <button
                   onClick={handleBookmark}
                   className="w-full mt-4 py-3 rounded-xl border border-surface-dim/20 text-secondary font-medium hover:bg-surface-container-high transition-all flex items-center justify-center gap-2"
                 >
@@ -473,7 +518,7 @@ export default function CourseDetail() {
                   {isBookmarked ? "Saved to Wishlist" : "Save to Wishlist"}
                 </button>
 
-                <button className="w-full mt-2 py-3 text-secondary text-sm flex items-center justify-center gap-2 hover:text-primary transition">
+                <button onClick={handleShare} className="w-full mt-2 py-3 text-secondary text-sm flex items-center justify-center gap-2 hover:text-primary transition">
                   <Share2 className="w-4 h-4" />
                   Share this course
                 </button>

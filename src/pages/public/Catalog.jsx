@@ -40,15 +40,30 @@ export default function Catalog() {
 
   // Load courses
   React.useEffect(() => {
-  const loadCourses = async () => {
-    setLoading(true)
-    const data = await StorageService.getCourses()
-    setCourses(data)
-    setFilteredCourses(data)
-    setLoading(false)
-  }
-  loadCourses()
-}, [])
+    const loadCourses = async () => {
+      // Check if we have cached data first to avoid showing loader if possible
+      const cached = await StorageService.getCourses()
+      if (cached && cached.length > 0) {
+        setCourses(cached)
+        setFilteredCourses(cached)
+        setLoading(false)
+        
+        // Background refresh to ensure data is up to date
+        const fresh = await StorageService.getCourses(true)
+        if (JSON.stringify(fresh) !== JSON.stringify(cached)) {
+          setCourses(fresh)
+          setFilteredCourses(fresh)
+        }
+      } else {
+        setLoading(true)
+        const data = await StorageService.getCourses()
+        setCourses(data)
+        setFilteredCourses(data)
+        setLoading(false)
+      }
+    }
+    loadCourses()
+  }, [])
 
   // Filter and sort courses
   React.useEffect(() => {

@@ -178,6 +178,7 @@ export default function Home() {
                     src={`https://i.pravatar.cc/150?img=${i + 10}`}
                     className="w-10 h-10 rounded-full border-2 border-surface shadow-sm object-cover"
                     alt="Learner"
+                    loading="lazy"
                   />
                 ))}
               </div>
@@ -201,7 +202,9 @@ export default function Home() {
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=60"
+                fetchPriority="high"
+                loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface-container/80 backdrop-blur-xl rounded-2xl border border-surface-dim/20 flex justify-between items-center shadow-2xl">
@@ -209,9 +212,9 @@ export default function Home() {
                   <p className="text-3xl font-headline font-bold text-primary leading-none mb-1">98%</p>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Success Rate</p>
                 </div>
-                <button className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                <Link to="/catalog" className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
                   <Play className="w-5 h-5 fill-current" />
-                </button>
+                </Link>
               </div>
             </div>
             
@@ -224,7 +227,7 @@ export default function Home() {
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
+      <section id="about" className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-8">
             <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
@@ -251,17 +254,17 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
             <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://thumbs.dreamstime.com/b/high-school-students-laptop-classroom-education-people-technology-learning-concept-happy-computer-library-72257218.jpg" className="w-full h-full object-cover" alt="Campus Life" />
+              <img src="https://thumbs.dreamstime.com/b/high-school-students-laptop-classroom-education-people-technology-learning-concept-happy-computer-library-72257218.jpg" className="w-full h-full object-cover" alt="Campus Life" loading="lazy" />
             </div>
             <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" />
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" loading="lazy" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Courses Section (NEW) */}
-      <section className="py-24 px-8 bg-surface">
+      <section id="courses" className="py-24 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest mb-4">
@@ -295,7 +298,7 @@ export default function Home() {
                   </span>
                 </div>
                 <Link 
-                  to={`/catalog/${course.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  to="/catalog"
                   className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
                 >
                   Learn More <ArrowRight className="w-3 h-3" />
@@ -385,7 +388,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section (NEW) */}
-      <section className="py-24 px-8 bg-surface">
+      <section id="testimonials" className="py-24 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">What Our Learners Say</h2>
@@ -407,6 +410,7 @@ export default function Home() {
                     src={testimonial.avatar} 
                     alt={testimonial.name}
                     className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy"
                   />
                   <div>
                     <p className="font-bold text-sm">{testimonial.name}</p>
@@ -418,10 +422,10 @@ export default function Home() {
           </div>
           
           <div className="text-center mt-12">
-            <Link to="/testimonials" className="inline-flex items-center gap-2 text-primary font-medium group">
+            <a href="#testimonials" className="inline-flex items-center gap-2 text-primary font-medium group">
               Read more success stories
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </a>
           </div>
         </div>
       </section>
