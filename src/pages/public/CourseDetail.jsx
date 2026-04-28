@@ -253,7 +253,17 @@ export default function CourseDetail() {
                 <h2 className="text-2xl font-headline font-bold text-primary">Course Modules</h2>
                 <div className="space-y-3">
                   {modules.map((module, idx) => (
-                    <div key={module.id} className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden">
+                    <div 
+                      key={module.id} 
+                      onClick={() => {
+                        if (isEnrolled) {
+                          navigate(`/student/course/${id}`)
+                        } else {
+                          alert("Please enroll to access course modules.")
+                        }
+                      }}
+                      className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
+                    >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
@@ -271,7 +281,7 @@ export default function CourseDetail() {
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-secondary" />
+                        <ChevronRight className="w-5 h-5 text-secondary group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   ))}

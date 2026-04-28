@@ -285,7 +285,7 @@ function PlayerContent() {
                   <span className="text-[10px] font-bold text-primary uppercase tracking-[0.1em]">{module.title}</span>
                 </div>
                 <div className="space-y-2">
-                  {module.lessons?.map((lesson) => (
+                  {Array.isArray(module.lessons) && module.lessons.map((lesson) => (
                     <button
                       key={lesson.id}
                       onClick={() => handleSelectItem(lesson, 'lesson')}
@@ -301,7 +301,7 @@ function PlayerContent() {
                       <div className="flex-1">
                         <p className={`text-xs font-bold leading-tight ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-primary'}`}>{lesson.title}</p>
                         <p className={`text-[10px] uppercase font-bold tracking-widest mt-1 opacity-60 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-secondary'}`}>
-                          {lesson.duration} mins • Video
+                          {lesson.duration || "10"} mins • Video
                         </p>
                       </div>
                     </button>
