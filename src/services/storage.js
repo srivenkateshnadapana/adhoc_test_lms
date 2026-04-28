@@ -160,11 +160,25 @@ export const StorageService = {
       const token = StorageService.getToken()
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
       const response = await fetch(`${API_URL}/courses/${id}`, { headers })
-      const data = await response.json()
-      return data.data
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data.data) {
+          return data.data
+        }
+      }
+      
+      // Fallback: If 401 or not found, try to find it in the public courses list
+      const courses = await StorageService.getCourses()
+      return courses.find(c => c.id === parseInt(id)) || null
     } catch (error) {
       console.error('Error fetching course:', error)
-      return null
+      try {
+        const courses = await StorageService.getCourses()
+        return courses.find(c => c.id === parseInt(id)) || null
+      } catch (fallbackError) {
+        return null
+      }
     }
   },
   

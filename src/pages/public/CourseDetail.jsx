@@ -97,6 +97,12 @@ export default function CourseDetail() {
     setIsBookmarked(!isBookmarked)
   }
 
+  React.useEffect(() => {
+    if (course) {
+      setSelectedPlan(course.allowed_plan || '1month')
+    }
+  }, [course])
+
   // EARLY RETURNS
   if (loading) {
     return (
@@ -137,11 +143,6 @@ export default function CourseDetail() {
   const originalPrice = course.prices ? course.prices[allowedPlanId] : (course.price_1month || course.price || 599)
   const selectedPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
 
-  React.useEffect(() => {
-    if (course) {
-      setSelectedPlan(course.allowed_plan || '1month')
-    }
-  }, [course])
 
   const modules = course.modules || [
     { id: 1, title: "Foundation & Core Concepts", duration: "2.5 hours", lessons: 6 },
@@ -161,7 +162,7 @@ export default function CourseDetail() {
     <main className="min-h-screen bg-surface">
       <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
         <img 
-          src={course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
+          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
           className="w-full h-full object-cover scale-105" 
           alt={course.title} 
         />
@@ -252,7 +253,17 @@ export default function CourseDetail() {
                 <h2 className="text-2xl font-headline font-bold text-primary">Course Modules</h2>
                 <div className="space-y-3">
                   {modules.map((module, idx) => (
-                    <div key={module.id} className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden">
+                    <div 
+                      key={module.id} 
+                      onClick={() => {
+                        if (isEnrolled) {
+                          navigate(`/student/course/${id}`)
+                        } else {
+                          alert("Please enroll to access course modules.")
+                        }
+                      }}
+                      className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
+                    >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
@@ -265,12 +276,12 @@ export default function CourseDetail() {
                                 <Clock className="w-3 h-3" /> {module.duration}
                               </span>
                               <span className="text-xs text-secondary flex items-center gap-1">
-                                <FileText className="w-3 h-3" /> {module.lessons} lessons
+                                <FileText className="w-3 h-3" /> {Array.isArray(module.lessons) ? module.lessons.length : (module.lessons || 0)} lessons
                               </span>
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-secondary" />
+                        <ChevronRight className="w-5 h-5 text-secondary group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   ))}
@@ -400,7 +411,7 @@ export default function CourseDetail() {
                     </div>
                     <button 
                       onClick={() => navigate(`/student/course/${id}`)}
-                      className="w-full py-4 rounded-2xl bg-primary text-white font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
+                      className="w-full py-4 rounded-2xl bg-primary text-on-primary font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
                     >
                       Continue Learning
                       <Play className="w-5 h-5" />
