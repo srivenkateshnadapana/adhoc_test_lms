@@ -40,11 +40,31 @@ export function Header() {
   const dropdownRef = React.useRef(null)
 
   React.useEffect(() => {
-    // Load initial auth state
-    setAuthState({
-      isAuthenticated: StorageService.isAuthenticated(),
-      user: StorageService.getUser()
-    })
+    const loadUser = async () => {
+      // First load from local storage
+      setAuthState({
+        isAuthenticated: StorageService.isAuthenticated(),
+        user: StorageService.getUser()
+      })
+      
+      // Then refresh from backend if authenticated
+      if (StorageService.isAuthenticated()) {
+        try {
+          const token = StorageService.getToken()
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          const data = await res.json()
+          if (data.success && data.user) {
+            StorageService.updateUser(data.user)
+          }
+        } catch (error) {
+          console.error("Failed to refresh user", error)
+        }
+      }
+    }
+    
+    loadUser()
 
     // Listen for auth changes
     const handleAuthUpdate = () => {
@@ -57,6 +77,7 @@ export function Header() {
     window.addEventListener('storage-update-lms_auth', handleAuthUpdate)
     return () => window.removeEventListener('storage-update-lms_auth', handleAuthUpdate)
   }, [])
+
 
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')

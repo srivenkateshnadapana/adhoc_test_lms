@@ -4,7 +4,35 @@ import { Gift } from "lucide-react"
 import { StorageService } from "../../services/storage"
 
 export default function Referral() {
-  const user = StorageService.getUser()
+  const [user, setUser] = React.useState(StorageService.getUser())
+
+  React.useEffect(() => {
+    const refreshUser = async () => {
+      try {
+        const token = StorageService.getToken()
+        if (token) {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          const data = await res.json()
+          if (data.success && data.user) {
+            StorageService.updateUser(data.user)
+            setUser(data.user)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to refresh user", error)
+      }
+    }
+    refreshUser()
+
+    const handleAuthUpdate = () => {
+      setUser(StorageService.getUser())
+    }
+    window.addEventListener('storage-update-lms_auth', handleAuthUpdate)
+    return () => window.removeEventListener('storage-update-lms_auth', handleAuthUpdate)
+  }, [])
+
   const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
   const referralLink = user?.referralCode ? `${baseUrl}/register?ref=${user.referralCode}` : 'Link not available'
 
