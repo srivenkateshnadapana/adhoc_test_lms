@@ -30,6 +30,7 @@ function PlayerContent() {
   const [loading, setLoading] = React.useState(true)
   const [progress, setProgress] = React.useState({})
   const [finalQuizPassed, setFinalQuizPassed] = React.useState(false)
+  const [totalLessonsCount, setTotalLessonsCount] = React.useState(0)
 
   // Quiz Player States
   const [quizAnswers, setQuizAnswers] = React.useState({})
@@ -57,6 +58,12 @@ function PlayerContent() {
       // Load course details
       const courseData = await api.courses.getById(id, token)
       setCourse(courseData.data)
+      
+      let count = 0
+      courseData.data?.modules?.forEach(m => {
+        count += (m.lessons?.length || 0)
+      })
+      setTotalLessonsCount(count)
 
       // Load quizzes (this endpoint includes questions)
       const quizData = await api.quizzes.getCourseQuizzes(id, token)
@@ -294,6 +301,8 @@ function PlayerContent() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'bg-on-primary' : 'bg-surface-container-high'}`}>
                         {progress[lesson.id] === 'completed' ? (
                           <CheckCircle className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-primary' : 'text-emerald-500'}`} />
+                        ) : lesson.type === 'pdf' || lesson.type === 'ppt' ? (
+                          <Layers className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-primary' : 'text-secondary opacity-60'}`} />
                         ) : (
                           <Play className={`w-4 h-4 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-primary' : 'text-secondary opacity-60'}`} />
                         )}
@@ -301,7 +310,7 @@ function PlayerContent() {
                       <div className="flex-1">
                         <p className={`text-xs font-bold leading-tight ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-primary'}`}>{lesson.title}</p>
                         <p className={`text-[10px] uppercase font-bold tracking-widest mt-1 opacity-60 ${activeItem?.id === lesson.id && activeType === 'lesson' ? 'text-on-primary' : 'text-secondary'}`}>
-                          {lesson.duration || "10"} mins • Video
+                          {lesson.duration || "10"} mins • {lesson.type === 'pdf' ? 'PDF Resource' : lesson.type === 'ppt' ? 'PPT Resource' : 'Video'}
                         </p>
                       </div>
                     </button>
@@ -330,11 +339,12 @@ function PlayerContent() {
           })}
           
           {/* Final Quiz Section */}
-          {finalQuiz && (
+          {finalQuiz && Object.keys(progress).length >= totalLessonsCount && (
             <div className="pt-8 mt-8 border-t border-surface-dim/20 space-y-3">
               <div className="flex items-center gap-2 px-2">
                 <span className="text-[10px] font-bold text-primary uppercase tracking-[0.1em]">Certification</span>
               </div>
+              <p className="text-xs text-secondary px-2 mb-2">You have completed all lessons! Take the final quiz to earn your certificate.</p>
               <button
                 onClick={() => !finalQuizPassed && handleSelectItem(finalQuiz, 'quiz')}
                 disabled={finalQuizPassed}
@@ -388,7 +398,16 @@ function PlayerContent() {
           <div className="flex-grow flex flex-col p-8 lg:p-12 overflow-y-auto no-scrollbar">
             <div className="w-full max-w-6xl mx-auto flex flex-col h-full">
               <div className="relative aspect-video bg-primary rounded-[3rem] overflow-hidden shadow-2xl group flex items-center justify-center border-8 border-surface-container-low">
-                {activeItem.videoUrl ? (
+                {activeItem.type === 'pdf' || activeItem.type === 'ppt' ? (
+                  <div className="absolute inset-0 w-full h-full bg-surface-container-lowest flex flex-col items-center justify-center text-center p-8">
+                    <Layers className="w-20 h-20 text-primary mb-6" />
+                    <h3 className="text-2xl font-headline font-bold text-primary mb-2">Resource: {activeItem.title}</h3>
+                    <p className="text-secondary mb-8">{activeItem.type === 'pdf' ? 'PDF Document' : 'PowerPoint Presentation'}</p>
+                    <a href={activeItem.resourceUrl || activeItem.videoUrl} target="_blank" rel="noreferrer" className="px-8 py-4 signature-gradient text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 shadow-lg">
+                      <Layers className="w-5 h-5" /> Download Resource
+                    </a>
+                  </div>
+                ) : activeItem.videoUrl ? (
                   getVideoType(activeItem.videoUrl) === 'mp4' ? (
                     <video src={activeItem.videoUrl} className="absolute inset-0 w-full h-full object-cover bg-black" controls autoPlay />
                   ) : (

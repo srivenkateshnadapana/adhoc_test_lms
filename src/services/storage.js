@@ -36,7 +36,40 @@ export const StorageService = {
   
   getUser: () => {
     const user = localStorage.getItem(USER_KEY)
-    return user ? JSON.parse(user) : null
+    const parsedUser = user ? JSON.parse(user) : null
+    if (parsedUser && typeof parsedUser.coins === 'undefined') {
+      parsedUser.coins = 0 // Default coins
+    }
+    return parsedUser
+  },
+  
+  updateUser: (updates) => {
+    const user = StorageService.getUser()
+    if (user) {
+      const updatedUser = { ...user, ...updates }
+      StorageService.setUser(updatedUser)
+      window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+    }
+  },
+
+  getCoins: () => {
+    return StorageService.getUser()?.coins || 0
+  },
+
+  addCoins: (amount) => {
+    const user = StorageService.getUser()
+    if (user) {
+      StorageService.updateUser({ coins: (user.coins || 0) + amount })
+    }
+  },
+
+  useCoins: (amount) => {
+    const user = StorageService.getUser()
+    if (user && (user.coins || 0) >= amount) {
+      StorageService.updateUser({ coins: user.coins - amount })
+      return true
+    }
+    return false
   },
   
   removeUser: () => localStorage.removeItem(USER_KEY),
@@ -212,35 +245,35 @@ export const StorageService = {
     }
   },
   // In storage.js
-enroll: async (courseId, plan = '3months') => {
-  try {
-    const token = StorageService.getToken()
-    if (!token) return { success: false, message: 'Please login first' }
-    
-    const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        courseId: parseInt(courseId), 
-        plan: plan, 
-        paymentId: 'web_' + Date.now() 
+  enroll: async (courseId, plan = '3months', price = 0, coinsUsed = 0) => {
+    try {
+      const token = StorageService.getToken()
+      if (!token) return { success: false, message: 'Please login first' }
+      
+      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0, paymentId: 'web_' + Date.now() })
       })
-    })
-    
-    const data = await response.json()
-    
-    if (data.success) {
-      window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Handle coins logic locally
+        if (coinsUsed > 0) {
+          StorageService.useCoins(coinsUsed)
+        }
+        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+      }
+      return data
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      return { success: false, message: 'Network error' }
     }
-    return data
-  } catch (error) {
-    console.error('Enrollment error:', error)
-    return { success: false, message: 'Network error' }
-  }
-},
+  },
   
   // ============ PROGRESS ============
   
@@ -311,31 +344,7 @@ enroll: async (courseId, plan = '3months') => {
   
   // ============ ENROLLMENT ============
   
-  enroll: async (courseId, plan = '3months') => {
-    try {
-      const token = StorageService.getToken()
-      if (!token) return { success: false, message: 'Please login first' }
-      
-      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ courseId: parseInt(courseId), plan, paymentId: 'web_' + Date.now() })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
-      }
-      return data
-    } catch (error) {
-      console.error('Enrollment error:', error)
-      return { success: false, message: 'Network error' }
-    }
-  },
+  // Duplicate enroll removed. (it's already defined above)
   
   // Get enrollments (IDs only)
   getEnrollments: () => {

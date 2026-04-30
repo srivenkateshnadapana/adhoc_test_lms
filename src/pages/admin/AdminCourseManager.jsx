@@ -51,8 +51,9 @@ function AdminCourseManagerContent() {
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', order: 1 })
-  const [lessonForm, setLessonForm] = useState({ title: '', videoUrl: '', duration: 10, order: 1 })
+  const [lessonForm, setLessonForm] = useState({ title: '', type: 'video', videoUrl: '', duration: 10, order: 1 })
   const [quizForm, setQuizForm] = useState({ title: '', passingScore: 80 })
+  const [questionForm, setQuestionForm] = useState({ questionText: '', options: ['', '', '', ''], correctOptionIndex: 0 })
 
   useEffect(() => {
     loadCourseData()
@@ -165,9 +166,11 @@ function AdminCourseManagerContent() {
       // Find parent module to get next order
       const parentModule = course?.modules?.find(m => m.id === parent)
       const nextOrder = (parentModule?.lessons?.length || 0) + 1
-      setLessonForm(item ? { title: item.title, videoUrl: item.videoUrl, duration: item.duration, order: item.order } : { title: '', videoUrl: '', duration: 10, order: nextOrder })
+      setLessonForm(item ? { title: item.title, type: item.type || 'video', videoUrl: item.videoUrl, duration: item.duration, order: item.order } : { title: '', type: 'video', videoUrl: '', duration: 10, order: nextOrder })
     } else if (type === 'quiz') {
       setQuizForm(item ? { title: item.title, passingScore: item.passingScore || 80, type: item.type || quizType, moduleId: item.moduleId || parent } : { title: '', passingScore: quizType === 'module' ? 0 : 80, type: quizType, moduleId: parent })
+    } else if (type === 'manage_questions') {
+      setQuestionForm({ questionText: '', options: ['', '', '', ''], correctOptionIndex: 0 })
     }
   }
 
@@ -175,6 +178,7 @@ function AdminCourseManagerContent() {
     setActiveModal(null)
     setEditingItem(null)
     setParentId(null)
+    setQuestionForm({ questionText: '', options: ['', '', '', ''], correctOptionIndex: 0 })
   }
 
   // Submit Handlers
@@ -238,6 +242,62 @@ function AdminCourseManagerContent() {
       toast.error('Operation failed')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleQuestionSubmit = async (e) => {
+    e.preventDefault()
+    if (!editingItem) return
+    if (questionForm.options.some(opt => !opt.trim())) {
+      toast.error('All 4 options must be filled out.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      const token = StorageService.getToken()
+      await api.admin.createQuestion(editingItem.id, {
+        questionText: questionForm.questionText,
+        options: questionForm.options,
+        correctAnswer: questionForm.correctOptionIndex
+      }, token)
+      toast.success('Question added')
+      setQuestionForm({ questionText: '', options: ['', '', '', ''], correctOptionIndex: 0 })
+      
+      // Update editingItem with new questions optimistic/fetch
+      const updatedData = await api.courses.getById(id, token) // fetch fresh course data
+      setCourse(updatedData.data)
+      const quizData = await api.quizzes.getCourseQuizzes(id, token)
+      if (quizData.success) {
+        setModuleQuizzes(quizData.data.moduleQuizzes || [])
+        setFinalQuiz(quizData.data.finalQuiz || null)
+        
+        // Update local editing item
+        const updatedQuiz = quizData.data.moduleQuizzes?.find(q => q.id === editingItem.id) || quizData.data.finalQuiz
+        if (updatedQuiz) setEditingItem(updatedQuiz)
+      }
+    } catch (error) {
+      toast.error('Failed to add question')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm('Are you sure you want to delete this question?')) return
+    try {
+      const token = StorageService.getToken()
+      await api.admin.deleteQuestion(questionId, token)
+      toast.success('Question deleted')
+      
+      const quizData = await api.quizzes.getCourseQuizzes(id, token)
+      if (quizData.success) {
+        setModuleQuizzes(quizData.data.moduleQuizzes || [])
+        setFinalQuiz(quizData.data.finalQuiz || null)
+        const updatedQuiz = quizData.data.moduleQuizzes?.find(q => q.id === editingItem.id) || quizData.data.finalQuiz
+        if (updatedQuiz) setEditingItem(updatedQuiz)
+      }
+    } catch (error) {
+      toast.error('Failed to delete question')
     }
   }
 
@@ -332,6 +392,7 @@ function AdminCourseManagerContent() {
                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-1 rounded-md inline-block">Final Quiz • Pass: {finalQuiz.passingScore}%</p>
                   </div>
                   <div className="flex gap-2">
+                    <button onClick={() => openModal('manage_questions', finalQuiz)} className="p-2 text-blue-600 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 text-xs font-bold px-3">Questions ({finalQuiz.questions?.length || 0})</button>
                     <button onClick={() => openModal('quiz', finalQuiz, null, 'final')} className="p-2 text-secondary hover:text-primary"><Edit className="w-4 h-4" /></button>
                     <button onClick={() => handleDelete('quiz', finalQuiz.id)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -349,70 +410,147 @@ function AdminCourseManagerContent() {
                 <button onClick={closeModal} className="p-2 bg-surface-container rounded-full text-secondary hover:text-primary"><X className="w-5 h-5" /></button>
               </div>
               
-              <form onSubmit={
-                activeModal === 'module' ? handleModuleSubmit : 
-                activeModal === 'lesson' ? handleLessonSubmit : handleQuizSubmit
-              } className="p-6 space-y-4">
-                
-                {/* Module Form */}
-                {activeModal === 'module' && (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Module Title</label>
-                      <input type="text" value={moduleForm.title} onChange={e => setModuleForm({...moduleForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
-                    </div>
-                  </>
-                )}
-
-                {/* Lesson Form */}
-                {activeModal === 'lesson' && (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Lesson Title</label>
-                      <input type="text" value={lessonForm.title} onChange={e => setLessonForm({...lessonForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Video URL (Vimeo/MP4)</label>
-                      <input type="url" value={lessonForm.videoUrl} onChange={e => setLessonForm({...lessonForm, videoUrl: e.target.value})} className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Duration (mins)</label>
-                      <input type="number" value={lessonForm.duration} onChange={e => setLessonForm({...lessonForm, duration: Number(e.target.value)})} required min="1" className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
-                    </div>
-                  </>
-                )}
-
-                {/* Quiz Form */}
-                {activeModal === 'quiz' && (
-                  <>
-                    <div className="mb-4">
-                      <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md ${quizForm.type === 'final' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-blue-500/10 text-blue-600'}`}>
-                        {quizForm.type} Quiz
-                      </span>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Quiz Title</label>
-                      <input type="text" value={quizForm.title} onChange={e => setQuizForm({...quizForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
-                    </div>
-                    {quizForm.type === 'final' && (
+              {activeModal !== 'manage_questions' ? (
+                <form onSubmit={
+                  activeModal === 'module' ? handleModuleSubmit : 
+                  activeModal === 'lesson' ? handleLessonSubmit : handleQuizSubmit
+                } className="p-6 space-y-4">
+                  
+                  {/* Module Form */}
+                  {activeModal === 'module' && (
+                    <>
                       <div>
-                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Passing Score (%)</label>
-                        <input type="number" value={quizForm.passingScore} onChange={e => setQuizForm({...quizForm, passingScore: Number(e.target.value)})} required min="1" max="100" className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Module Title</label>
+                        <input type="text" value={moduleForm.title} onChange={e => setModuleForm({...moduleForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
                       </div>
-                    )}
-                    {quizForm.type === 'module' && (
-                      <p className="text-xs text-secondary italic">Module quizzes act as knowledge checks and have no minimum passing criteria.</p>
-                    )}
-                  </>
-                )}
+                    </>
+                  )}
 
-                <div className="pt-6 flex justify-end gap-3">
-                  <button type="button" onClick={closeModal} className="px-6 py-3 rounded-xl font-bold text-secondary hover:bg-surface-container">Cancel</button>
-                  <button type="submit" disabled={submitting} className="px-6 py-3 signature-gradient rounded-xl font-bold text-white flex items-center gap-2">
-                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />} Save
-                  </button>
+                  {/* Lesson Form */}
+                  {activeModal === 'lesson' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Lesson Title</label>
+                        <input type="text" value={lessonForm.title} onChange={e => setLessonForm({...lessonForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Lesson Type</label>
+                        <select value={lessonForm.type} onChange={e => setLessonForm({...lessonForm, type: e.target.value})} className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none">
+                          <option value="video">Video Lecture</option>
+                          <option value="pdf">PDF Document</option>
+                          <option value="ppt">PowerPoint Presentation</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Resource URL (Vimeo/MP4/PDF/PPT)</label>
+                        <input type="url" value={lessonForm.videoUrl} onChange={e => setLessonForm({...lessonForm, videoUrl: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Duration / Reading Time (mins)</label>
+                        <input type="number" value={lessonForm.duration} onChange={e => setLessonForm({...lessonForm, duration: Number(e.target.value)})} required min="1" className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Quiz Form */}
+                  {activeModal === 'quiz' && (
+                    <>
+                      <div className="mb-4">
+                        <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md ${quizForm.type === 'final' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-blue-500/10 text-blue-600'}`}>
+                          {quizForm.type} Quiz
+                        </span>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Quiz Title</label>
+                        <input type="text" value={quizForm.title} onChange={e => setQuizForm({...quizForm, title: e.target.value})} required className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                      </div>
+                      {quizForm.type === 'final' && (
+                        <div>
+                          <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">Passing Score (%)</label>
+                          <input type="number" value={quizForm.passingScore} onChange={e => setQuizForm({...quizForm, passingScore: Number(e.target.value)})} required min="1" max="100" className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 focus:ring-2 focus:ring-primary focus:outline-none" />
+                        </div>
+                      )}
+                      {quizForm.type === 'module' && (
+                        <p className="text-xs text-secondary italic">Module quizzes act as knowledge checks and have no minimum passing criteria.</p>
+                      )}
+                    </>
+                  )}
+
+                  <div className="pt-6 flex justify-end gap-3">
+                    <button type="button" onClick={closeModal} className="px-6 py-3 rounded-xl font-bold text-secondary hover:bg-surface-container">Cancel</button>
+                    <button type="submit" disabled={submitting} className="px-6 py-3 signature-gradient rounded-xl font-bold text-white flex items-center gap-2">
+                      {submitting && <Loader2 className="w-4 h-4 animate-spin" />} Save
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Manage Questions Modal Content */
+                <div className="p-6 max-h-[70vh] overflow-y-auto no-scrollbar">
+                  <h3 className="text-lg font-bold text-primary mb-4">Questions ({editingItem?.questions?.length || 0})</h3>
+                  
+                  {/* Existing Questions List */}
+                  <div className="space-y-4 mb-8">
+                    {editingItem?.questions?.map((q, idx) => (
+                      <div key={q.id} className="p-4 bg-surface-container-low border border-surface-dim/20 rounded-xl relative group">
+                        <button onClick={() => handleDeleteQuestion(q.id)} className="absolute top-2 right-2 p-1 text-red-500/50 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <p className="font-bold text-primary text-sm pr-6"><span className="text-secondary">{idx + 1}.</span> {q.questionText}</p>
+                        <ul className="mt-2 space-y-1 pl-4">
+                          {q.options?.map((opt, oIdx) => (
+                            <li key={oIdx} className={`text-xs ${q.correctOptionIndex === oIdx ? 'text-emerald-600 font-bold' : 'text-secondary'}`}>
+                              {oIdx === 0 ? 'A' : oIdx === 1 ? 'B' : oIdx === 2 ? 'C' : 'D'}. {opt}
+                              {q.correctOptionIndex === oIdx && ' ✓'}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                    {!editingItem?.questions?.length && (
+                      <p className="text-sm text-secondary italic">No questions added yet.</p>
+                    )}
+                  </div>
+
+                  {/* Add Question Form */}
+                  <div className="bg-surface-container-lowest p-5 border border-primary/20 rounded-2xl shadow-inner">
+                    <h4 className="text-sm font-bold text-primary mb-3">Add New Question</h4>
+                    <form onSubmit={handleQuestionSubmit} className="space-y-3">
+                      <div>
+                        <input type="text" placeholder="Enter question..." value={questionForm.questionText} onChange={e => setQuestionForm({...questionForm, questionText: e.target.value})} required className="w-full px-3 py-2 bg-surface-container rounded-lg border border-surface-dim/20 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        {questionForm.options.map((opt, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <input 
+                              type="radio" 
+                              name="correctOption" 
+                              checked={questionForm.correctOptionIndex === idx}
+                              onChange={() => setQuestionForm({...questionForm, correctOptionIndex: idx})}
+                              className="accent-emerald-500 w-4 h-4"
+                            />
+                            <input 
+                              type="text" 
+                              placeholder={`Option ${idx + 1}`} 
+                              value={opt} 
+                              onChange={e => {
+                                const newOpts = [...questionForm.options];
+                                newOpts[idx] = e.target.value;
+                                setQuestionForm({...questionForm, options: newOpts});
+                              }} 
+                              required 
+                              className={`w-full px-3 py-1.5 bg-surface-container rounded-lg border text-sm focus:outline-none ${questionForm.correctOptionIndex === idx ? 'border-emerald-500/50' : 'border-surface-dim/20'}`} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-secondary italic">Select the radio button next to the correct answer.</p>
+                      <button type="submit" disabled={submitting} className="w-full py-2 bg-primary text-white rounded-lg text-sm font-bold mt-2 flex items-center justify-center gap-2">
+                        {submitting && <Loader2 className="w-4 h-4 animate-spin" />} Add Question
+                      </button>
+                    </form>
+                  </div>
                 </div>
-              </form>
+              )}
             </div>
           </div>
         )}
@@ -489,7 +627,8 @@ function SortableModule({ module, modQuiz, mIdx, openModal, handleDelete }) {
                   <p className="text-xs text-blue-600 mt-1">Knowledge Check</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
+                <button onClick={() => openModal('manage_questions', modQuiz)} className="text-xs font-bold text-blue-600 bg-blue-500/10 px-3 py-1 rounded-lg hover:bg-blue-500/20">Questions ({modQuiz.questions?.length || 0})</button>
                 <button onClick={() => openModal('quiz', modQuiz, module.id, 'module')} className="text-secondary hover:text-primary"><Edit className="w-4 h-4" /></button>
                 <button onClick={() => handleDelete('quiz', modQuiz.id)} className="text-red-500/60 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
               </div>
@@ -527,11 +666,11 @@ function SortableLesson({ lesson, moduleId, lIdx, openModal, handleDelete }) {
           <GripVertical className="w-4 h-4" />
         </div>
         <div className="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center text-primary shrink-0">
-          <Play className="w-5 h-5" />
+          {lesson.type === 'pdf' || lesson.type === 'ppt' ? <Layers className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </div>
         <div>
           <p className="font-bold text-primary">{lesson.title}</p>
-          <p className="text-xs text-secondary mt-1">{lesson.duration} mins • Part {lIdx + 1}</p>
+          <p className="text-xs text-secondary mt-1">{lesson.duration} mins • {lesson.type === 'pdf' ? 'PDF' : lesson.type === 'ppt' ? 'PPT' : 'Video'}</p>
         </div>
       </div>
       <div className="flex gap-3">

@@ -5,7 +5,13 @@ import { Menu, X, LogOut, Sun, Moon, User, BookOpen, Award, Settings, Gift, Mess
 import { AnimatePresence, motion } from "framer-motion"
 import { StorageService } from "../../services/storage"
 
-const NAV_ITEMS = [
+const PUBLIC_NAV_ITEMS = [
+  { href: "/", label: "Home" },
+  { href: "/catalog", label: "Courses" },
+  { href: "/verify-certificate", label: "Certificate Verification" },
+]
+
+const PRIVATE_NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/catalog", label: "Courses" },
   { href: "/my-courses", label: "My Courses" },
@@ -100,7 +106,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-8 font-headline font-semibold tracking-tight">
-          {NAV_ITEMS.map((item) => (
+          {(isAuthenticated ? PRIVATE_NAV_ITEMS : PUBLIC_NAV_ITEMS).map((item) => (
             <Link
               key={item.href}
               to={item.href}
@@ -212,7 +218,7 @@ export function Header() {
             transition={{ duration: 0.2 }}
           >
             <div className="flex flex-col gap-1 px-4 py-3">
-              {NAV_ITEMS.map((item) => (
+              {(isAuthenticated ? PRIVATE_NAV_ITEMS : PUBLIC_NAV_ITEMS).map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}

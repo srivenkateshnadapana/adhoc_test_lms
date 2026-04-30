@@ -1,8 +1,20 @@
 import React from 'react'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { Gift } from "lucide-react"
+import { StorageService } from "../../services/storage"
 
 export default function Referral() {
+  const user = StorageService.getUser()
+  const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
+  const referralLink = user?.referralCode ? `${baseUrl}/register?ref=${user.referralCode}` : 'Link not available'
+
+  const handleCopy = () => {
+    if (user?.referralCode) {
+      navigator.clipboard.writeText(referralLink)
+      alert('Referral link copied to clipboard!')
+    }
+  }
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-surface pt-24 pb-20 px-8">
@@ -21,10 +33,25 @@ export default function Referral() {
 
           <div className="bg-surface-container-lowest rounded-[3rem] p-16 text-center border-2 border-dashed border-surface-dim shadow-inner">
             <Gift className="w-16 h-16 text-surface-dim mx-auto mb-6" />
-            <h3 className="text-2xl font-headline font-bold text-primary mb-4">Your Referral Link</h3>
-            <p className="text-on-surface-variant max-w-sm mx-auto">
-              Referral program is currently being set up. Check back soon for your unique link!
-            </p>
+            <h3 className="text-2xl font-headline font-bold text-primary mb-4">Your Referral Stats</h3>
+            <div className="flex flex-col items-center justify-center gap-4 mb-8">
+              <div className="bg-amber-500/10 text-amber-600 px-6 py-4 rounded-2xl border border-amber-500/20 font-bold flex flex-col items-center">
+                <span className="text-sm uppercase tracking-widest opacity-80">Your Coins</span>
+                <span className="text-4xl font-headline mt-1">{user?.coins || 0}</span>
+              </div>
+              <p className="text-secondary max-w-sm text-sm">
+                Earn 10% of your friend's purchase price as coins when they buy a course using your link!
+              </p>
+            </div>
+            
+            <div className="max-w-xl mx-auto space-y-4">
+              <div className="p-4 bg-surface-container rounded-xl flex items-center justify-between border border-surface-dim/20 gap-4 overflow-hidden">
+                <span className="text-primary font-mono text-sm truncate">{referralLink}</span>
+                <button onClick={handleCopy} className="text-xs font-bold bg-primary text-white px-6 py-3 rounded-lg hover:opacity-90 shrink-0">
+                  Copy Link
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
