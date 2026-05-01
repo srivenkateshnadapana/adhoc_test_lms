@@ -149,6 +149,12 @@
   body {
     @apply bg-surface font-body text-on-surface antialiased;
   }
+  input, textarea, select {
+    @apply text-on-surface;
+  }
+  ::placeholder {
+    @apply text-on-surface-variant opacity-60;
+  }
 }
 
 @layer utilities {

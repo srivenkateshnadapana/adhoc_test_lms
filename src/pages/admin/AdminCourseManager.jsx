@@ -479,20 +479,21 @@ function SortableModule({ module, modQuiz, mIdx, openModal, handleDelete }) {
 
         {/* Render Module Quiz at the bottom of the module (non-draggable to keep it fixed at the end) */}
         {modQuiz && (
-          <div className="flex justify-between items-center p-4 bg-blue-500/5 rounded-2xl border border-blue-500/20">
+          <div className="flex justify-between items-center p-4 bg-surface-container-low rounded-2xl border border-surface-dim/20">
              <div className="flex items-center gap-4 pl-10">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-600 shrink-0">
-                  <HelpCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-bold text-blue-800">{modQuiz.title}</p>
-                  <p className="text-xs text-blue-600 mt-1">Knowledge Check</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button onClick={() => openModal('quiz', modQuiz, module.id, 'module')} className="text-secondary hover:text-primary"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => handleDelete('quiz', modQuiz.id)} className="text-red-500/60 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-              </div>
+               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
+                 <HelpCircle className="w-5 h-5" />
+               </div>
+               <div>
+                 <p className="font-bold text-primary">{modQuiz.title}</p>
+                 <p className="text-xs text-secondary mt-1">Knowledge Check</p>
+               </div>
+             </div>
+             <div className="flex gap-3 items-center">
+               <button onClick={() => openModal('manage_questions', modQuiz)} className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg hover:bg-primary/20">Questions ({modQuiz.questions?.length || 0})</button>
+               <button onClick={() => openModal('quiz', modQuiz, module.id, 'module')} className="text-secondary hover:text-primary"><Edit className="w-4 h-4" /></button>
+               <button onClick={() => handleDelete('quiz', modQuiz.id)} className="text-red-500/60 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+             </div>
           </div>
         )}
       </div>

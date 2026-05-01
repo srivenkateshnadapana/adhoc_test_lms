@@ -367,20 +367,20 @@ export default function Home() {
               <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
             </motion.div>
             </div>
-              <motion.div 
+            <motion.div 
               variants={fadeUp}
-              className="w-full md:col-span-3 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
+              className="w-full md:col-span-3 bg-surface-container-low flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-[2.5rem] border border-surface-dim/20 p-8 sm:p-10 gap-8"
             >
-              <div>
-                <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
-                <p className="text-xl font-headline font-bold">Start your free trial today</p>
+              <div className="space-y-2">
+                <p className="text-xs sm:text-sm text-secondary uppercase tracking-[0.2em] font-bold">Ready to begin?</p>
+                <p className="text-2xl sm:text-3xl font-headline font-bold text-primary">Start your free trial today</p>
               </div>
               <Link 
                 to="/register" 
-                className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-bold rounded-2xl hover:scale-105 transition-transform group flex items-center justify-center gap-2 whitespace-nowrap shadow-xl shadow-primary/10"
               >
                 Join Today 
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </motion.div>
           </motion.div>
