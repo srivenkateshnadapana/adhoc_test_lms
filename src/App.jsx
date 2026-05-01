@@ -27,6 +27,9 @@ const AdminCourses = React.lazy(() => import('./pages/admin/AdminCourses'))
 const AdminCourseManager = React.lazy(() => import('./pages/admin/AdminCourseManager'))
 const AdminDoubts = React.lazy(() => import('./pages/admin/AdminDoubts'))
 const VerifyCertificate = React.lazy(() => import('./pages/public/VerifyCertificate'))
+const BlogList = React.lazy(() => import('./pages/public/BlogList'))
+const BlogPost = React.lazy(() => import('./pages/public/BlogPost'))
+const AdminBlogs = React.lazy(() => import('./pages/admin/AdminBlogs'))
 
 function App() {
   return (
@@ -46,6 +49,8 @@ function App() {
             <Route path="/course/:id" element={<CourseDetail />} />
             <Route path="/verify-certificate" element={<VerifyCertificate />} />
             <Route path="/verify-certificate/:code" element={<VerifyCertificate />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -62,6 +67,7 @@ function App() {
             <Route path="/admin/courses" element={<AdminCourses />} />
             <Route path="/admin/courses/:id" element={<AdminCourseManager />} />
             <Route path="/admin/doubts" element={<AdminDoubts />} />
+            <Route path="/admin/blogs" element={<AdminBlogs />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />

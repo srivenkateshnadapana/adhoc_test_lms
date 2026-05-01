@@ -8,12 +8,14 @@ import { StorageService } from "../../services/storage"
 const PUBLIC_NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/catalog", label: "Courses" },
+  { href: "/blog", label: "Blog" },
   { href: "/verify-certificate", label: "Certificate Verification" },
 ]
 
 const PRIVATE_NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/catalog", label: "Courses" },
+  { href: "/blog", label: "Blog" },
   { href: "/my-courses", label: "My Courses" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/certificates", label: "Certificates" },
