@@ -246,33 +246,102 @@ export const StorageService = {
   },
   // In storage.js
   enroll: async (courseId, plan = '3months', price = 0, coinsUsed = 0) => {
-    try {
-      const token = StorageService.getToken()
-      if (!token) return { success: false, message: 'Please login first' }
-      
-      const response = await fetch(`${API_URL}/payments/mock-purchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0, paymentId: 'web_' + Date.now() })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        // Handle coins logic locally
-        if (coinsUsed > 0) {
-          StorageService.useCoins(coinsUsed)
+    return new Promise(async (resolve) => {
+      try {
+        const token = StorageService.getToken()
+        if (!token) return resolve({ success: false, message: 'Please login first' })
+        
+        // 1. Create Order
+        const orderRes = await fetch(`${API_URL}/payments/create-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0 })
+        })
+        const orderData = await orderRes.json()
+        
+        if (!orderData.success) {
+          return resolve(orderData)
         }
-        window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+
+        // 2. Handle Free or Fully Discounted Case
+        if (orderData.isFree) {
+          const verifyRes = await fetch(`${API_URL}/payments/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0 })
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyData.success) {
+            if (coinsUsed > 0) StorageService.useCoins(coinsUsed)
+            window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+          }
+          return resolve(verifyData)
+        }
+
+        // 3. Initialize Razorpay Checkout
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.order.amount,
+          currency: orderData.order.currency,
+          name: "Adhoc Network Tech",
+          description: "Course Enrollment",
+          order_id: orderData.order.id,
+          handler: async function (response) {
+            try {
+              // 4. Verify Payment on Backend
+              const verifyRes = await fetch(`${API_URL}/payments/verify`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  courseId: parseInt(courseId),
+                  plan,
+                  coinsUsed: coinsUsed || 0
+                })
+              })
+              const verifyData = await verifyRes.json()
+              if (verifyData.success) {
+                if (coinsUsed > 0) StorageService.useCoins(coinsUsed)
+                window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
+              }
+              resolve(verifyData)
+            } catch (err) {
+              console.error('Payment verification error', err)
+              resolve({ success: false, message: 'Payment verification failed' })
+            }
+          },
+          prefill: {
+            name: StorageService.getUser()?.name || "",
+            email: StorageService.getUser()?.email || ""
+          },
+          theme: {
+            color: "#0052cc"
+          }
+        }
+
+        const rzp = new window.Razorpay(options)
+        rzp.on('payment.failed', function (response) {
+          console.error(response.error)
+          resolve({ success: false, message: response.error.description || 'Payment failed' })
+        })
+        rzp.open()
+        
+      } catch (error) {
+        console.error('Enrollment error:', error)
+        resolve({ success: false, message: 'Network error' })
       }
-      return data
-    } catch (error) {
-      console.error('Enrollment error:', error)
-      return { success: false, message: 'Network error' }
-    }
+    })
   },
   
   // ============ PROGRESS ============

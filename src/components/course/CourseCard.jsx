@@ -83,9 +83,9 @@ export function CourseCard({
         <div className="flex items-center justify-between pt-2 border-t border-surface-dim/20">
           <div>
             {originalPrice && (
-              <span className="text-xs text-on-surface-variant line-through mr-2">${originalPrice}</span>
+              <span className="text-xs text-on-surface-variant line-through mr-2">₹{originalPrice}</span>
             )}
-            <span className="text-xl font-bold text-primary">${price}</span>
+            <span className="text-xl font-bold text-primary">₹{price}</span>
             {discount > 0 && (
               <span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
             )}

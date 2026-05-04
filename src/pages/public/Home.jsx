@@ -100,7 +100,7 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest"
             >
-              The Digital Curator
+              Learn Any Thing And Any Where
             </motion.span>
             
             <motion.h1 
