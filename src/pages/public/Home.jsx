@@ -100,7 +100,7 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest"
             >
-              The Digital Curator
+              Learn Any Thing And Any Where
             </motion.span>
             
             <motion.h1 
@@ -202,11 +202,9 @@ export default function Home() {
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=60"
-                fetchPriority="high"
-                loading="eager"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&auto=format&fit=crop&q=100"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface-container/80 backdrop-blur-xl rounded-2xl border border-surface-dim/20 flex justify-between items-center shadow-2xl">
                 <div>
                   <p className="text-3xl font-headline font-bold text-primary leading-none mb-1">98%</p>
@@ -254,10 +252,10 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
             <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://thumbs.dreamstime.com/b/high-school-students-laptop-classroom-education-people-technology-learning-concept-happy-computer-library-72257218.jpg" className="w-full h-full object-cover" alt="Campus Life" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Campus Life" />
             </div>
             <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=60" className="w-full h-full object-cover" alt="Study" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1920&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Study" />
             </div>
           </div>
         </div>

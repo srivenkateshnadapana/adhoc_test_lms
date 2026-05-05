@@ -178,6 +178,34 @@ function CertificatesContent() {
                       <Shield className="w-4 h-4" /> Verify
                     </Link>
                   </div>
+
+                  {/* Share Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-surface-dim/20">
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/verify-certificate/' + (cert.verificationCode || cert.id))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#0077b5]/10 text-[#0077b5] rounded-lg font-bold text-xs hover:bg-[#0077b5]/20 transition-colors"
+                    >
+                      LinkedIn
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/verify-certificate/' + (cert.verificationCode || cert.id))}&text=I just earned my certificate for ${encodeURIComponent(cert.course?.title)}!`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-lg font-bold text-xs hover:bg-[#1DA1F2]/20 transition-colors"
+                    >
+                      Twitter
+                    </a>
+                    <a
+                      href={`https://api.whatsapp.com/send?text=I just earned my certificate for ${encodeURIComponent(cert.course?.title)}! Check it out: ${encodeURIComponent(window.location.origin + '/verify-certificate/' + (cert.verificationCode || cert.id))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#25D366]/10 text-[#25D366] rounded-lg font-bold text-xs hover:bg-[#25D366]/20 transition-colors"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}

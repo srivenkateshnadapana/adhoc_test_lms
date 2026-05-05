@@ -82,6 +82,10 @@ function AdminDashboardContent() {
               <MessageCircle className="w-4 h-4" />
               Student Doubts
             </Link>
+            <Link to="/admin/blogs" className="px-8 py-4 bg-surface-container-low border border-surface-dim/20 rounded-2xl font-bold text-secondary text-sm hover:bg-surface-container transition-all flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Blogs
+            </Link>
             <Link to="/admin/courses" className="px-8 py-4 signature-gradient text-white rounded-2xl font-bold text-sm shadow-xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2">
               <Plus className="w-4 h-4" />
               New Asset

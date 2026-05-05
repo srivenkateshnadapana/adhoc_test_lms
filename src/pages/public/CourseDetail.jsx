@@ -45,6 +45,7 @@ export default function CourseDetail() {
   const [isBookmarked, setIsBookmarked] = React.useState(false)
   const [enrolling, setEnrolling] = React.useState(false)
   const [selectedPlan, setSelectedPlan] = React.useState('3months')
+  const [useCoins, setUseCoins] = React.useState(false)
 
   // Fetch course data
   React.useEffect(() => {
@@ -98,10 +99,12 @@ export default function CourseDetail() {
 
     setEnrolling(true)
     try {
-      const result = await StorageService.enroll(parseInt(id), selectedPlan)
+      const result = await StorageService.enroll(parseInt(id), selectedPlan, finalPrice, coinsToUse)
       if (result.success) {
         setIsEnrolled(true)
-        toast.success('Successfully enrolled in the course!')
+        alert('Successfully enrolled in the course!')
+        // Reload user to update coin balance in the UI
+        StorageService.getAuthState() 
       } else if (result.message === 'You already have an active subscription for this course') {
         setIsEnrolled(true)
         toast.info('You already have access to this course!')
@@ -175,7 +178,11 @@ export default function CourseDetail() {
   const allowedPlanId = course.allowed_plan || '1month'
   const planInfo = planMap[allowedPlanId] || planMap['1month']
   const originalPrice = course.prices ? course.prices[allowedPlanId] : (course.price_1month || course.price || 599)
-  const selectedPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+  const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+  
+  const userCoins = StorageService.getCoins()
+  const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
+  const finalPrice = discountPrice - coinsToUse
 
 
   const modules = course.modules || [
@@ -292,10 +299,7 @@ export default function CourseDetail() {
                         if (isEnrolled) {
                           navigate(`/student/course/${id}`)
                         } else {
-                          toast.info("Please enroll in the course to access the curriculum.")
-                        }
-                      }}
-                      className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer group/module"
+                      className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
                     >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
                         <div className="flex items-center gap-4">
@@ -314,9 +318,7 @@ export default function CourseDetail() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container-high text-secondary group-hover/module:bg-primary group-hover/module:text-on-primary transition-all duration-300 shadow-sm group-hover/module:shadow-md active:scale-95">
-                          <ChevronRight className="w-5 h-5 transition-transform group-hover/module:translate-x-0.5" />
-                        </div>
+                        <ChevronRight className="w-5 h-5 text-secondary group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   ))}
@@ -463,14 +465,31 @@ export default function CourseDetail() {
                             <p className="text-xs text-secondary">{planInfo.days} days access</p>
                           </div>
                           <div className="text-right">
-                            {hasDiscount && <div className="text-xs text-secondary line-through">₹{originalPrice}</div>}
-                            <div className="text-2xl font-headline font-bold text-primary">₹{selectedPrice}</div>
+                             {hasDiscount && <div className="text-xs text-secondary line-through">₹{originalPrice}</div>}
+                             <div className="text-2xl font-headline font-bold text-primary">₹{finalPrice}</div>
                           </div>
                         </div>
                         {hasDiscount && (
                           <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
                             10% Referral Discount Applied
                           </div>
+                        )}
+                        {userCoins > 0 && (
+                          <div className="mt-4 pt-3 border-t border-primary/20 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-amber-400 text-white flex items-center justify-center text-xs font-bold">C</span>
+                              <span className="text-xs font-bold text-primary">Use Coins (Balance: {userCoins})</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" checked={useCoins} onChange={() => setUseCoins(!useCoins)} />
+                              <div className="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                            </label>
+                          </div>
+                        )}
+                        {useCoins && coinsToUse > 0 && (
+                           <div className="mt-2 text-xs font-bold text-amber-600 bg-amber-500/10 px-2 py-1 rounded inline-block">
+                             -{coinsToUse} Coins Applied
+                           </div>
                         )}
                       </div>
                     </div>
@@ -487,7 +506,7 @@ export default function CourseDetail() {
                         </>
                       ) : (
                         <>
-                          Enroll Now - ₹{selectedPrice}
+                          Enroll Now - ₹{finalPrice}
                           <ArrowRight className="w-5 h-5" />
                         </>
                       )}

@@ -27,14 +27,17 @@ const AdminCourses = React.lazy(() => import('./pages/admin/AdminCourses'))
 const AdminCourseManager = React.lazy(() => import('./pages/admin/AdminCourseManager'))
 const AdminDoubts = React.lazy(() => import('./pages/admin/AdminDoubts'))
 const VerifyCertificate = React.lazy(() => import('./pages/public/VerifyCertificate'))
+const BlogList = React.lazy(() => import('./pages/public/BlogList'))
+const BlogPost = React.lazy(() => import('./pages/public/BlogPost'))
+const AdminBlogs = React.lazy(() => import('./pages/admin/AdminBlogs'))
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-surface font-body text-on-surface transition-colors duration-300 flex flex-col">
+      <div className="min-h-screen bg-surface font-body text-on-surface flex flex-col">
         <Header />
-        <main className="flex-grow pt-20 pb-20 md:pb-8 w-full max-w-[1920px] mx-auto transition-all duration-300">
+        <main className="flex-grow pt-20 pb-20 md:pb-8 w-full max-w-[1920px] mx-auto">
           <React.Suspense fallback={
             <div className="flex items-center justify-center min-h-[50vh]">
               <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -46,6 +49,8 @@ function App() {
             <Route path="/course/:id" element={<CourseDetail />} />
             <Route path="/verify-certificate" element={<VerifyCertificate />} />
             <Route path="/verify-certificate/:code" element={<VerifyCertificate />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -62,6 +67,7 @@ function App() {
             <Route path="/admin/courses" element={<AdminCourses />} />
             <Route path="/admin/courses/:id" element={<AdminCourseManager />} />
             <Route path="/admin/doubts" element={<AdminDoubts />} />
+            <Route path="/admin/blogs" element={<AdminBlogs />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
