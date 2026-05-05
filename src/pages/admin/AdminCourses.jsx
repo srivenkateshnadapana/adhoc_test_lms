@@ -246,11 +246,11 @@ function AdminCoursesContent() {
               <div key={course.id} className="bg-surface-container-lowest p-6 rounded-3xl border border-surface-dim/20 shadow-xl flex flex-col md:flex-row gap-6 items-center hover:border-primary/30 transition-all duration-300">
                 <div className="w-full md:w-48 h-32 bg-surface-container rounded-2xl overflow-hidden shrink-0">
                   <img 
-                    src={course.thumbnail || course.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'} 
+                    src={course.thumbnail || course.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&q=100'} 
                     alt={course.title} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'
+                      e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&q=100'
                     }}
                   />
                 </div>
@@ -289,7 +289,7 @@ function AdminCoursesContent() {
                       console.log('Edit button clicked for course:', course.id, course.title)
                       handleOpenModal(course)
                     }} 
-                    className="px-6 py-3 bg-surface-container-high text-secondary rounded-xl font-bold hover:text-primary transition-colors flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-surface-container-high text-secondary rounded-xl font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2"
                   >
                     <Edit className="w-4 h-4" /> Edit
                   </button>

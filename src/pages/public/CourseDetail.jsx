@@ -85,6 +85,25 @@ export default function CourseDetail() {
     fetchCourse()
   }, [id])
 
+  // PRICING CALCULATIONS
+  const user = StorageService.getUser()
+  const hasDiscount = user && user.availableDiscounts > 0
+  const userCoins = StorageService.getCoins()
+
+  const planMap = {
+    '1month': { name: '1 Month', days: 30 },
+    '3months': { name: '3 Months', days: 90 },
+    '6months': { name: '6 Months', days: 180 }
+  }
+
+  const allowedPlanId = course?.allowed_plan || '1month'
+  const planInfo = planMap[allowedPlanId] || planMap['1month']
+  const originalPrice = course?.prices ? course.prices[allowedPlanId] : (course?.price_1month || course?.price || 599)
+  const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+  
+  const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
+  const finalPrice = discountPrice - coinsToUse
+
   // HANDLE FUNCTIONS
   const handlePlanSelect = (planId) => {
     setSelectedPlan(planId)
@@ -166,26 +185,9 @@ export default function CourseDetail() {
     )
   }
 
-  const user = StorageService.getUser()
-  const hasDiscount = user && user.availableDiscounts > 0
-
-  const planMap = {
-    '1month': { name: '1 Month', days: 30 },
-    '3months': { name: '3 Months', days: 90 },
-    '6months': { name: '6 Months', days: 180 }
-  }
-
-  const allowedPlanId = course.allowed_plan || '1month'
-  const planInfo = planMap[allowedPlanId] || planMap['1month']
-  const originalPrice = course.prices ? course.prices[allowedPlanId] : (course.price_1month || course.price || 599)
-  const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
-  
-  const userCoins = StorageService.getCoins()
-  const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
-  const finalPrice = discountPrice - coinsToUse
 
 
-  const modules = course.modules || [
+  const modules = course?.modules || [
     { id: 1, title: "Foundation & Core Concepts", duration: "2.5 hours", lessons: 6 },
     { id: 2, title: "Advanced Implementation", duration: "4 hours", lessons: 8 },
     { id: 3, title: "Practical Labs & Case Studies", duration: "3.5 hours", lessons: 5 },
@@ -193,17 +195,17 @@ export default function CourseDetail() {
   ]
 
   const stats = [
-    { label: "Duration", value: `${course.durationHours || 20} hours`, icon: Clock },
-    { label: "Level", value: course.level || "Intermediate", icon: BarChart },
-    { label: "Students", value: course.studentsCount || "2,500+", icon: Users },
-    { label: "Lessons", value: course.lessonsCount || "24", icon: Video },
+    { label: "Duration", value: `${course?.durationHours || 20} hours`, icon: Clock },
+    { label: "Level", value: course?.level || "Intermediate", icon: BarChart },
+    { label: "Students", value: course?.studentsCount || "2,500+", icon: Users },
+    { label: "Lessons", value: course?.lessonsCount || "24", icon: Video },
   ]
 
   return (
     <main className="min-h-screen bg-surface">
       <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
         <img
-          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80"}
+          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&fit=crop&q=100"}
           className="w-full h-full object-cover scale-105"
           alt={course.title}
         />
@@ -299,6 +301,9 @@ export default function CourseDetail() {
                         if (isEnrolled) {
                           navigate(`/student/course/${id}`)
                         } else {
+                          alert("Please enroll to access course modules.")
+                        }
+                      }}
                       className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
                     >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">

@@ -330,15 +330,14 @@ function DashboardContent() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ y: -4 }}
-                    className="bg-surface-container-lowest rounded-3xl sm:rounded-[3rem] overflow-hidden border border-surface-dim/20 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
+                    className="bg-surface-container-lowest rounded-3xl sm:rounded-[3rem] overflow-hidden border border-surface-dim/20 hover:border-blue-500/50 shadow-xl hover:shadow-2xl transition-all group flex flex-col sm:flex-row h-full"
                   >
                     <div className="w-full sm:w-48 h-48 sm:h-auto shrink-0 relative overflow-hidden">
                       <img 
-                        src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"} 
+                        src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&q=100"} 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         alt={course.title} 
                       />
-                      <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors"></div>
                       {progress[course.id] === 100 && (
                         <div className="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                           Completed!
@@ -355,7 +354,7 @@ function DashboardContent() {
                             {course.level} Level
                           </span>
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-3 sm:mb-4 leading-tight group-hover:text-primary-container transition-colors">
+                        <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-3 sm:mb-4 leading-tight transition-colors group-hover:text-blue-500">
                           {course.title}
                         </h3>
                         <p className="text-on-surface-variant text-xs sm:text-sm line-clamp-2 mb-4">
