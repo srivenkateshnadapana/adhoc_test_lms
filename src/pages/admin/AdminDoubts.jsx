@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { AdminProtectedRoute } from "../../context/AdminProtectedRoute"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
+import { toast } from "sonner"
 import {
   MessageCircle, Loader2, Clock, CheckCircle2, AlertCircle, Send,
   Filter, User, BookOpen, X, ChevronDown, ChevronUp, RefreshCw
@@ -91,7 +92,7 @@ function AdminDoubtsContent() {
         setStats(p => ({ ...p, open: Math.max(0, p.open - 1), resolved: p.resolved + 1 }))
       }
     } catch {
-      alert('Failed to send response.')
+      toast.error('Failed to send response.', { duration: 5000 })
     } finally {
       setResponding(p => ({ ...p, [ticketId]: false }))
     }
@@ -104,7 +105,7 @@ function AdminDoubtsContent() {
       await api.tickets.updateStatus(ticketId, newStatus, token)
       setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t))
     } catch {
-      alert('Failed to update status.')
+      toast.error('Failed to update status.', { duration: 5000 })
     } finally {
       setStatusUpdating(p => ({ ...p, [ticketId]: false }))
     }

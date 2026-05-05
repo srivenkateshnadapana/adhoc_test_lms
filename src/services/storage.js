@@ -321,6 +321,12 @@ export const StorageService = {
               resolve({ success: false, message: 'Payment verification failed' })
             }
           },
+          modal: {
+            // User closed the Razorpay popup without completing payment
+            ondismiss: function () {
+              resolve({ success: false, message: 'cancelled' })
+            }
+          },
           prefill: {
             name: StorageService.getUser()?.name || "",
             email: StorageService.getUser()?.email || ""
