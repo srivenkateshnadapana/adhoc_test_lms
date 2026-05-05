@@ -111,7 +111,7 @@ function MyCoursesContent() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                       alt={course.title} 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-60"></div>
+
                   </div>
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">
