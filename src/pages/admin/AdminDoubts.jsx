@@ -31,6 +31,7 @@ function AdminDoubtsContent() {
   const [responding, setResponding] = useState({}) // {id: bool}
   const [responseText, setResponseText] = useState({}) // {id: string}
   const [statusUpdating, setStatusUpdating] = useState({})
+  const [authError, setAuthError] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -38,13 +39,36 @@ function AdminDoubtsContent() {
 
   const loadData = async () => {
     setLoading(true)
+    setAuthError(false)
     try {
       const token = StorageService.getToken()
+      if (!token) {
+        setAuthError(true)
+        return
+      }
       const filters = filterStatus !== 'all' ? { status: filterStatus } : {}
-      const [ticketsRes, statsRes] = await Promise.all([
-        api.tickets.getAll(token, filters),
-        api.tickets.getStats(token)
+
+      // Fetch raw responses to detect 403
+      const params = new URLSearchParams(filters).toString()
+      const [ticketsRaw, statsRaw] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/tickets/all?${params}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/tickets/stats`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ])
+
+      if (ticketsRaw.status === 403 || statsRaw.status === 403) {
+        setAuthError(true)
+        return
+      }
+
+      const [ticketsRes, statsRes] = await Promise.all([
+        ticketsRaw.json(),
+        statsRaw.json()
+      ])
+
       if (ticketsRes.success) setTickets(ticketsRes.data || [])
       if (statsRes.success) setStats(statsRes.data)
     } catch {
@@ -92,6 +116,27 @@ function AdminDoubtsContent() {
     { label: 'Resolved',    value: stats.resolved,    color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
     { label: 'Closed',      value: stats.closed,      color: 'text-outline',     bg: 'bg-surface-dim/10' },
   ]
+
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-surface pt-24 pb-20 px-8 flex items-center justify-center">
+        <div className="bg-surface-container-lowest border border-red-500/20 rounded-3xl p-12 text-center max-w-lg shadow-xl">
+          <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-headline font-bold text-primary mb-3">Session Expired</h2>
+          <p className="text-on-surface-variant mb-2">Your admin session is no longer valid.</p>
+          <p className="text-sm text-outline mb-8">This usually happens when your login token has expired or was issued before your account was given admin access. Please log out and log back in.</p>
+          <button
+            onClick={() => { StorageService.logout(); window.location.href = '/login' }}
+            className="px-8 py-3 signature-gradient text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all"
+          >
+            Log Out &amp; Re-Login
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-surface pt-24 pb-20 px-8">
