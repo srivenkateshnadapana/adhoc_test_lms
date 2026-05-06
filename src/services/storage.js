@@ -31,12 +31,19 @@ export const StorageService = {
   },
   
   getUser: () => {
-    const user = localStorage.getItem(USER_KEY)
-    const parsedUser = user ? JSON.parse(user) : null
-    if (parsedUser && typeof parsedUser.coins === 'undefined') {
-      parsedUser.coins = 0 // Default coins
+    const raw = localStorage.getItem(USER_KEY)
+    if (!raw) return null
+    try {
+      const parsedUser = JSON.parse(raw)
+      if (parsedUser && typeof parsedUser.coins === 'undefined') {
+        parsedUser.coins = 0 // Default coins
+      }
+      return parsedUser
+    } catch {
+      // Corrupted data — clear it so the app recovers on next login
+      localStorage.removeItem(USER_KEY)
+      return null
     }
-    return parsedUser
   },
   
   updateUser: (updates) => {
@@ -295,6 +302,13 @@ export const StorageService = {
         }
 
         // 3. Initialize Razorpay Checkout
+        if (typeof window === 'undefined' || !window.Razorpay) {
+          return resolve({ 
+            success: false, 
+            message: 'Payment system not ready. Please refresh the page or check your internet connection.' 
+          })
+        }
+
         const options = {
           key: orderData.keyId,
           amount: orderData.order.amount,
@@ -329,6 +343,12 @@ export const StorageService = {
             } catch (err) {
               console.error('Payment verification error', err)
               resolve({ success: false, message: 'Payment verification failed' })
+            }
+          },
+          modal: {
+            // User closed the Razorpay popup without completing payment
+            ondismiss: function () {
+              resolve({ success: false, message: 'cancelled' })
             }
           },
           prefill: {
@@ -400,8 +420,15 @@ export const StorageService = {
   // ============ FAVORITES (Local only) ============
   
   getFavorites: () => {
-    const favs = localStorage.getItem(FAVORITES_KEY)
-    return favs ? JSON.parse(favs) : []
+    const raw = localStorage.getItem(FAVORITES_KEY)
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      localStorage.removeItem(FAVORITES_KEY)
+      return []
+    }
   },
   
   toggleFavorite: (courseId) => {
@@ -426,8 +453,15 @@ export const StorageService = {
   // Duplicate enroll removed. (it's already defined above)
   // Get enrollments (IDs only)
   getEnrollments: () => {
-    const enrolled = localStorage.getItem(ENROLLMENTS_KEY)
-    return enrolled ? JSON.parse(enrolled) : []
+    const raw = localStorage.getItem(ENROLLMENTS_KEY)
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      localStorage.removeItem(ENROLLMENTS_KEY)
+      return []
+    }
   },
   
   // Add enrollment ID

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
+import { toast } from "sonner"
 import { MessageCircle, Plus, Loader2, Clock, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, BookOpen, X } from "lucide-react"
 
 const STATUS_CONFIG = {
@@ -65,11 +66,12 @@ function MyDoubtsContent() {
         setTickets(prev => [res.data, ...prev])
         setForm({ subject: '', message: '', courseId: '' })
         setShowForm(false)
+        toast.success('Your question has been submitted!', { duration: 5000 })
       } else {
-        alert(res.message || 'Failed to post doubt.')
+        toast.error(res.message || 'Failed to post doubt.', { duration: 5000 })
       }
     } catch {
-      alert('Server error. Please try again.')
+      toast.error('Server error. Please try again.', { duration: 5000 })
     } finally {
       setSubmitting(false)
     }

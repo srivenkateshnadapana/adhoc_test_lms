@@ -76,7 +76,7 @@ function App() {
         </main>
         <Footer />
         <BottomNav />
-        <Toaster position="top-right" />
+        <Toaster position="top-right" richColors duration={5000} closeButton />
       </div>
     </Router>
   )

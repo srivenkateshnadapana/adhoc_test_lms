@@ -13,8 +13,14 @@ export const StorageService = {
   
   setUser: (user) => localStorage.setItem(USER_KEY, JSON.stringify(user)),
   getUser: () => {
-    const user = localStorage.getItem(USER_KEY)
-    return user ? JSON.parse(user) : null
+    const raw = localStorage.getItem(USER_KEY)
+    if (!raw) return null
+    try {
+      return JSON.parse(raw)
+    } catch {
+      localStorage.removeItem(USER_KEY)
+      return null
+    }
   },
   removeUser: () => localStorage.removeItem(USER_KEY),
   
@@ -106,8 +112,15 @@ export const StorageService = {
 
   // Favorites (local only for now)
   getFavorites: () => {
-    const favs = localStorage.getItem('adhoc_favorites')
-    return favs ? JSON.parse(favs) : []
+    const raw = localStorage.getItem('adhoc_favorites')
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      localStorage.removeItem('adhoc_favorites')
+      return []
+    }
   },
   
   toggleFavorite: (courseId) => {

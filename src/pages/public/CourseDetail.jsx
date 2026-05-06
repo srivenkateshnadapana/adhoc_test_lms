@@ -121,9 +121,10 @@ export default function CourseDetail() {
       const result = await StorageService.enroll(parseInt(id), selectedPlan, finalPrice, coinsToUse)
       if (result.success) {
         setIsEnrolled(true)
-        alert('Successfully enrolled in the course!')
-        // Reload user to update coin balance in the UI
-        StorageService.getAuthState() 
+        toast.success('Successfully enrolled in the course!', { duration: 5000 })
+        StorageService.getAuthState()
+      } else if (result.message === 'cancelled') {
+        // User closed Razorpay — do nothing, just reset button
       } else if (result.message === 'You already have an active subscription for this course') {
         setIsEnrolled(true)
         toast.info('You already have access to this course!')
@@ -301,7 +302,7 @@ export default function CourseDetail() {
                         if (isEnrolled) {
                           navigate(`/student/course/${id}`)
                         } else {
-                          alert("Please enroll to access course modules.")
+                          toast.error('Please enroll to access course modules.', { duration: 5000 })
                         }
                       }}
                       className="bg-surface-container-lowest rounded-2xl border border-surface-dim/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
