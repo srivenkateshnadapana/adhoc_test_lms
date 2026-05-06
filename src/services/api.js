@@ -32,6 +32,17 @@ export const api = {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       return handleResponse(response)
+    },
+    changePassword: async (currentPassword, newPassword, token) => {
+      const response = await fetch(`${API_URL}/password/change`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      })
+      return handleResponse(response)
     }
   },
 

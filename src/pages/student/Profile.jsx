@@ -2,6 +2,7 @@ import * as React from "react"
 import { toast } from "sonner"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { StorageService, AUTH_KEY } from "../../services/storage"
+import { api } from "../../services/api"
 import { Shield, Bell, Key, Trash2, Sun, Moon, Award, Heart, Gift, Copy } from "lucide-react"
 
 export default function Profile() {
@@ -16,11 +17,18 @@ function ProfileContent() {
   const [authState, setAuthState] = React.useState(StorageService.getAuthState())
   const [enrollments, setEnrollments] = React.useState([])
   const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light')
+  const [passwords, setPasswords] = React.useState({ current: "", new: "" })
+  const [isUpdating, setIsUpdating] = React.useState(false)
 
   React.useEffect(() => {
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
       setAuthState(StorageService.getAuthState())
-      setEnrollments(StorageService.getEnrollments())
+      try {
+        const enrolled = await StorageService.getEnrolledCourses()
+        setEnrollments(enrolled)
+      } catch (error) {
+        setEnrollments(StorageService.getEnrollments())
+      }
     }
     
     handleUpdate()
@@ -38,8 +46,35 @@ function ProfileContent() {
   const user = authState.user || { name: "Guest", email: "guest@example.com" }
   const favorites = new Set(StorageService.getFavorites())
 
-  const handleUpdatePassword = () => {
-    toast.success("Security configuration updated in local archives.")
+  const handleUpdatePassword = async () => {
+    if (!passwords.current || !passwords.new) {
+      toast.error("Please provide both current and new access keys.")
+      return
+    }
+
+    if (passwords.new.length < 6) {
+      toast.error("New access key must be at least 6 characters long.")
+      return
+    }
+
+    setIsUpdating(true)
+    try {
+      const token = StorageService.getToken()
+      await api.auth.changePassword(passwords.current, passwords.new, token)
+      toast.success("Security configuration updated successfully!")
+      setPasswords({ current: "", new: "" })
+    } catch (error) {
+      console.error("Password update error:", error)
+      toast.error(error.message || "Failed to update security credentials.", {
+        style: {
+          background: '#fee2e2',
+          color: '#b91c1c',
+          border: '1px solid #fecaca'
+        }
+      })
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleToggleTheme = () => {
@@ -98,9 +133,27 @@ function ProfileContent() {
               <h3 className="text-xl font-headline font-bold text-primary">Security Settings</h3>
             </div>
             <div className="space-y-5">
-              <input type="password" placeholder="Current Access Key" className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5" />
-              <input type="password" placeholder="New Access Key" className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5" />
-              <button onClick={handleUpdatePassword} className="w-full bg-primary text-on-primary font-bold rounded-xl py-4 hover:opacity-90 transition-all uppercase tracking-widest text-sm">Update Security</button>
+              <input 
+                type="password" 
+                placeholder="Current Access Key" 
+                className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
+                value={passwords.current}
+                onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+              />
+              <input 
+                type="password" 
+                placeholder="New Access Key" 
+                className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
+                value={passwords.new}
+                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+              />
+              <button 
+                onClick={handleUpdatePassword} 
+                disabled={isUpdating}
+                className="w-full bg-primary text-on-primary font-bold rounded-xl py-4 hover:opacity-90 transition-all uppercase tracking-widest text-sm disabled:opacity-50"
+              >
+                {isUpdating ? "Updating..." : "Update Security"}
+              </button>
             </div>
           </div>
 
