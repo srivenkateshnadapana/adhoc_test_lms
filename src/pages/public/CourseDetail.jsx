@@ -1,16 +1,16 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { 
-  CheckCircle2, 
-  Play, 
-  Clock, 
-  BarChart, 
-  Shield, 
-  Globe, 
-  ArrowLeft, 
-  ArrowRight, 
-  Loader2, 
-  Star, 
+import {
+  CheckCircle2,
+  Play,
+  Clock,
+  BarChart,
+  Shield,
+  Globe,
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  Star,
   BookOpen,
   Users,
   Award,
@@ -28,8 +28,16 @@ import { toast } from "sonner"
 export default function CourseDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   // ALL HOOKS MUST BE AT THE TOP
+  // Try to get initial data from cache synchronously to avoid flicker
+  const initialCourse = React.useMemo(() => {
+    const courseId = parseInt(id)
+    // Accessing internal cache is tricky, but getCourseById is async.
+    // However, if we just set loading to true, it will always show loader.
+    return null
+  }, [id])
+
   const [course, setCourse] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
   const [isEnrolled, setIsEnrolled] = React.useState(false)
@@ -42,25 +50,59 @@ export default function CourseDetail() {
   // Fetch course data
   React.useEffect(() => {
     const fetchCourse = async () => {
-      setLoading(true)
-      try {
-        const courseId = parseInt(id)
-        const data = await StorageService.getCourseById(courseId)
-        
-        if (data) {
-          setCourse(data)
-          const enrolled = await StorageService.isEnrolled(courseId)
-          setIsEnrolled(enrolled)
-          setIsBookmarked(StorageService.isBookmarked(courseId))
+      const courseId = parseInt(id)
+
+      // Check cache first to potentially skip loading state
+      const cachedCourse = await StorageService.getCourseById(courseId)
+      if (cachedCourse) {
+        setCourse(cachedCourse)
+        setLoading(false) // Data is ready, show it!
+
+        // Background updates for dynamic data
+        const [enrolled, bookmarked] = await Promise.all([
+          StorageService.isEnrolled(courseId),
+          StorageService.isBookmarked(courseId)
+        ])
+        setIsEnrolled(enrolled)
+        setIsBookmarked(bookmarked)
+      } else {
+        setLoading(true)
+        try {
+          const data = await StorageService.getCourseById(courseId)
+          if (data) {
+            setCourse(data)
+            const enrolled = await StorageService.isEnrolled(courseId)
+            setIsEnrolled(enrolled)
+            setIsBookmarked(StorageService.isBookmarked(courseId))
+          }
+        } catch (error) {
+          console.error('Error fetching course:', error)
+        } finally {
+          setLoading(false)
         }
-      } catch (error) {
-        console.error('Error fetching course:', error)
-      } finally {
-        setLoading(false)
       }
     }
     fetchCourse()
   }, [id])
+
+  // PRICING CALCULATIONS
+  const user = StorageService.getUser()
+  const hasDiscount = user && user.availableDiscounts > 0
+  const userCoins = StorageService.getCoins()
+
+  const planMap = {
+    '1month': { name: '1 Month', days: 30 },
+    '3months': { name: '3 Months', days: 90 },
+    '6months': { name: '6 Months', days: 180 }
+  }
+
+  const allowedPlanId = course?.allowed_plan || '1month'
+  const planInfo = planMap[allowedPlanId] || planMap['1month']
+  const originalPrice = course?.prices ? course.prices[allowedPlanId] : (course?.price_1month || course?.price || 599)
+  const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+  
+  const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
+  const finalPrice = discountPrice - coinsToUse
 
   // HANDLE FUNCTIONS
   const handlePlanSelect = (planId) => {
@@ -73,7 +115,7 @@ export default function CourseDetail() {
       navigate("/auth")
       return
     }
-    
+
     setEnrolling(true)
     try {
       const result = await StorageService.enroll(parseInt(id), selectedPlan, finalPrice, coinsToUse)
@@ -100,6 +142,16 @@ export default function CourseDetail() {
   const handleBookmark = () => {
     StorageService.toggleFavorite(parseInt(id))
     setIsBookmarked(!isBookmarked)
+    toast.success(isBookmarked ? "Removed from wishlist" : "Saved to wishlist")
+  }
+
+  const handlePlaceholder = (feature) => {
+    toast.info(`${feature} feature coming soon!`)
+  }
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href)
+    toast.success("Link copied to clipboard!")
   }
 
   React.useEffect(() => {
@@ -134,26 +186,9 @@ export default function CourseDetail() {
     )
   }
 
-  const user = StorageService.getUser()
-  const hasDiscount = user && user.availableDiscounts > 0
-
-  const planMap = {
-    '1month': { name: '1 Month', days: 30 },
-    '3months': { name: '3 Months', days: 90 },
-    '6months': { name: '6 Months', days: 180 }
-  }
-
-  const allowedPlanId = course.allowed_plan || '1month'
-  const planInfo = planMap[allowedPlanId] || planMap['1month']
-  const originalPrice = course.prices ? course.prices[allowedPlanId] : (course.price_1month || course.price || 599)
-  const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
-  
-  const userCoins = StorageService.getCoins()
-  const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
-  const finalPrice = discountPrice - coinsToUse
 
 
-  const modules = course.modules || [
+  const modules = course?.modules || [
     { id: 1, title: "Foundation & Core Concepts", duration: "2.5 hours", lessons: 6 },
     { id: 2, title: "Advanced Implementation", duration: "4 hours", lessons: 8 },
     { id: 3, title: "Practical Labs & Case Studies", duration: "3.5 hours", lessons: 5 },
@@ -161,28 +196,28 @@ export default function CourseDetail() {
   ]
 
   const stats = [
-    { label: "Duration", value: `${course.durationHours || 20} hours`, icon: Clock },
-    { label: "Level", value: course.level || "Intermediate", icon: BarChart },
-    { label: "Students", value: course.studentsCount || "2,500+", icon: Users },
-    { label: "Lessons", value: course.lessonsCount || "24", icon: Video },
+    { label: "Duration", value: `${course?.durationHours || 20} hours`, icon: Clock },
+    { label: "Level", value: course?.level || "Intermediate", icon: BarChart },
+    { label: "Students", value: course?.studentsCount || "2,500+", icon: Users },
+    { label: "Lessons", value: course?.lessonsCount || "24", icon: Video },
   ]
 
   return (
     <main className="min-h-screen bg-surface">
       <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
-        <img 
-          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80"} 
-          className="w-full h-full object-cover scale-105" 
-          alt={course.title} 
+        <img
+          src={course.image || course.thumbnail || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&fit=crop&q=100"}
+          className="w-full h-full object-cover scale-105"
+          alt={course.title}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
-        
+
         <div className="absolute bottom-0 left-0 right-0 pb-16">
           <div className="max-w-7xl mx-auto px-8">
             <Link to="/catalog" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all font-bold text-sm mb-6 group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Catalog
             </Link>
-            
+
             <div className="flex flex-wrap gap-3 mb-4">
               <span className="bg-primary/10 backdrop-blur-md text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-primary/20">
                 {course.category || "Professional Development"}
@@ -200,7 +235,7 @@ export default function CourseDetail() {
                 </span>
               )}
             </div>
-            
+
             <h1 className="text-4xl lg:text-6xl font-headline font-extrabold text-primary mb-4 tracking-tighter leading-[1.1] max-w-3xl">
               {course.title}
             </h1>
@@ -219,7 +254,7 @@ export default function CourseDetail() {
             {/* Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {stats.map((stat, i) => (
-                <motion.div 
+                <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -240,11 +275,10 @@ export default function CourseDetail() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all ${
-                      activeTab === tab 
-                        ? "text-primary border-b-2 border-primary" 
+                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all ${activeTab === tab
+                        ? "text-primary border-b-2 border-primary"
                         : "text-secondary hover:text-primary"
-                    }`}
+                      }`}
                   >
                     {tab === "curriculum" ? "Curriculum" : tab === "instructor" ? "Instructor" : "Reviews"}
                   </button>
@@ -275,11 +309,11 @@ export default function CourseDetail() {
                     >
                       <div className="p-5 flex justify-between items-center hover:bg-surface-container-high/50 transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm group-hover/module:bg-primary group-hover/module:text-on-primary transition-colors">
                             {idx + 1}
                           </div>
                           <div>
-                            <h3 className="font-headline font-bold text-on-surface">{module.title}</h3>
+                            <h3 className="font-headline font-bold text-on-surface group-hover/module:text-primary transition-colors">{module.title}</h3>
                             <div className="flex items-center gap-3 mt-1">
                               <span className="text-xs text-secondary flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> {module.duration}
@@ -326,10 +360,10 @@ export default function CourseDetail() {
                 className="space-y-6"
               >
                 <div className="flex flex-col sm:flex-row gap-6 p-6 bg-surface-container-lowest rounded-3xl border border-surface-dim/20">
-                  <img 
-                    src={`https://i.pravatar.cc/150?u=${course.instructor}`} 
-                    className="w-24 h-24 rounded-2xl object-cover shadow-lg" 
-                    alt={course.instructor} 
+                  <img
+                    src={`https://i.pravatar.cc/150?u=${course.instructor}`}
+                    className="w-24 h-24 rounded-2xl object-cover shadow-lg"
+                    alt={course.instructor}
                   />
                   <div>
                     <h2 className="text-2xl font-headline font-bold text-primary mb-2">{course.instructor}</h2>
@@ -362,11 +396,11 @@ export default function CourseDetail() {
               >
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-headline font-bold text-primary">Student Reviews</h2>
-                  <button className="text-primary text-sm font-medium flex items-center gap-1">
+                  <button onClick={() => handlePlaceholder("Review writing")} className="text-primary text-sm font-medium flex items-center gap-1">
                     Write a Review <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-4">
                   {[
                     { id: 1, name: "Sarah Chen", role: "CTO", rating: 5, comment: "Excellent course! The curriculum is well-structured and the instructor is highly knowledgeable.", date: "2 weeks ago", avatar: "https://i.pravatar.cc/100?img=1" },
@@ -389,7 +423,7 @@ export default function CourseDetail() {
                       </div>
                       <p className="text-on-surface-variant text-sm leading-relaxed mb-2">{review.comment}</p>
                       <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition">
+                        <button onClick={() => handlePlaceholder("Review helpfulness voting")} className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition">
                           <ThumbsUp className="w-3 h-3" /> Helpful
                         </button>
                         <span className="text-xs text-secondary">{review.date}</span>
@@ -397,8 +431,8 @@ export default function CourseDetail() {
                     </div>
                   ))}
                 </div>
-                
-                <button className="w-full py-3 text-primary border border-primary/30 rounded-xl font-medium hover:bg-primary/5 transition">
+
+                <button onClick={() => handlePlaceholder("Review pagination")} className="w-full py-3 text-primary border border-primary/30 rounded-xl font-medium hover:bg-primary/5 transition">
                   Load More Reviews
                 </button>
               </motion.div>
@@ -418,7 +452,7 @@ export default function CourseDetail() {
                       <h3 className="text-xl font-headline font-bold text-primary mb-2">You're Enrolled!</h3>
                       <p className="text-secondary text-sm">You have access to this course.</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => navigate(`/student/course/${id}`)}
                       className="w-full py-4 rounded-2xl bg-primary text-on-primary font-headline font-bold text-base hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
                     >
@@ -442,9 +476,9 @@ export default function CourseDetail() {
                           </div>
                         </div>
                         {hasDiscount && (
-                           <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
-                             10% Referral Discount Applied
-                           </div>
+                          <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded inline-block">
+                            10% Referral Discount Applied
+                          </div>
                         )}
                         {userCoins > 0 && (
                           <div className="mt-4 pt-3 border-t border-primary/20 flex items-center justify-between">
@@ -466,7 +500,7 @@ export default function CourseDetail() {
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleEnroll}
                       disabled={enrolling}
                       className="w-full py-4 rounded-2xl signature-gradient text-white font-headline font-bold text-base hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
@@ -501,7 +535,7 @@ export default function CourseDetail() {
                   </>
                 )}
 
-                <button 
+                <button
                   onClick={handleBookmark}
                   className="w-full mt-4 py-3 rounded-xl border border-surface-dim/20 text-secondary font-medium hover:bg-surface-container-high transition-all flex items-center justify-center gap-2"
                 >
@@ -509,7 +543,7 @@ export default function CourseDetail() {
                   {isBookmarked ? "Saved to Wishlist" : "Save to Wishlist"}
                 </button>
 
-                <button className="w-full mt-2 py-3 text-secondary text-sm flex items-center justify-center gap-2 hover:text-primary transition">
+                <button onClick={handleShare} className="w-full mt-2 py-3 text-secondary text-sm flex items-center justify-center gap-2 hover:text-primary transition">
                   <Share2 className="w-4 h-4" />
                   Share this course
                 </button>
