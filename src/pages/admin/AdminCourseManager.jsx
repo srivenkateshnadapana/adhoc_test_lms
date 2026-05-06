@@ -617,7 +617,7 @@ function SortableModule({ module, modQuiz, mIdx, openModal, handleDelete }) {
 
         {/* Render Module Quiz at the bottom of the module (non-draggable to keep it fixed at the end) */}
         {modQuiz && (
-          <div className="flex justify-between items-center p-4 bg-blue-500/5 rounded-2xl border border-blue-500/20">
+          <div className="flex justify-between items-center p-4 bg-surface-container-low rounded-2xl border border-surface-dim/20">
              <div className="flex items-center gap-4 pl-10">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-600 shrink-0">
                   <HelpCircle className="w-5 h-5" />

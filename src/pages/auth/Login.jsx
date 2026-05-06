@@ -19,7 +19,7 @@ export default function Login() {
 
     try {
       const result = await StorageService.login(email, password)
-      
+
       if (result.success) {
         navigate("/dashboard")
       } else {

@@ -422,7 +422,7 @@ function PlayerContent() {
                   )
                 ) : (
                   <>
-                    <img src={course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600"} className="absolute inset-0 w-full h-full object-cover opacity-60 blur-[2px] scale-105" alt="Video Static" />
+                    <img src={course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&q=100"} className="absolute inset-0 w-full h-full object-cover opacity-60 blur-[2px] scale-105" alt="Video Static" />
                     <div className="relative z-10 w-24 h-24 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white cursor-pointer">
                       <Play className="w-10 h-10 fill-current" />
                     </div>

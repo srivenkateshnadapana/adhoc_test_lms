@@ -107,11 +107,10 @@ function MyCoursesContent() {
                 >
                   <div className="h-48 relative overflow-hidden shrink-0">
                     <img 
-                      src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"} 
+                      src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&q=100"} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                       alt={course.title} 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-60"></div>
                   </div>
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">

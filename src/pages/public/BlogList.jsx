@@ -42,7 +42,7 @@ export default function BlogList() {
             <BookOpen className="w-8 h-8" />
           </div>
           <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-6">Latest Knowledge</h1>
-          <p className="text-lg text-on-surface-variant">Stay updated with the latest trends, tips, and insights from our experts.</p>
+          <p className="text-lg text-on-surface font-medium">Stay updated with the latest trends, tips, and insights from our experts.</p>
         </div>
 
         {blogs.length === 0 ? (
@@ -66,18 +66,18 @@ export default function BlogList() {
                 )}
                 
                 <div className="p-8 flex flex-col flex-1">
-                  <div className="flex items-center gap-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">
+                   <div className="flex items-center gap-4 text-xs font-bold text-on-surface uppercase tracking-wider mb-4">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
                       {new Date(blog.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-headline font-bold text-primary mb-4 line-clamp-2 group-hover:text-secondary transition-colors">
+                  <h3 className="text-xl font-headline font-bold text-primary mb-4 line-clamp-2 transition-colors">
                     {blog.title}
                   </h3>
                   
-                  <p className="text-on-surface-variant mb-6 line-clamp-3 text-sm flex-1">
+                  <p className="text-on-surface mb-6 line-clamp-3 text-sm flex-1 leading-relaxed">
                     {blog.content.replace(/<[^>]+>/g, '').substring(0, 150)}...
                   </p>
                   
@@ -89,7 +89,7 @@ export default function BlogList() {
                       <span className="text-sm font-bold text-on-surface">{blog.author?.name || 'Admin'}</span>
                     </div>
                     
-                    <Link to={`/blog/${blog.slug}`} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                    <Link to={`/blog/${blog.slug}`} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
                       <ArrowRight className="w-5 h-5" />
                     </Link>
                   </div>
