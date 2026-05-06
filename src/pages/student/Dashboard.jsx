@@ -338,6 +338,7 @@ function DashboardContent() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         alt={course.title} 
                       />
+                      <div className="absolute inset-0 group-hover:bg-transparent transition-colors"></div>
                       {progress[course.id] === 100 && (
                         <div className="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                           Completed!
