@@ -230,7 +230,7 @@ export const api = {
         body: JSON.stringify({ items })
       })
       return handleResponse(response)
-    }
+    },
 
     // Lessons
     createLesson: async (moduleId, data, token) => {
@@ -263,7 +263,7 @@ export const api = {
         body: JSON.stringify({ items })
       })
       return handleResponse(response)
-    }
+    },
 
     // Quizzes
     createQuiz: async (data, token) => {
@@ -296,7 +296,7 @@ export const api = {
         body: JSON.stringify({ items })
       })
       return handleResponse(response)
-    }
+    },
 
     // Questions
     createQuestion: async (quizId, data, token) => {
