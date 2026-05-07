@@ -44,7 +44,6 @@ function ProfileContent() {
   }, [])
 
   const user = authState.user || { name: "Guest", email: "guest@example.com" }
-  const favorites = new Set(StorageService.getFavorites())
 
   const handleUpdatePassword = async () => {
     if (!passwords.current || !passwords.new) {
@@ -65,13 +64,7 @@ function ProfileContent() {
       setPasswords({ current: "", new: "" })
     } catch (error) {
       console.error("Password update error:", error)
-      toast.error(error.message || "Failed to update security credentials.", {
-        style: {
-          background: '#fee2e2',
-          color: '#b91c1c',
-          border: '1px solid #fecaca'
-        }
-      })
+      toast.error(error.message || "Failed to update security credentials.")
     } finally {
       setIsUpdating(false)
     }
@@ -125,39 +118,61 @@ function ProfileContent() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Security */}
-          <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Shield className="w-6 h-6" /></div>
-              <h3 className="text-xl font-headline font-bold text-primary">Security Settings</h3>
+        {/* Main Grid: items-start prevents the cards from stretching vertically */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          
+          {/* LEFT COLUMN: Security and Platform Preferences */}
+          <div className="flex flex-col gap-8">
+            {/* Security Settings */}
+            <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Shield className="w-6 h-6" /></div>
+                <h3 className="text-xl font-headline font-bold text-primary">Security Settings</h3>
+              </div>
+              <div className="space-y-5">
+                <input 
+                  type="password" 
+                  placeholder="Current Access Key" 
+                  className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
+                  value={passwords.current}
+                  onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                />
+                <input 
+                  type="password" 
+                  placeholder="New Access Key" 
+                  className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
+                  value={passwords.new}
+                  onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                />
+                <button 
+                  onClick={handleUpdatePassword} 
+                  disabled={isUpdating}
+                  className="w-full bg-primary text-on-primary font-bold rounded-xl py-4 hover:opacity-90 transition-all uppercase tracking-widest text-sm disabled:opacity-50"
+                >
+                  {isUpdating ? "Updating..." : "Update Security"}
+                </button>
+              </div>
             </div>
-            <div className="space-y-5">
-              <input 
-                type="password" 
-                placeholder="Current Access Key" 
-                className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
-                value={passwords.current}
-                onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-              />
-              <input 
-                type="password" 
-                placeholder="New Access Key" 
-                className="w-full bg-surface-container-low border border-surface-dim rounded-xl px-4 py-3.5"
-                value={passwords.new}
-                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-              />
-              <button 
-                onClick={handleUpdatePassword} 
-                disabled={isUpdating}
-                className="w-full bg-primary text-on-primary font-bold rounded-xl py-4 hover:opacity-90 transition-all uppercase tracking-widest text-sm disabled:opacity-50"
-              >
-                {isUpdating ? "Updating..." : "Update Security"}
-              </button>
+
+            {/* Platform Preferences (Moved here from the right column) */}
+            <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Bell className="w-6 h-6" /></div>
+                <h3 className="text-xl font-headline font-bold text-primary">Platform Preferences</h3>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+                <div>
+                  <div className="font-bold text-primary">Visual Theme</div>
+                  <div className="text-xs text-secondary">Switch between Light and Dark interface.</div>
+                </div>
+                <button onClick={handleToggleTheme} className="p-2 bg-surface-container-lowest rounded-xl border border-surface-dim">
+                  {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-primary" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Preferences and Referrals */}
+          {/* RIGHT COLUMN: Referral Program and Danger Zone */}
           <div className="flex flex-col gap-8">
             {/* Referral Program */}
             {enrollments.length > 0 && user.referralCode && (
@@ -202,23 +217,7 @@ function ProfileContent() {
               </div>
             )}
 
-            {/* Preferences */}
-            <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Bell className="w-6 h-6" /></div>
-                <h3 className="text-xl font-headline font-bold text-primary">Platform Preferences</h3>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
-                <div>
-                  <div className="font-bold text-primary">Visual Theme</div>
-                  <div className="text-xs text-secondary">Switch between Light and Dark interface.</div>
-                </div>
-                <button onClick={handleToggleTheme} className="p-2 bg-surface-container-lowest rounded-xl border border-surface-dim">
-                  {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-primary" />}
-                </button>
-              </div>
-            </div>
-
+            {/* Danger Zone */}
             <div className="border border-error/20 bg-error/5 rounded-[2rem] p-8">
               <h3 className="text-xl font-headline font-bold text-error mb-2">Danger Zone</h3>
               <p className="text-xs text-secondary mb-6">Irreversible deletion of your entire academic record.</p>
