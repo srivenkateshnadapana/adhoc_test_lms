@@ -22,13 +22,13 @@ function ProfileContent() {
       setAuthState(StorageService.getAuthState())
       setEnrollments(StorageService.getEnrollments())
     }
-    
+
     handleUpdate()
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-    
+
     const syncTheme = () => setTheme(localStorage.getItem('theme') || 'light')
     window.addEventListener('themeSync', syncTheme)
-    
+
     return () => {
       window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
       window.removeEventListener('themeSync', syncTheme)
