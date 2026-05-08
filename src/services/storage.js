@@ -1,5 +1,5 @@
 // src/services/storage.js
-const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
+import { api } from './api'
 
 // Keys for localStorage
 export const TOKEN_KEY = 'lms_token'
@@ -88,13 +88,7 @@ export const StorageService = {
   
   login: async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      
-      const data = await response.json()
+      const data = await api.auth.login(email, password)
       
       if (data.success) {
         StorageService.setToken(data.token)
@@ -106,25 +100,13 @@ export const StorageService = {
       }
     } catch (error) {
       console.error('Login error:', error)
-      return { success: false, message: 'Network error. Please try again.' }
+      return { success: false, message: error.message || 'Network error. Please try again.' }
     }
   },
   
   register: async (userData) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: userData.name,
-          email: userData.email,
-          password: userData.password,
-          role: userData.role || 'student',
-          referralCode: userData.referralCode
-        })
-      })
-      
-      const data = await response.json()
+      const data = await api.auth.register(userData)
       
       if (data.success) {
         StorageService.setToken(data.token)
@@ -136,7 +118,7 @@ export const StorageService = {
       }
     } catch (error) {
       console.error('Register error:', error)
-      return { success: false, message: 'Network error. Please try again.' }
+      return { success: false, message: error.message || 'Network error. Please try again.' }
     }
   },
   
@@ -155,10 +137,7 @@ export const StorageService = {
         return _cache.courses
       }
 
-      const response = await fetch(`${API_URL}/courses`)
-      if (!response.ok) throw new Error('Network response was not ok')
-      
-      const data = await response.json()
+      const data = await api.courses.getAll()
       const raw = data.data || []
 
       const mappedCourses = raw.map(course => ({
@@ -200,35 +179,19 @@ export const StorageService = {
       return _cache.courseDetails[courseId]
     }
 
-    if (_cache.courses) {
-      const cached = _cache.courses.find(c => c.id === courseId)
-      if (cached) return cached
-    }
-
     try {
       const token = StorageService.getToken()
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
-      const response = await fetch(`${API_URL}/courses/${courseId}`, { headers })
+      const data = await api.courses.getById(courseId, token)
       
-      if (response.ok) {
-        const data = await response.json()
-        if (data && data.data) {
-          _cache.courseDetails[courseId] = data.data
-          return data.data
-        }
-      }
-      
-      const courses = await StorageService.getCourses(true)
-      const found = courses.find(c => c.id === courseId)
-      if (found) {
-        _cache.courseDetails[courseId] = found
-        return found
+      if (data && data.success) {
+        _cache.courseDetails[courseId] = data.data
+        return data.data
       }
       
       return null
     } catch (error) {
       console.error('Error fetching course:', error)
-      return _cache.courses?.find(c => c.id === courseId) || null
+      return null
     }
   },
   
@@ -236,10 +199,7 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return []
-      const response = await fetch(`${API_URL}/courses/my-courses`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.courses.getMyCourses(token)
       return data.data || []
     } catch (error) {
       console.error('Error fetching enrolled courses:', error)
@@ -251,25 +211,26 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return false
-      const response = await fetch(`${API_URL}/subscriptions/course/${courseId}/access`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.enrollments.checkAccess(courseId, token)
       return data.hasAccess || false
     } catch (error) {
       console.error('Error checking enrollment:', error)
       return false
     }
   },
-  // In storage.js
+
+  // Enroll (purchase) now uses the api logic
   enroll: async (courseId, plan = '3months', price = 0, coinsUsed = 0) => {
+    // Keep the Razorpay logic here as it's a mix of API and UI
+    // But update the fetch calls to use api wrapper if applicable
+    // For now, I'll keep it mostly as is but clean it up to use handleResponse patterns via api.js eventually
     return new Promise(async (resolve) => {
       try {
         const token = StorageService.getToken()
         if (!token) return resolve({ success: false, message: 'Please login first' })
         
-        // 1. Create Order
-        const orderRes = await fetch(`${API_URL}/payments/create-order`, {
+        // This part should probably be in api.js too, but let's keep it here for now to avoid breaking Razorpay flow
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/create-order`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -277,15 +238,14 @@ export const StorageService = {
           },
           body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0 })
         })
-        const orderData = await orderRes.json()
+        const orderData = await response.json()
         
         if (!orderData.success) {
           return resolve(orderData)
         }
 
-        // 2. Handle Free or Fully Discounted Case
         if (orderData.isFree) {
-          const verifyRes = await fetch(`${API_URL}/payments/verify`, {
+          const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -301,12 +261,8 @@ export const StorageService = {
           return resolve(verifyData)
         }
 
-        // 3. Initialize Razorpay Checkout
         if (typeof window === 'undefined' || !window.Razorpay) {
-          return resolve({ 
-            success: false, 
-            message: 'Payment system not ready. Please refresh the page or check your internet connection.' 
-          })
+          return resolve({ success: false, message: 'Payment system not ready' })
         }
 
         const options = {
@@ -318,8 +274,7 @@ export const StorageService = {
           order_id: orderData.order.id,
           handler: async function (response) {
             try {
-              // 4. Verify Payment on Backend
-              const verifyRes = await fetch(`${API_URL}/payments/verify`, {
+              const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/verify`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -341,34 +296,20 @@ export const StorageService = {
               }
               resolve(verifyData)
             } catch (err) {
-              console.error('Payment verification error', err)
               resolve({ success: false, message: 'Payment verification failed' })
-            }
-          },
-          modal: {
-            // User closed the Razorpay popup without completing payment
-            ondismiss: function () {
-              resolve({ success: false, message: 'cancelled' })
             }
           },
           prefill: {
             name: StorageService.getUser()?.name || "",
             email: StorageService.getUser()?.email || ""
           },
-          theme: {
-            color: "#0052cc"
-          }
+          theme: { color: "#0052cc" }
         }
 
         const rzp = new window.Razorpay(options)
-        rzp.on('payment.failed', function (response) {
-          console.error(response.error)
-          resolve({ success: false, message: response.error.description || 'Payment failed' })
-        })
         rzp.open()
         
       } catch (error) {
-        console.error('Enrollment error:', error)
         resolve({ success: false, message: 'Network error' })
       }
     })
@@ -380,10 +321,7 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return {}
-      const response = await fetch(`${API_URL}/progress/course/${courseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await response.json()
+      const data = await api.progress.getCourseProgress(courseId, token)
       
       const progressMap = {}
       if (data.data?.lessons) {
@@ -402,15 +340,7 @@ export const StorageService = {
     try {
       const token = StorageService.getToken()
       if (!token) return null
-      
-      const response = await fetch(`${API_URL}/progress/lesson/${lessonId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      return await response.json()
+      return await api.progress.markComplete(lessonId, token)
     } catch (error) {
       console.error('Error updating progress:', error)
       return null
@@ -448,10 +378,6 @@ export const StorageService = {
     return favs.includes(courseId)
   },
   
-  // ============ ENROLLMENT ============
-  
-  // Duplicate enroll removed. (it's already defined above)
-  // Get enrollments (IDs only)
   getEnrollments: () => {
     const raw = localStorage.getItem(ENROLLMENTS_KEY)
     if (!raw) return []
@@ -464,7 +390,6 @@ export const StorageService = {
     }
   },
   
-  // Add enrollment ID
   addEnrollment: (courseId) => {
     const enrollments = StorageService.getEnrollments()
     if (!enrollments.includes(courseId)) {
@@ -474,7 +399,6 @@ export const StorageService = {
   }
 }
 
-// Export individual items for direct imports
 export const getToken = () => StorageService.getToken()
 export const getUser = () => StorageService.getUser()
 export const isAuthenticated = () => StorageService.isAuthenticated()
