@@ -479,52 +479,91 @@ function PlayerContent() {
                         {activeItem.type === 'final' && quizResult.passed && " Your certificate has been generated and unlocked."}
                         {activeItem.type === 'final' && !quizResult.passed && ` You needed at least ${quizResult.passingScore}% to pass.`}
                       </p>
-                      <button onClick={() => setQuizResult(null)} className="px-8 py-4 bg-surface-container text-primary rounded-xl font-bold hover:bg-surface-dim transition-colors">
-                        Review Questions
-                      </button>
+                      <div className="flex justify-center gap-4">
+                        <button onClick={() => {
+                          // Keep result but scroll to questions
+                          document.getElementById('quiz-questions')?.scrollIntoView({ behavior: 'smooth' })
+                        }} className="px-8 py-4 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all">
+                          Review Answers
+                        </button>
+                        <button onClick={() => { setQuizResult(null); setQuizAnswers({}); }} className="px-8 py-4 bg-surface-container text-primary rounded-xl font-bold hover:bg-surface-dim transition-colors">
+                          Retake Quiz
+                        </button>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="space-y-12">
-                      {activeItem.questions?.length === 0 ? (
-                        <p className="text-secondary italic text-center py-12">No questions have been configured for this quiz.</p>
-                      ) : (
-                        activeItem.questions?.map((q, idx) => (
+                  ) : null}
+
+                  <div id="quiz-questions" className={`space-y-12 ${quizResult ? 'mt-12 pt-12 border-t border-surface-dim/20' : ''}`}>
+                    {activeItem.questions?.length === 0 ? (
+                      <p className="text-secondary italic text-center py-12">No questions have been configured for this quiz.</p>
+                    ) : (
+                      activeItem.questions?.map((q, idx) => {
+                        const userAnswer = quizAnswers[q.id];
+                        const isCorrect = quizResult?.results?.[q.id]?.correct || (q.correctOption === userAnswer);
+                        const showFeedback = quizResult !== null;
+
+                        return (
                           <div key={q.id} className="space-y-4">
-                            <h4 className="text-xl font-bold text-primary flex gap-4">
-                              <span className="text-secondary">{idx + 1}.</span> {q.questionText}
-                            </h4>
+                            <div className="flex items-start justify-between gap-4">
+                              <h4 className="text-xl font-bold text-primary flex gap-4">
+                                <span className="text-secondary">{idx + 1}.</span> {q.questionText}
+                              </h4>
+                              {showFeedback && (
+                                <span className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${isCorrect ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'}`}>
+                                  {isCorrect ? 'Correct' : 'Incorrect'}
+                                </span>
+                              )}
+                            </div>
                             <div className="space-y-3 pl-8">
-                              {q.options?.map((option, optIdx) => (
-                                <label key={optIdx} className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all ${quizAnswers[q.id] === optIdx ? 'border-primary bg-primary/5' : 'border-surface-dim/20 bg-surface-container-low hover:border-primary/30'}`}>
-                                  <input 
-                                    type="radio" 
-                                    name={`question-${q.id}`} 
-                                    className="w-5 h-5 accent-primary" 
-                                    checked={quizAnswers[q.id] === optIdx}
-                                    onChange={() => setQuizAnswers(prev => ({...prev, [q.id]: optIdx}))}
-                                  />
-                                  <span className="text-on-surface font-medium">{option}</span>
-                                </label>
-                              ))}
+                              {q.options?.map((option, optIdx) => {
+                                let variantClasses = "border-surface-dim/20 bg-surface-container-low hover:border-primary/30";
+                                if (showFeedback) {
+                                  if (optIdx === q.correctOption) {
+                                    variantClasses = "border-emerald-500 bg-emerald-500/10";
+                                  } else if (userAnswer === optIdx && !isCorrect) {
+                                    variantClasses = "border-red-500 bg-red-500/10";
+                                  } else {
+                                    variantClasses = "border-surface-dim/10 bg-surface-container-low opacity-50";
+                                  }
+                                } else if (userAnswer === optIdx) {
+                                  variantClasses = "border-primary bg-primary/5";
+                                }
+
+                                return (
+                                  <label key={optIdx} className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${!showFeedback ? 'cursor-pointer' : 'cursor-default'} ${variantClasses}`}>
+                                    <input 
+                                      type="radio" 
+                                      name={`question-${q.id}`} 
+                                      className="w-5 h-5 accent-primary" 
+                                      checked={userAnswer === optIdx}
+                                      disabled={showFeedback}
+                                      onChange={() => setQuizAnswers(prev => ({...prev, [q.id]: optIdx}))}
+                                    />
+                                    <span className="text-on-surface font-medium">{option}</span>
+                                    {showFeedback && optIdx === q.correctOption && <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-auto" />}
+                                    {showFeedback && userAnswer === optIdx && !isCorrect && <AlertCircle className="w-4 h-4 text-red-500 ml-auto" />}
+                                  </label>
+                                );
+                              })}
                             </div>
                           </div>
-                        ))
-                      )}
+                        );
+                      })
+                    )}
 
-                      {activeItem.questions?.length > 0 && (
-                        <div className="pt-8 border-t border-surface-dim/20 flex justify-end">
-                          <button
-                            onClick={handleQuizSubmit}
-                            disabled={submittingQuiz}
-                            className={`px-10 py-5 rounded-2xl font-bold text-white shadow-xl transition-all active:scale-[0.98] flex items-center gap-3 ${activeItem.type === 'final' ? 'signature-gradient' : 'bg-blue-600 hover:bg-blue-700'}`}
-                          >
-                            {submittingQuiz && <Loader2 className="w-5 h-5 animate-spin" />}
-                            SUBMIT {activeItem.type === 'final' ? 'CERTIFICATION' : 'KNOWLEDGE CHECK'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {!quizResult && activeItem.questions?.length > 0 && (
+                      <div className="pt-8 border-t border-surface-dim/20 flex justify-end">
+                        <button
+                          onClick={handleQuizSubmit}
+                          disabled={submittingQuiz}
+                          className={`px-10 py-5 rounded-2xl font-bold text-white shadow-xl transition-all active:scale-[0.98] flex items-center gap-3 ${activeItem.type === 'final' ? 'signature-gradient' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        >
+                          {submittingQuiz && <Loader2 className="w-5 h-5 animate-spin" />}
+                          SUBMIT {activeItem.type === 'final' ? 'CERTIFICATION' : 'KNOWLEDGE CHECK'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
              </div>
           </div>

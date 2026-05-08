@@ -2,8 +2,18 @@
 const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
 
 const handleResponse = async (response) => {
+  if (response.status === 401) {
+    // Unauthorized - clear session and redirect
+    localStorage.removeItem('lms_token');
+    localStorage.removeItem('lms_user');
+    window.dispatchEvent(new Event('storage-update-lms_auth'));
+    window.location.href = '/login';
+    throw new Error('Session expired. Please login again.');
+  }
+
   if (!response.ok) {
-    throw new Error(response.statusText || `Request failed with status ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || response.statusText || `Request failed with status ${response.status}`);
   }
   return response.json();
 };

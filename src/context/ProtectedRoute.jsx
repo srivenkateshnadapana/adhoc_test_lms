@@ -4,7 +4,8 @@ import { StorageService, AUTH_KEY } from "../services/storage"
 
 export function ProtectedRoute({ 
   children, 
-  fallbackPath = "/auth" 
+  fallbackPath = "/auth",
+  requiredRole = null
 }) {
   const navigate = useNavigate()
   const [isHydrated, setIsHydrated] = React.useState(false)
@@ -14,19 +15,25 @@ export function ProtectedRoute({
     const handleUpdate = () => {
       const state = StorageService.getAuthState()
       setAuthState(state)
+      
       if (!state.isAuthenticated) {
         navigate(fallbackPath)
+      } else if (requiredRole && state.user?.role !== requiredRole) {
+        navigate("/unauthorized")
       }
     }
 
-    if (!StorageService.getAuthState().isAuthenticated) {
+    const currentState = StorageService.getAuthState()
+    if (!currentState.isAuthenticated) {
       navigate(fallbackPath)
+    } else if (requiredRole && currentState.user?.role !== requiredRole) {
+      navigate("/unauthorized")
     }
 
     setIsHydrated(true)
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
     return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-  }, [navigate, fallbackPath])
+  }, [navigate, fallbackPath, requiredRole])
 
   if (!isHydrated) {
     return (
@@ -40,6 +47,9 @@ export function ProtectedRoute({
   }
 
   if (authState.isAuthenticated) {
+    if (requiredRole && authState.user?.role !== requiredRole) {
+      return null // Will be handled by navigate in useEffect
+    }
     return <>{children}</>
   }
 
