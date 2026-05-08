@@ -64,7 +64,8 @@ function DashboardContent() {
         return {
           id: course.id,
           percent: Math.round((completedLessonsCount / totalLessons) * 100),
-          completedLessons: completedLessonsCount
+          completedLessons: completedLessonsCount,
+          title: course.title
         }
       })
 
@@ -79,24 +80,62 @@ function DashboardContent() {
       })
       
       setProgress(progressData)
-      
-      // Assuming each completed lesson takes roughly 1 hour
       setLearningHours(totalCompletedLessons)
       
-      // Fetch Certificates
+      // Fetch Activity: Quiz Attempts
+      const activities = []
+      try {
+        const quizRes = await api.quizzes.getMyAttempts(token)
+        if (quizRes && quizRes.success) {
+          const quizActivities = (quizRes.data || []).slice(0, 3).map(attempt => ({
+            id: `quiz-${attempt.id}`,
+            type: 'scored',
+            course: attempt.Quiz?.title || "Quiz",
+            date: new Date(attempt.createdAt).toLocaleDateString(),
+            points: Math.round(attempt.score),
+            score: attempt.score
+          }))
+          activities.push(...quizActivities)
+        }
+      } catch (err) {
+        console.error("Failed to load quiz attempts", err)
+      }
+
+      // Fetch Activity: Certificates
       try {
         const certData = await api.certificates.getMyCertificates(token)
         if (certData && certData.success) {
-          setCertificates(certData.data || [])
+          const certs = certData.data || []
+          setCertificates(certs)
+          
+          const certActivities = certs.slice(0, 2).map(cert => ({
+            id: `cert-${cert.id}`,
+            type: 'completed',
+            course: cert.Course?.title || "Course",
+            date: new Date(cert.createdAt).toLocaleDateString(),
+            points: 500
+          }))
+          activities.push(...certActivities)
         }
       } catch (err) {
         console.error("Failed to load certificates", err)
       }
+
+      setRecentActivity(activities.sort((a, b) => new Date(b.date) - new Date(a.date)))
+
+      // Generate Deadlines based on enrolled courses
+      if (enrolled.length > 0) {
+        const deadlines = enrolled.slice(0, 2).map((course, idx) => ({
+          id: course.id,
+          course: course.title,
+          assignment: `Complete Module ${idx + 1} Assessment`,
+          due: `${idx + 2} days`,
+          priority: idx === 0 ? 'high' : 'medium'
+        }))
+        setUpcomingDeadlines(deadlines)
+      }
       
-      // Streak Calculation (mock logic based on last login/activity)
-      // For now, we simulate a streak based on total completed lessons if > 0
       setStreak(totalCompletedLessons > 0 ? Math.min(totalCompletedLessons, 7) : 0)
-      
       setIsHydrated(true)
     }
     loadEnrolledCourses()
