@@ -46,30 +46,40 @@ export default function Home() {
     { value: "98%", label: "Success Rate", icon: TrendingUp },
   ]
 
-  // Testimonials
-  const testimonials = [
+  // Testimonials state
+  const [testimonials, setTestimonials] = React.useState([
     {
-      name: "Dr. Sarah Chen",
-      role: "CTO, TechForward",
+      user: { name: "Dr. Sarah Chen", role: "CTO, TechForward", avatar: "https://i.pravatar.cc/150?img=1" },
       content: "The curriculum depth and production quality are unmatched. This platform accelerated our team's upskilling by 3x.",
       rating: 5,
-      avatar: "https://i.pravatar.cc/150?img=1"
     },
     {
-      name: "Michael Rodriguez",
-      role: "Lead Architect",
+      user: { name: "Michael Rodriguez", role: "Lead Architect", avatar: "https://i.pravatar.cc/150?img=2" },
       content: "Finally, a learning platform that respects design sophistication. The bento layout makes discovery effortless.",
       rating: 5,
-      avatar: "https://i.pravatar.cc/150?img=2"
     },
     {
-      name: "Priya Sharma",
-      role: "Product Manager",
+      user: { name: "Priya Sharma", role: "Product Manager", avatar: "https://i.pravatar.cc/150?img=3" },
       content: "The certification helped me transition into a leadership role. Highly recommend for serious professionals.",
       rating: 5,
-      avatar: "https://i.pravatar.cc/150?img=3"
     }
-  ]
+  ])
+
+  React.useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
+        const res = await fetch(`${API_URL}/feedbacks/home`)
+        const data = await res.json()
+        if (data.success && data.data && data.data.length > 0) {
+          setTestimonials(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch home feedbacks:", err)
+      }
+    }
+    fetchFeedbacks()
+  }, [])
 
   // Featured courses
   const featuredCourses = [
@@ -203,7 +213,7 @@ export default function Home() {
                 alt="Students Learning"
                 className="w-full h-full object-cover"
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=2560&auto=format&fit=crop&q=100"
-                fetchPriority="high"
+                fetchpriority="high"
                 loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
@@ -407,14 +417,14 @@ export default function Home() {
                 <p className="text-on-surface mb-6 leading-relaxed">"{testimonial.content}"</p>
                 <div className="flex items-center gap-3">
                   <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
+                    src={testimonial.user?.avatar || `https://i.pravatar.cc/150?u=${testimonial.id || testimonial.user?.name}`}
+                    alt={testimonial.user?.name || "User"}
                     className="w-10 h-10 rounded-full object-cover"
                     loading="lazy"
                   />
                   <div>
-                    <p className="font-bold text-sm">{testimonial.name}</p>
-                    <p className="text-xs text-secondary">{testimonial.role}</p>
+                    <p className="font-bold text-sm">{testimonial.user?.name || "Unknown User"}</p>
+                    <p className="text-xs text-secondary">{testimonial.user?.role || "Learner"}</p>
                   </div>
                 </div>
               </div>

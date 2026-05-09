@@ -388,5 +388,42 @@ export const api = {
       })
       return handleResponse(response)
     }
+  },
+
+  // Feedbacks
+  feedbacks: {
+    submit: async (data, token) => {
+      const response = await fetch(`${API_URL}/feedbacks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data)
+      })
+      return handleResponse(response)
+    },
+    getAll: async (token) => {
+      const response = await fetch(`${API_URL}/feedbacks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      return handleResponse(response)
+    },
+    updateDisplay: async (id, showOnHome, token) => {
+      const response = await fetch(`${API_URL}/feedbacks/${id}/display`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ showOnHome })
+      })
+      return handleResponse(response)
+    },
+    getHomeFeedbacks: async () => {
+      const response = await fetch(`${API_URL}/feedbacks/home`)
+      return handleResponse(response)
+    },
+    delete: async (id, token) => {
+      const response = await fetch(`${API_URL}/feedbacks/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      return handleResponse(response)
+    }
   }
 }

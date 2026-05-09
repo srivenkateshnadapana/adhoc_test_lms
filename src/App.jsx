@@ -30,6 +30,8 @@ const VerifyCertificate = React.lazy(() => import('./pages/public/VerifyCertific
 const BlogList = React.lazy(() => import('./pages/public/BlogList'))
 const BlogPost = React.lazy(() => import('./pages/public/BlogPost'))
 const AdminBlogs = React.lazy(() => import('./pages/admin/AdminBlogs'))
+const AdminFeedbacks = React.lazy(() => import('./pages/admin/AdminFeedbacks'))
+const StudentFeedback = React.lazy(() => import('./pages/student/StudentFeedback'))
 
 function App() {
   return (
@@ -63,11 +65,13 @@ function App() {
             <Route path="/my-doubts" element={<MyDoubts />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/referral" element={<Referral />} />
+            <Route path="/feedback" element={<StudentFeedback />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/courses" element={<AdminCourses />} />
             <Route path="/admin/courses/:id" element={<AdminCourseManager />} />
             <Route path="/admin/doubts" element={<AdminDoubts />} />
             <Route path="/admin/blogs" element={<AdminBlogs />} />
+            <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { Play, CheckCircle, ArrowLeft, Loader2, Layers, ShieldCheck, HelpCircle, Award, Lock, MessageCircle, Send, Plus, Clock, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react"
+import { Play, CheckCircle, ArrowLeft, Loader2, Layers, ShieldCheck, HelpCircle, Award, Lock, MessageCircle, Send, Plus, Clock, CheckCircle2, AlertCircle, ChevronDown, Star } from "lucide-react"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
@@ -45,6 +45,11 @@ function PlayerContent() {
   const [doubtForm, setDoubtForm] = React.useState({ subject: '', message: '' })
   const [postingDoubt, setPostingDoubt] = React.useState(false)
   const [doubtsLoading, setDoubtsLoading] = React.useState(false)
+
+  // Feedback Modal States
+  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false)
+  const [feedbackForm, setFeedbackForm] = React.useState({ content: '', rating: 5 })
+  const [submittingFeedback, setSubmittingFeedback] = React.useState(false)
 
   React.useEffect(() => {
     loadCourseData()
@@ -185,6 +190,10 @@ function PlayerContent() {
                 error: 'Failed to generate certificate.'
               }
             )
+            // Show feedback modal after a short delay
+            setTimeout(() => {
+              setShowFeedbackModal(true)
+            }, 1500)
           }
         } else {
           toast.error(`Quiz Failed. Score: ${result.percentage}%. Minimum required is ${result.passingScore}%.`)
@@ -194,6 +203,28 @@ function PlayerContent() {
       toast.error('Failed to submit quiz.')
     } finally {
       setSubmittingQuiz(false)
+    }
+  }
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault()
+    if (!feedbackForm.content.trim()) {
+      toast.error("Please enter your feedback.")
+      return
+    }
+
+    try {
+      setSubmittingFeedback(true)
+      const token = StorageService.getToken()
+      const res = await api.feedbacks.submit(feedbackForm, token)
+      if (res.success) {
+        toast.success("Feedback submitted successfully. Thank you!")
+        setShowFeedbackModal(false)
+      }
+    } catch (err) {
+      toast.error("Failed to submit feedback. Please try again.")
+    } finally {
+      setSubmittingFeedback(false)
     }
   }
 
@@ -530,6 +561,72 @@ function PlayerContent() {
           </div>
         )}
       </main>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest p-8 md:p-12 rounded-[2.5rem] shadow-2xl max-w-lg w-full relative animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={() => setShowFeedbackModal(false)}
+              className="absolute top-6 right-6 p-2 rounded-full hover:bg-surface-container transition-colors text-secondary"
+            >
+              ✕
+            </button>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-4">
+                <Star className="w-8 h-8 fill-current text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-headline font-bold text-primary mb-2">Congratulations!</h2>
+              <p className="text-secondary text-sm">You have earned your certificate. We'd love to hear your feedback on the course!</p>
+            </div>
+
+            <form onSubmit={handleFeedbackSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-primary mb-3 text-center">Rate your experience</label>
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackForm(p => ({ ...p, rating: star }))}
+                      className="focus:outline-none hover:scale-110 transition-transform"
+                    >
+                      <Star
+                        className={`w-8 h-8 ${feedbackForm.rating >= star ? 'text-amber-400 fill-current' : 'text-surface-dim fill-current'}`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-primary mb-2">Your Feedback</label>
+                <textarea
+                  value={feedbackForm.content}
+                  onChange={(e) => setFeedbackForm(p => ({ ...p, content: e.target.value }))}
+                  placeholder="Tell us what you liked and how we can improve..."
+                  className="w-full h-32 bg-surface-container border border-surface-dim/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                  required
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingFeedback}
+                className="w-full py-4 signature-gradient text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg"
+              >
+                {submittingFeedback ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" /> Submit Feedback
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
