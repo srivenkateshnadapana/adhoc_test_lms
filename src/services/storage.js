@@ -8,16 +8,12 @@ export const FAVORITES_KEY = 'lms_favorites'
 export const AUTH_KEY = 'lms_auth'
 export const ENROLLMENTS_KEY = 'lms_enrollments'
 
-// Helper: map backend course_type to frontend category
-function mapCourseTypeToCategory(courseType) {
-  const map = {
-    mega: 'development',
-    mini: 'design',
-    crash: 'business',
-    bootcamp: 'development',
-  }
-  return map[courseType] || 'development'
+const _cache = {
+  courses: null,
+  courseDetails: {}, // Cache for individual course details
+  lastFetched: 0
 }
+const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
 
 export const StorageService = {
   // ============ AUTHENTICATION ============
@@ -35,12 +31,19 @@ export const StorageService = {
   },
   
   getUser: () => {
-    const user = localStorage.getItem(USER_KEY)
-    const parsedUser = user ? JSON.parse(user) : null
-    if (parsedUser && typeof parsedUser.coins === 'undefined') {
-      parsedUser.coins = 0 // Default coins
+    const raw = localStorage.getItem(USER_KEY)
+    if (!raw) return null
+    try {
+      const parsedUser = JSON.parse(raw)
+      if (parsedUser && typeof parsedUser.coins === 'undefined') {
+        parsedUser.coins = 0 // Default coins
+      }
+      return parsedUser
+    } catch {
+      // Corrupted data — clear it so the app recovers on next login
+      localStorage.removeItem(USER_KEY)
+      return null
     }
-    return parsedUser
   },
   
   updateUser: (updates) => {
@@ -83,7 +86,6 @@ export const StorageService = {
     user: StorageService.getUser()
   }),
   
-  // Login user
   login: async (email, password) => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -108,7 +110,6 @@ export const StorageService = {
     }
   },
   
-  // Register user
   register: async (userData) => {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
@@ -139,41 +140,41 @@ export const StorageService = {
     }
   },
   
-  // Logout
   logout: () => {
     StorageService.removeToken()
     StorageService.removeUser()
     window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
   },
-  
+
   // ============ COURSES ============
   
-  getCourses: async () => {
+  getCourses: async (forceRefresh = false) => {
     try {
+      const now = Date.now()
+      if (!forceRefresh && _cache.courses && (now - _cache.lastFetched < CACHE_DURATION)) {
+        return _cache.courses
+      }
+
       const response = await fetch(`${API_URL}/courses`)
+      if (!response.ok) throw new Error('Network response was not ok')
+      
       const data = await response.json()
       const raw = data.data || []
 
-      // Map backend fields → frontend-expected fields
-      return raw.map(course => ({
+      const mappedCourses = raw.map(course => ({
         id: course.id,
         title: course.title || 'Untitled Course',
         description: course.description || '',
-        // Use thumbnail as image; fallback to placeholder
         image: course.thumbnail || null,
-        // Backend has no instructor field; default gracefully
         instructor: course.instructor || 'Expert Instructor',
-        // Use 3-month price as default display price
         price: parseFloat(course.price_3months) || parseFloat(course.price_1month) || 0,
         originalPrice: parseFloat(course.price_6months) || null,
         price_1month: parseFloat(course.price_1month) || 0,
         price_3months: parseFloat(course.price_3months) || 0,
         price_6months: parseFloat(course.price_6months) || 0,
-        // Map course_type to category (mega → development, etc.)
-        category: course.category || mapCourseTypeToCategory(course.course_type),
+        category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
         course_type: course.course_type,
         allowed_plan: course.allowed_plan,
-        // Defaults for fields not stored in backend yet
         level: course.level || 'intermediate',
         duration: course.duration || 20,
         rating: course.rating || 4.5,
@@ -182,36 +183,52 @@ export const StorageService = {
         createdAt: course.createdAt,
         userAccess: course.userAccess || { hasAccess: false }
       }))
+
+      _cache.courses = mappedCourses
+      _cache.lastFetched = now
+      return mappedCourses
     } catch (error) {
       console.error('Error fetching courses:', error)
-      return []
+      return _cache.courses || []
     }
   },
   
   getCourseById: async (id) => {
+    const courseId = parseInt(id)
+    
+    if (_cache.courseDetails[courseId]) {
+      return _cache.courseDetails[courseId]
+    }
+
+    if (_cache.courses) {
+      const cached = _cache.courses.find(c => c.id === courseId)
+      if (cached) return cached
+    }
+
     try {
       const token = StorageService.getToken()
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
-      const response = await fetch(`${API_URL}/courses/${id}`, { headers })
+      const response = await fetch(`${API_URL}/courses/${courseId}`, { headers })
       
       if (response.ok) {
         const data = await response.json()
         if (data && data.data) {
+          _cache.courseDetails[courseId] = data.data
           return data.data
         }
       }
       
-      // Fallback: If 401 or not found, try to find it in the public courses list
-      const courses = await StorageService.getCourses()
-      return courses.find(c => c.id === parseInt(id)) || null
+      const courses = await StorageService.getCourses(true)
+      const found = courses.find(c => c.id === courseId)
+      if (found) {
+        _cache.courseDetails[courseId] = found
+        return found
+      }
+      
+      return null
     } catch (error) {
       console.error('Error fetching course:', error)
-      try {
-        const courses = await StorageService.getCourses()
-        return courses.find(c => c.id === parseInt(id)) || null
-      } catch (fallbackError) {
-        return null
-      }
+      return _cache.courses?.find(c => c.id === courseId) || null
     }
   },
   
@@ -285,6 +302,13 @@ export const StorageService = {
         }
 
         // 3. Initialize Razorpay Checkout
+        if (typeof window === 'undefined' || !window.Razorpay) {
+          return resolve({ 
+            success: false, 
+            message: 'Payment system not ready. Please refresh the page or check your internet connection.' 
+          })
+        }
+
         const options = {
           key: orderData.keyId,
           amount: orderData.order.amount,
@@ -319,6 +343,12 @@ export const StorageService = {
             } catch (err) {
               console.error('Payment verification error', err)
               resolve({ success: false, message: 'Payment verification failed' })
+            }
+          },
+          modal: {
+            // User closed the Razorpay popup without completing payment
+            ondismiss: function () {
+              resolve({ success: false, message: 'cancelled' })
             }
           },
           prefill: {
@@ -390,8 +420,15 @@ export const StorageService = {
   // ============ FAVORITES (Local only) ============
   
   getFavorites: () => {
-    const favs = localStorage.getItem(FAVORITES_KEY)
-    return favs ? JSON.parse(favs) : []
+    const raw = localStorage.getItem(FAVORITES_KEY)
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      localStorage.removeItem(FAVORITES_KEY)
+      return []
+    }
   },
   
   toggleFavorite: (courseId) => {
@@ -414,11 +451,17 @@ export const StorageService = {
   // ============ ENROLLMENT ============
   
   // Duplicate enroll removed. (it's already defined above)
-  
   // Get enrollments (IDs only)
   getEnrollments: () => {
-    const enrolled = localStorage.getItem(ENROLLMENTS_KEY)
-    return enrolled ? JSON.parse(enrolled) : []
+    const raw = localStorage.getItem(ENROLLMENTS_KEY)
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      localStorage.removeItem(ENROLLMENTS_KEY)
+      return []
+    }
   },
   
   // Add enrollment ID

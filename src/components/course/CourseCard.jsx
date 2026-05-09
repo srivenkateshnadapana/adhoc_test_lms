@@ -30,7 +30,7 @@ export function CourseCard({
       {/* Image Section */}
       <Link to={`/course/${id}`} className="block relative overflow-hidden aspect-video">
         <img
-          src={image || `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&auto=format`}
+          src={image || `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&q=100`}
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -51,7 +51,7 @@ export function CourseCard({
       <div className="p-5">
         <div className="flex justify-between items-start gap-2 mb-2">
           <Link to={`/course/${id}`} className="flex-1">
-            <h3 className="font-headline font-bold text-lg text-on-surface line-clamp-2 group-hover:text-primary transition-colors">
+            <h3 className="font-headline font-bold text-lg text-on-surface-variant line-clamp-2 group-hover:text-primary transition-colors">
               {title}
             </h3>
           </Link>

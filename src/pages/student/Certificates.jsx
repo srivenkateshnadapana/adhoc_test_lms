@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
+import { toast } from "sonner"
 import { Award, Download, BookOpen, Calendar, Loader2, ExternalLink, Shield, Copy, Check } from "lucide-react"
 
 export default function Certificates() {
@@ -52,7 +53,7 @@ function CertificatesContent() {
       a.click()
       window.URL.revokeObjectURL(url)
     } catch {
-      alert('Download failed. Please try again.')
+      toast.error('Download failed. Please try again.', { duration: 5000 })
     }
   }
 

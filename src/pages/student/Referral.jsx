@@ -2,6 +2,7 @@ import React from 'react'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { Gift } from "lucide-react"
 import { StorageService } from "../../services/storage"
+import { toast } from "sonner"
 
 export default function Referral() {
   const [user, setUser] = React.useState(StorageService.getUser())
@@ -39,7 +40,7 @@ export default function Referral() {
   const handleCopy = () => {
     if (user?.referralCode) {
       navigator.clipboard.writeText(referralLink)
-      alert('Referral link copied to clipboard!')
+      toast.success('Referral link copied to clipboard!', { duration: 5000 })
     }
   }
 

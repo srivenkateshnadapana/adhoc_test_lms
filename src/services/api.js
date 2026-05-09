@@ -1,6 +1,13 @@
 // src/services/api.js
 const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
 
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    throw new Error(response.statusText || `Request failed with status ${response.status}`);
+  }
+  return response.json();
+};
+
 export const api = {
   // Auth endpoints
   auth: {
@@ -10,7 +17,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
-      return response.json()
+      return handleResponse(response)
     },
     register: async (userData) => {
       const response = await fetch(`${API_URL}/auth/register`, {
@@ -18,13 +25,24 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
       })
-      return response.json()
+      return handleResponse(response)
     },
     getMe: async (token) => {
       const response = await fetch(`${API_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
+    },
+    changePassword: async (currentPassword, newPassword, token) => {
+      const response = await fetch(`${API_URL}/password/change`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      })
+      return handleResponse(response)
     }
   },
 
@@ -32,18 +50,18 @@ export const api = {
   courses: {
     getAll: async () => {
       const response = await fetch(`${API_URL}/courses`)
-      return response.json()
+      return handleResponse(response)
     },
     getById: async (id, token) => {
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
       const response = await fetch(`${API_URL}/courses/${id}`, { headers })
-      return response.json()
+      return handleResponse(response)
     },
     getMyCourses: async (token) => {
       const response = await fetch(`${API_URL}/courses/my-courses`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -53,7 +71,7 @@ export const api = {
       const response = await fetch(`${API_URL}/progress/course/${courseId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     markComplete: async (lessonId, token) => {
       const response = await fetch(`${API_URL}/progress/lesson/${lessonId}/complete`, {
@@ -63,7 +81,7 @@ export const api = {
           'Authorization': `Bearer ${token}`
         }
       })
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -78,13 +96,13 @@ export const api = {
         },
         body: JSON.stringify({ courseId, plan, paymentId: 'web_' + Date.now() })
       })
-      return response.json()
+      return handleResponse(response)
     },
     checkAccess: async (courseId, token) => {
       const response = await fetch(`${API_URL}/subscriptions/course/${courseId}/access`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -94,12 +112,13 @@ export const api = {
       const response = await fetch(`${API_URL}/certificates/my`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     download: async (certificateId, token) => {
       const response = await fetch(`${API_URL}/certificates/${certificateId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      if (!response.ok) throw new Error(response.statusText || 'Download failed');
       return response.blob()
     },
     generate: async (courseId, quizScore, token) => {
@@ -111,11 +130,11 @@ export const api = {
         },
         body: JSON.stringify({ quizScore })
       })
-      return response.json()
+      return handleResponse(response)
     },
     verify: async (verificationCode) => {
       const response = await fetch(`${API_URL}/certificates/verify/${verificationCode}`)
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -125,13 +144,13 @@ export const api = {
       const response = await fetch(`${API_URL}/quizzes/course/${courseId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     getQuiz: async (quizId, token) => {
       const response = await fetch(`${API_URL}/quizzes/${quizId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     submitQuiz: async (quizId, answers, token) => {
       const response = await fetch(`${API_URL}/quizzes/${quizId}/submit`, {
@@ -142,13 +161,13 @@ export const api = {
         },
         body: JSON.stringify({ answers })
       })
-      return response.json()
+      return handleResponse(response)
     },
     getMyAttempts: async (token) => {
       const response = await fetch(`${API_URL}/quizzes/attempts/my`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -158,13 +177,13 @@ export const api = {
       const response = await fetch(`${API_URL}/admin/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     getAnalytics: async (token) => {
       const response = await fetch(`${API_URL}/admin/analytics`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     // Courses
     createCourse: async (data, token) => {
@@ -173,7 +192,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateCourse: async (id, data, token) => {
       const response = await fetch(`${API_URL}/admin/courses/${id}`, {
@@ -181,14 +200,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     deleteCourse: async (id, token) => {
       const response = await fetch(`${API_URL}/admin/courses/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     
     // Modules
@@ -198,7 +217,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateModule: async (id, data, token) => {
       const response = await fetch(`${API_URL}/admin/modules/${id}`, {
@@ -206,14 +225,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     deleteModule: async (id, token) => {
       const response = await fetch(`${API_URL}/admin/modules/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     reorderModules: async (items, token) => {
       const response = await fetch(`${API_URL}/admin/modules/reorder`, {
@@ -221,7 +240,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ items })
       })
-      return response.json()
+      return handleResponse(response)
     },
 
     // Lessons
@@ -231,7 +250,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateLesson: async (id, data, token) => {
       const response = await fetch(`${API_URL}/admin/lessons/${id}`, {
@@ -239,14 +258,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     deleteLesson: async (id, token) => {
       const response = await fetch(`${API_URL}/admin/lessons/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     reorderLessons: async (items, token) => {
       const response = await fetch(`${API_URL}/admin/lessons/reorder`, {
@@ -254,7 +273,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ items })
       })
-      return response.json()
+      return handleResponse(response)
     },
 
     // Quizzes
@@ -264,7 +283,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateQuiz: async (id, data, token) => {
       const response = await fetch(`${API_URL}/quizzes/${id}`, {
@@ -272,14 +291,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     deleteQuiz: async (id, token) => {
       const response = await fetch(`${API_URL}/quizzes/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     reorderQuizzes: async (items, token) => {
       const response = await fetch(`${API_URL}/admin/quizzes/reorder`, {
@@ -287,7 +306,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ items })
       })
-      return response.json()
+      return handleResponse(response)
     },
 
     // Questions
@@ -297,7 +316,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ questions: [data] })
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateQuestion: async (id, data, token) => {
       const response = await fetch(`${API_URL}/quizzes/questions/${id}`, {
@@ -305,14 +324,14 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     deleteQuestion: async (id, token) => {
       const response = await fetch(`${API_URL}/quizzes/questions/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     }
   },
 
@@ -325,19 +344,19 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     getMy: async (token) => {
       const response = await fetch(`${API_URL}/tickets/my`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     getById: async (ticketId, token) => {
       const response = await fetch(`${API_URL}/tickets/my/${ticketId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     // Admin
     getAll: async (token, filters = {}) => {
@@ -345,7 +364,7 @@ export const api = {
       const response = await fetch(`${API_URL}/tickets/all?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     },
     respond: async (ticketId, data, token) => {
       const response = await fetch(`${API_URL}/tickets/${ticketId}/respond`, {
@@ -353,7 +372,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       })
-      return response.json()
+      return handleResponse(response)
     },
     updateStatus: async (ticketId, status, token) => {
       const response = await fetch(`${API_URL}/tickets/${ticketId}/status`, {
@@ -361,13 +380,13 @@ export const api = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status })
       })
-      return response.json()
+      return handleResponse(response)
     },
     getStats: async (token) => {
       const response = await fetch(`${API_URL}/tickets/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      return response.json()
+      return handleResponse(response)
     }
   }
 }

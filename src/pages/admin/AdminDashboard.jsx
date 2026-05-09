@@ -16,30 +16,40 @@ export default function AdminDashboard() {
 function AdminDashboardContent() {
   const [stats, setStats] = React.useState(null)
   const [loading, setLoading] = React.useState(true)
+  const [authError, setAuthError] = React.useState(false)
   const navigate = useNavigate()
 
   const [analytics, setAnalytics] = React.useState(null)
   const [ticketStats, setTicketStats] = React.useState(null)
 
+  const BASE = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
+
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const token = StorageService.getToken()
-        const [statsData, analyticsData, ticketsData] = await Promise.all([
-          api.admin.getStats(token),
-          api.admin.getAnalytics(token),
-          api.tickets.getStats(token)
+        if (!token) { setAuthError(true); setLoading(false); return }
+
+        // Use raw fetch to detect 403 before parsing JSON
+        const [statsRaw, analyticsRaw, ticketsRaw] = await Promise.all([
+          fetch(`${BASE}/admin/stats`,     { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BASE}/admin/analytics`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BASE}/tickets/stats`,   { headers: { 'Authorization': `Bearer ${token}` } })
         ])
-        
-        if (statsData?.success) {
-          setStats(statsData.data)
+
+        if ([statsRaw, analyticsRaw, ticketsRaw].some(r => r.status === 403)) {
+          setAuthError(true)
+          setLoading(false)
+          return
         }
-        if (analyticsData?.success) {
-          setAnalytics(analyticsData.data)
-        }
-        if (ticketsData?.success) {
-          setTicketStats(ticketsData.data)
-        }
+
+        const [statsData, analyticsData, ticketsData] = await Promise.all([
+          statsRaw.json(), analyticsRaw.json(), ticketsRaw.json()
+        ])
+
+        if (statsData?.success)   setStats(statsData.data)
+        if (analyticsData?.success) setAnalytics(analyticsData.data)
+        if (ticketsData?.success) setTicketStats(ticketsData.data)
       } catch (err) {
         console.error("Failed to load admin stats", err)
       } finally {
@@ -52,6 +62,25 @@ function AdminDashboardContent() {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-surface">
       <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  )
+
+  if (authError) return (
+    <div className="min-h-screen bg-surface pt-24 pb-20 px-8 flex items-center justify-center">
+      <div className="bg-surface-container-lowest border border-red-500/20 rounded-3xl p-12 text-center max-w-lg shadow-xl">
+        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <ShieldCheck className="w-8 h-8 text-red-500" />
+        </div>
+        <h2 className="text-2xl font-headline font-bold text-primary mb-3">Session Expired</h2>
+        <p className="text-on-surface-variant mb-2">Your admin session is no longer valid.</p>
+        <p className="text-sm text-outline mb-8">Your login token may have expired or was issued before admin access was granted. Please log out and log back in as admin.</p>
+        <button
+          onClick={() => { StorageService.logout(); window.location.href = '/login' }}
+          className="px-8 py-3 signature-gradient text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all"
+        >
+          Log Out &amp; Re-Login
+        </button>
+      </div>
     </div>
   )
 

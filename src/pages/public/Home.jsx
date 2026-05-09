@@ -1,14 +1,14 @@
 // src/pages/public/Home.jsx
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { 
+import {
   ArrowRight,
   Play,
-  ShieldCheck, 
-  Star, 
-  Brain, 
-  History, 
-  Globe, 
+  ShieldCheck,
+  Star,
+  Brain,
+  History,
+  Globe,
   Award,
   TrendingUp,
   Users,
@@ -81,7 +81,7 @@ export default function Home() {
   return (
     <div className="bg-surface text-on-surface">
       {/* Hero Section with Animation */}
-      <motion.section 
+      <motion.section
         ref={heroRef}
         initial="hidden"
         animate={isHeroInView ? "visible" : "hidden"}
@@ -94,7 +94,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="relative z-10 space-y-8">
-            <motion.span 
+            <motion.span
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -102,8 +102,8 @@ export default function Home() {
             >
               Learn Any Thing And Any Where
             </motion.span>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -114,8 +114,8 @@ export default function Home() {
                 Learning Journey
               </span>
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -123,8 +123,8 @@ export default function Home() {
             >
               Access premium courses designed by industry experts. Experience a sophisticated curriculum structured for modern professionals.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
@@ -132,7 +132,7 @@ export default function Home() {
             >
               <Link
                 to="/catalog"
-                className="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
+                className="px-8 py-4 border-2 border-white bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
               >
                 Explore Courses
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -145,9 +145,9 @@ export default function Home() {
                 Watch Demo
               </Link>
             </motion.div>
-            
+
             {/* Stats Row */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
@@ -163,9 +163,9 @@ export default function Home() {
                 </div>
               ))}
             </motion.div>
-            
+
             {/* Social Proof */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
@@ -175,9 +175,10 @@ export default function Home() {
                 {[1, 2, 3, 4].map(i => (
                   <img
                     key={i}
-                    src={`https://i.pravatar.cc/150?img=${i + 10}`}
+                    src={`https://i.pravatar.cc/300?img=${i + 10}`}
                     className="w-10 h-10 rounded-full border-2 border-surface shadow-sm object-cover"
                     alt="Learner"
+                    loading="lazy"
                   />
                 ))}
               </div>
@@ -191,7 +192,7 @@ export default function Home() {
           </div>
 
           {/* Hero Image Card */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -201,7 +202,9 @@ export default function Home() {
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&auto=format&fit=crop&q=100"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=2560&auto=format&fit=crop&q=100"
+                fetchPriority="high"
+                loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 p-6 bg-surface-container/80 backdrop-blur-xl rounded-2xl border border-surface-dim/20 flex justify-between items-center shadow-2xl">
@@ -214,9 +217,9 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Floating badge */}
-           <div className="absolute top-5 right-5 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+            <div className="absolute top-5 right-5 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold shadow-lg">
               Limited Spots
             </div>
           </motion.div>
@@ -224,12 +227,12 @@ export default function Home() {
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
+      <section id="about" className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-8">
             <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
             <p className="text-secondary text-lg leading-relaxed">
-                  The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
+              The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
             </p>
             <ul className="space-y-4">
               {[
@@ -251,17 +254,17 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
             <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Campus Life" />
+              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=2560&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Campus Life" loading="lazy" />
             </div>
             <div className="h-56 sm:h-72 mt-8 sm:mt-12 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
-              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1920&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Study" />
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=2560&auto=format&fit=crop&q=100" className="w-full h-full object-cover" alt="Study" loading="lazy" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Courses Section (NEW) */}
-      <section className="py-24 px-8 bg-surface">
+      <section id="courses" className="py-24 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest mb-4">
@@ -270,10 +273,10 @@ export default function Home() {
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">Most Popular Pathways</h2>
             <p className="text-secondary">Join thousands of professionals accelerating their careers with our flagship programs.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((course, idx) => (
-              <div 
+              <div
                 key={idx}
                 onMouseEnter={() => setHoveredCard(idx)}
                 onMouseLeave={() => setHoveredCard(null)}
@@ -285,7 +288,7 @@ export default function Home() {
                     {course.level}
                   </span>
                 </div>
-                <h3 className="text-xl font-headline font-bold mb-2">{course.title}</h3>
+                <h3 className="text-xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-2">{course.title}</h3>
                 <div className="flex justify-between items-center text-sm text-secondary mb-4">
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {course.duration}
@@ -294,8 +297,8 @@ export default function Home() {
                     <Users className="w-3 h-3" /> {course.students} students
                   </span>
                 </div>
-                <Link 
-                  to={`/catalog/${course.title.toLowerCase().replace(/\s+/g, '-')}`}
+                <Link
+                  to="/catalog"
                   className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
                 >
                   Learn More <ArrowRight className="w-3 h-3" />
@@ -307,21 +310,21 @@ export default function Home() {
       </section>
 
       {/* Bento Grid Features (Enhanced) */}
-         <section className="py-24 px-8 bg-surface-container-lowest">
+      <section className="py-24 px-8 bg-surface-container-lowest">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">The Editorial Experience</h2>
             <p className="text-secondary">Designed for professionals who demand high-end interfaces and unparalleled curriculum depth.</p>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            <motion.div 
+            <motion.div
               variants={fadeUp}
               className="w-full sm:col-span-2 bg-surface-container-low p-6 sm:p-10 rounded-[2rem] border border-surface-dim/20 hover:border-primary/20 transition-all group relative overflow-hidden"
             >
@@ -334,8 +337,8 @@ export default function Home() {
                 <ArrowRight className="w-3 h-3" />
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               variants={fadeUp}
               className="w-full sm:col-span-1 bg-primary text-on-primary p-8 sm:p-10 rounded-[2rem] shadow-xl ambient-shadow flex flex-col justify-between group hover:scale-[1.02] transition-transform"
             >
@@ -346,38 +349,38 @@ export default function Home() {
               </div>
             </motion.div>
             <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-            <motion.div 
-              variants={fadeUp}
-              className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
-            >
-              <History className="w-10 h-10 text-primary mb-6" />
-              <h3 className="text-xl font-headline font-bold mb-2">Lifetime Access</h3>
-              <p className="text-secondary text-sm">Purchase once, review forever. All future updates included.</p>
-            </motion.div>
-
-            <motion.div 
-              variants={fadeUp}
-              className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
-            >
-              <Globe className="w-10 h-10 text-primary mb-6" />
-              <h3 className="text-xl font-headline font-bold mb-2">Global Network</h3>
-              <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
-            </motion.div>
-            </div>
-              <motion.div 
-              variants={fadeUp}
-              className="w-full md:col-span-3 bg-surface-container-low flex items-center justify-between rounded-[2rem] border border-surface-dim/20 p-8"
-            >
-              <div>
-                <p className="text-sm text-secondary uppercase tracking-wide mb-1">Ready to begin?</p>
-                <p className="text-xl font-headline font-bold">Start your free trial today</p>
-              </div>
-              <Link 
-                to="/register" 
-                className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 transition-transform group flex items-center gap-2"
+              <motion.div
+                variants={fadeUp}
+                className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
               >
-                Join Today 
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <History className="w-10 h-10 text-primary mb-6" />
+                <h3 className="text-xl font-headline font-bold mb-2">Lifetime Access</h3>
+                <p className="text-secondary text-sm">Purchase once, review forever. All future updates included.</p>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUp}
+                className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
+              >
+                <Globe className="w-10 h-10 text-primary mb-6" />
+                <h3 className="text-xl font-headline font-bold mb-2">Global Network</h3>
+                <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
+              </motion.div>
+            </div>
+            <motion.div
+              variants={fadeUp}
+              className="w-full md:col-span-3 bg-surface-container-low flex flex-col lg:flex-row items-center lg:items-center justify-between rounded-[2.5rem] border border-surface-dim/20 p-8 sm:p-12 gap-8 text-center lg:text-left"
+            >
+              <div className="space-y-4">
+                <p className="text-xs sm:text-sm text-secondary uppercase tracking-[0.3em] font-bold opacity-70">Ready to begin?</p>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-primary leading-tight">Start your free trial today</h3>
+              </div>
+              <Link
+                to="/register"
+                className="w-full sm:w-max px-10 py-5 bg-primary text-on-primary font-bold rounded-2xl hover:scale-105 transition-all group flex items-center justify-center gap-3 shadow-2xl shadow-primary/20 hover:shadow-primary/40"
+              >
+                <span className="text-lg whitespace-nowrap">Join Today</span>
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </Link>
             </motion.div>
           </motion.div>
@@ -385,16 +388,16 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section (NEW) */}
-      <section className="py-24 px-8 bg-surface">
+      <section id="testimonials" className="py-24 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">What Our Learners Say</h2>
             <p className="text-secondary">Trusted by professionals from leading companies worldwide.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((testimonial, idx) => (
-              <div 
+              <div
                 key={idx}
                 className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/20 transition-all"
               >
@@ -403,10 +406,11 @@ export default function Home() {
                 </div>
                 <p className="text-on-surface mb-6 leading-relaxed">"{testimonial.content}"</p>
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={testimonial.avatar} 
+                  <img
+                    src={testimonial.avatar}
                     alt={testimonial.name}
                     className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy"
                   />
                   <div>
                     <p className="font-bold text-sm">{testimonial.name}</p>
@@ -416,12 +420,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center mt-12">
-            <Link to="/testimonials" className="inline-flex items-center gap-2 text-primary font-medium group">
+            <a href="#testimonials" className="inline-flex items-center gap-2 text-primary font-medium group">
               Read more success stories
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -434,17 +438,11 @@ export default function Home() {
             Join thousands of professionals who have transformed their careers with our premium courses.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/catalog" 
-              className="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
+            <Link
+              to="/catalog"
+              className="px-8 py-4 border-2 border-white/30 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
             >
               Browse All Courses
-            </Link>
-            <Link 
-              to="/register" 
-              className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-bold hover:bg-white/10 transition-all"
-            >
-              Start Free Trial
             </Link>
           </div>
           <p className="text-sm opacity-70 mt-6">No credit card required • Cancel anytime</p>
