@@ -30,13 +30,13 @@ function ProfileContent() {
         setEnrollments(StorageService.getEnrollments())
       }
     }
-    
+
     handleUpdate()
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-    
+
     const syncTheme = () => setTheme(localStorage.getItem('theme') || 'light')
     window.addEventListener('themeSync', syncTheme)
-    
+
     return () => {
       window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
       window.removeEventListener('themeSync', syncTheme)
@@ -217,12 +217,12 @@ function ProfileContent() {
               </div>
             )}
 
-            {/* Danger Zone */}
+            {/* Danger Zone
             <div className="border border-error/20 bg-error/5 rounded-[2rem] p-8">
               <h3 className="text-xl font-headline font-bold text-error mb-2">Danger Zone</h3>
               <p className="text-xs text-secondary mb-6">Irreversible deletion of your entire academic record.</p>
               <button className="w-full py-4 bg-surface-container-lowest text-error font-bold rounded-xl border border-error/20 hover:bg-error hover:text-white transition-all uppercase tracking-widest text-xs">Delete Identity</button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
