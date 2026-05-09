@@ -132,18 +132,18 @@ export default function Home() {
             >
               <Link
                 to="/catalog"
-                className="px-8 py-4 border-2 border-white bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
+                className="px-16 py-5 border-2 border-white bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform ambient-shadow flex items-center justify-center gap-2 group"
               >
                 Explore Courses
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link
+              {/* <Link
                 to="/catalog"
                 className="px-8 py-4 border border-primary/30 text-primary rounded-xl font-bold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group"
               >
                 <Play className="w-5 h-5" />
                 Watch Demo
-              </Link>
+              </Link> */}
             </motion.div>
 
             {/* Stats Row */}
@@ -212,7 +212,7 @@ export default function Home() {
                   <p className="text-3xl font-headline font-bold text-primary leading-none mb-1">98%</p>
                   <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Success Rate</p>
                 </div>
-                <Link to="/catalog" className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                <Link to="" className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center transition-transform shadow-lg">
                   <Play className="w-5 h-5 fill-current" />
                 </Link>
               </div>
@@ -247,10 +247,10 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Link to="/about" className="inline-flex items-center gap-2 text-primary font-semibold group">
+            {/* <Link to="/about" className="inline-flex items-center gap-2 text-primary font-semibold group">
               Learn more about our mission
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </Link> */}
           </div>
           <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
             <div className="h-48 sm:h-64 rounded-3xl bg-surface-container overflow-hidden hover:scale-105 transition-transform duration-500">
@@ -275,13 +275,13 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course, idx) => (
+            {featuredCourses.map((course, idx) => ( 
               <div
                 key={idx}
                 onMouseEnter={() => setHoveredCard(idx)}
                 onMouseLeave={() => setHoveredCard(null)}
                 className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl group"
-              >
+              > 
                 <div className="flex justify-between items-start mb-4">
                   <Sparkles className="w-8 h-8 text-primary" />
                   <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
@@ -354,7 +354,7 @@ export default function Home() {
                 className="bg-surface-container-lowest p-10 rounded-[2rem] border border-surface-dim/20 ambient-shadow hover:shadow-xl transition-all"
               >
                 <History className="w-10 h-10 text-primary mb-6" />
-                <h3 className="text-xl font-headline font-bold mb-2">Lifetime Access</h3>
+                <h3 className="text-xl font-headline font-bold mb-2">Limited time Access</h3>
                 <p className="text-secondary text-sm">Purchase once, review forever. All future updates included.</p>
               </motion.div>
 
@@ -367,22 +367,6 @@ export default function Home() {
                 <p className="text-secondary text-sm">Join 45k+ alumni worldwide across 80+ countries.</p>
               </motion.div>
             </div>
-            <motion.div
-              variants={fadeUp}
-              className="w-full md:col-span-3 bg-surface-container-low flex flex-col lg:flex-row items-center lg:items-center justify-between rounded-[2.5rem] border border-surface-dim/20 p-8 sm:p-12 gap-8 text-center lg:text-left"
-            >
-              <div className="space-y-4">
-                <p className="text-xs sm:text-sm text-secondary uppercase tracking-[0.3em] font-bold opacity-70">Ready to begin?</p>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-primary leading-tight">Start your free trial today</h3>
-              </div>
-              <Link
-                to="/register"
-                className="w-full sm:w-max px-10 py-5 bg-primary text-on-primary font-bold rounded-2xl hover:scale-105 transition-all group flex items-center justify-center gap-3 shadow-2xl shadow-primary/20 hover:shadow-primary/40"
-              >
-                <span className="text-lg whitespace-nowrap">Join Today</span>
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -421,12 +405,12 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          {/* <div className="text-center mt-12">
             <a href="#testimonials" className="inline-flex items-center gap-2 text-primary font-medium group">
               Read more success stories
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
-          </div>
+          </div> */}
         </div>
       </section>
 
