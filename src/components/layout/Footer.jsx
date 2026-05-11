@@ -1,7 +1,7 @@
 // src/components/layout/Footer.jsx
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { Github, Twitter, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
+import { Instagram, Twitter, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -38,7 +38,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-y-12 sm:gap-x-8 lg:gap-x-12 lg:gap-y-8 mb-16 md:mb-20">
           {/* Brand Shard */}
-          <div className="sm:col-span-2 lg:col-span-3">
+          <div className="sm:col-span-2 lg:col-span-4">
             <Link to="/" className="inline-flex items-center gap-3 mb-6 sm:mb-8 group">
               <div className="w-8 h-8 sm:w-10 sm:h-10 signature-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <span className="text-white font-headline font-bold text-lg sm:text-xl">A</span>
@@ -51,13 +51,15 @@ export function Footer() {
             <div className="flex items-center gap-4">
               {[
                 { Icon: Twitter, href: "#", label: "Twitter" },
-                { Icon: Github, href: "#", label: "GitHub" },
-                { Icon: Linkedin, href: "#", label: "LinkedIn" }
+                { Icon: Instagram, href: "https://www.instagram.com/adhocnetworktech?igsh=MXFkcXZqb2w2ajRubg%3D%3D&utm_source=qr", label: "Instagram" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/company/adhocnetwork/", label: "LinkedIn" }
               ].map((social, i) => (
                 <a
                   key={i}
                   href={social.href}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all shadow-sm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all shadow-sm"
                   aria-label={social.label}
                 >
                   <social.Icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -67,7 +69,7 @@ export function Footer() {
           </div>
 
           {/* Newsletter Signup */}
-          <div className="sm:col-span-2 lg:col-span-3">
+          <div className="sm:col-span-2 lg:col-span-4">
             <h4 className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6 sm:mb-8 italic">Neural Dispatch</h4>
             <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">
               Subscribe to receive tactical insights, curriculum updates, and exclusive content.
@@ -90,51 +92,25 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Platform Links */}
-          <div className="lg:col-span-2">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Platform</h4>
-            <ul className="space-y-4">
-              {links.platform.map(link => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div className="lg:col-span-2">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-8 italic">Academy</h4>
-            <ul className="space-y-4">
-              {links.company.map(link => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-secondary hover:text-primary font-medium transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Contact Base */}
-          <div className="sm:col-span-2 lg:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-4">
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6 sm:mb-8 italic">Base</h4>
             <ul className="space-y-4 sm:space-y-6">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <span className="text-sm font-medium text-on-surface-variant leading-relaxed opacity-70">
-                  Global HQ / Sector 7<br />Adhoc Terminal
-                </span>
+                  Adhoc Network <br />
+                  Sunrise Towers, 1st floor, IT Sez, Hill-03, Rushikonda <br />
+                  Visakhapatnam, Andhra Pradesh, India - 530048
+                </span>             
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-sm font-medium text-on-surface-variant opacity-70">+1 ADHOC-NET</span>
+                <span className="text-sm font-medium text-on-surface-variant opacity-70">+91 7815823764</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-sm font-medium text-on-surface-variant opacity-70">hello@adhoc.network</span>
+                <span className="text-sm font-medium text-on-surface-variant opacity-70">hr@adhocnetwork.tech</span>
               </li>
             </ul>
           </div>
