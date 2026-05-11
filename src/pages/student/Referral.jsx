@@ -75,8 +75,8 @@ export default function Referral() {
             
             <div className="max-w-xl mx-auto space-y-4">
               <div className="p-4 bg-surface-container rounded-xl flex items-center justify-between border border-surface-dim/20 gap-4 overflow-hidden">
-                <span className="text-primary font-mono text-sm truncate">{referralLink}</span>
-                <button onClick={handleCopy} className="text-xs font-bold bg-primary text-white px-6 py-3 rounded-lg hover:opacity-90 shrink-0">
+                <span className="text-primary font-mono text-sm  truncate">{referralLink}</span>
+                <button onClick={handleCopy} className="text-xs font-bold bg-primary text-on-primary px-6 py-3 rounded-lg hover:opacity-90 shrink-0">
                   Copy Link
                 </button>
               </div>

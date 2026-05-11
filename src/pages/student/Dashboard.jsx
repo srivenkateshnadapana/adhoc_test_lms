@@ -245,9 +245,7 @@ function DashboardContent() {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-headline font-bold text-primary">Recent Activity</h2>
-              <Link to="/activity" className="text-xs font-bold text-primary uppercase tracking-[0.2em] flex items-center gap-1 hover:gap-2 transition-all">
-                View All <ChevronRight className="w-3 h-3" />
-              </Link>
+              
             </div>
             
             {recentActivity.length === 0 ? (
@@ -270,12 +268,9 @@ function DashboardContent() {
                       <p className="text-sm font-medium text-on-surface">
                         {activity.type === 'completed' ? 'Completed' : activity.type === 'started' ? 'Started' : 'Scored'} <span className="font-bold text-primary">{activity.course}</span>
                       </p>
-                      <p className="text-xs text-on-surface-variant">{activity.date}</p>
+                      <p className="text-xs text-right text-on-surface-variant">{activity.date}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-primary">+{activity.points} XP</p>
-                      {activity.score && <p className="text-xs text-on-surface-variant">Score: {activity.score}%</p>}
-                    </div>
+                    
                   </div>
                 ))}
               </div>
@@ -291,7 +286,7 @@ function DashboardContent() {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-headline font-bold text-primary">Deadlines</h2>
-              <Calendar className="w-5 h-5 text-primary" />
+              
             </div>
             
             {upcomingDeadlines.length === 0 ? (
@@ -313,7 +308,7 @@ function DashboardContent() {
                     <p className="text-sm text-on-surface-variant mb-2">{deadline.assignment}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-primary font-medium">Due in {deadline.due}</span>
-                      <button className="text-xs text-primary hover:underline">Start →</button>
+                     
                     </div>
                   </div>
                 ))}
@@ -335,7 +330,7 @@ function DashboardContent() {
               <p className="text-on-surface-variant text-xs sm:text-sm mt-1">Continue where you left off</p>
             </div>
             <Link to="/catalog" className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-[0.2em] border-b-2 border-primary pb-1 hover:opacity-70 transition-all flex items-center gap-1">
-              Explore More <ArrowRight className="w-3 h-3" />
+              Continue <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -378,6 +373,7 @@ function DashboardContent() {
                         alt={course.title} 
                       />
                       <div className="absolute inset-0 group-hover:bg-transparent transition-colors"></div>
+
                       {progress[course.id] === 100 && (
                         <div className="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                           Completed!
