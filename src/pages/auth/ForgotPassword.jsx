@@ -13,7 +13,6 @@ export default function ForgotPassword() {
     e.preventDefault()
     setLoading(true)
     setError("")
-
     try {
       const result = await StorageService.forgotPassword(email)
 
