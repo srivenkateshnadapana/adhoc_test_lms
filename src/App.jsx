@@ -11,6 +11,7 @@ const Home = React.lazy(() => import('./pages/public/Home'))
 const Catalog = React.lazy(() => import('./pages/public/Catalog'))
 const Login = React.lazy(() => import('./pages/auth/Login'))
 const Register = React.lazy(() => import('./pages/auth/Register'))
+const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword'))
 const CourseDetail = React.lazy(() => import('./pages/public/CourseDetail'))
 const NotFound = React.lazy(() => import('./pages/public/NotFound'))
 const Unauthorized = React.lazy(() => import('./pages/public/Unauthorized'))
@@ -56,6 +57,7 @@ function App() {
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/register" element={<Navigate to="/register" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/student/course/:id" element={<CoursePlayer />} />

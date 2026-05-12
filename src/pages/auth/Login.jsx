@@ -134,14 +134,7 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-surface-dim/20">
-            <p className="text-xs text-secondary text-center mb-3">Demo Credentials</p>
-            <div className="flex flex-col gap-2 text-xs text-secondary text-center">
-              <p>Student: student@example.com / student123</p>
-              <p>Admin: admin@example.com / admin123</p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
