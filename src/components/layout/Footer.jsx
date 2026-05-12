@@ -59,10 +59,10 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all shadow-sm"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary transition-all shadow-sm"
                   aria-label={social.label}
                 >
-                  <social.Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <social.Icon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                 </a>
               ))}
             </div>
@@ -97,7 +97,7 @@ export function Footer() {
             <h4 className="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6 sm:mb-8 italic">Base</h4>
             <ul className="space-y-4 sm:space-y-6">
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
                 <span className="text-sm font-medium text-on-surface-variant leading-relaxed opacity-70">
                   Adhoc Network <br />
                   Sunrise Towers, 1st floor, IT Sez, Hill-03, Rushikonda <br />
@@ -105,11 +105,11 @@ export function Footer() {
                 </span>             
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-primary shrink-0" />
+                <Phone className="w-5 h-5 text-primary shrink-0" strokeWidth={2.5} />
                 <span className="text-sm font-medium text-on-surface-variant opacity-70">+91 7815823764</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-primary shrink-0" />
+                <Mail className="w-5 h-5 text-primary shrink-0" strokeWidth={2.5} />
                 <span className="text-sm font-medium text-on-surface-variant opacity-70">hr@adhocnetwork.tech</span>
               </li>
             </ul>
