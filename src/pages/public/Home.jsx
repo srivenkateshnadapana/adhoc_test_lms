@@ -248,7 +248,7 @@ export default function Home() {
               {[
                 "150+ Expert Mentors from Global Firms",
                 "Certifications recognized across the tech industry",
-                "Lifetime access to premium course assets",
+                
                 "24/7 Mentor Support & Community Access"
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-3 text-on-surface font-medium group">
@@ -344,7 +344,7 @@ export default function Home() {
               <p className="text-secondary max-w-md">Our certs are designed directly with enterprise CTOs, providing immediate professional legitimacy.</p>
               <div className="mt-6 flex items-center gap-2 text-primary text-sm font-medium">
                 Recognized by 500+ companies
-                <ArrowRight className="w-3 h-3" />
+                
               </div>
             </motion.div>
 
