@@ -139,6 +139,36 @@ export const StorageService = {
       return { success: false, message: 'Network error. Please try again.' }
     }
   },
+
+  forgotPassword: async (email) => {
+    try {
+      const response = await fetch(`${API_URL}/password/forgot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      return { success: false, message: 'Network error. Please try again.' }
+    }
+  },
+
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await fetch(`${API_URL}/password/reset/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword })
+      })
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Reset password error:', error)
+      return { success: false, message: 'Network error. Please try again.' }
+    }
+  },
   
   logout: () => {
     StorageService.removeToken()
