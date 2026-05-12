@@ -19,7 +19,8 @@ export default function ForgotPassword() {
       if (result.success) {
         setSuccess(true)
       } else {
-        setError(result.message || "Failed to process request. Please try again.")
+        // Show detailed error if available, else fallback to message
+        setError(result.error ? `Error: ${result.error}` : (result.message || "Failed to process request. Please try again."))
       }
     } catch (err) {
       setError("Network error. Please try again.")
