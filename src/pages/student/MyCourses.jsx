@@ -115,10 +115,19 @@ function MyCoursesContent() {
                   </div>
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="bg-surface-container-high text-secondary px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
-                        {course.category}
+                      <span className={`
+                        inline-block px-3 py-1 rounded-full text-xs font-semibold
+                        ${
+                          course.level === "beginner"
+                            ? "bg-green-100 text-green-700"
+                            : course.level === "advanced"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-700"
+                        }
+                      `}>
+                        {course.level || "Intermediate"}
                       </span>
-                    </div>
+                  </div>
                     <h3 className="text-xl font-headline font-bold text-primary mb-2 line-clamp-2">
                       {course.title}
                     </h3>
