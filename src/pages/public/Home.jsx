@@ -248,7 +248,7 @@ export default function Home() {
               {[
                 "150+ Expert Mentors from Global Firms",
                 "Certifications recognized across the tech industry",
-                
+                 "Limited-time access to premium course assets",  
                 "24/7 Mentor Support & Community Access"
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-3 text-on-surface font-medium group">
@@ -429,7 +429,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-4xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who have transformed their careers with our premium courses.
+            Join an exclusive community of professionals transforming their careers with our premium courses.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
