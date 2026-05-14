@@ -170,28 +170,38 @@ export const StorageService = {
       const data = await api.courses.getAll()
       const raw = data.data || []
 
-      const mappedCourses = raw.map(course => ({
-        id: course.id,
-        title: course.title || 'Untitled Course',
-        description: course.description || '',
-        image: course.thumbnail || null,
-        instructor: course.instructor || 'Expert Instructor',
-        price: parseFloat(course.price_3months) || parseFloat(course.price_1month) || 0,
-        originalPrice: parseFloat(course.price_6months) || null,
-        price_1month: parseFloat(course.price_1month) || 0,
-        price_3months: parseFloat(course.price_3months) || 0,
-        price_6months: parseFloat(course.price_6months) || 0,
-        category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
-        course_type: course.course_type,
-        allowed_plan: course.allowed_plan,
-        level: course.level || 'intermediate',
-        duration: course.duration || 20,
-        rating: course.rating || 4.5,
-        reviewCount: course.review_count || 0,
-        enrolled: course.enrolled || 0,
-        createdAt: course.createdAt,
-        userAccess: course.userAccess || { hasAccess: false }
-      }))
+      const mappedCourses = raw.map(course => {
+        const allowedPlan = course.allowed_plan || '1month';
+        let displayPrice = 0;
+        if (allowedPlan === '1month') displayPrice = parseFloat(course.price_1month);
+        else if (allowedPlan === '3months') displayPrice = parseFloat(course.price_3months);
+        else if (allowedPlan === '6months') displayPrice = parseFloat(course.price_6months);
+        
+        displayPrice = displayPrice || parseFloat(course.price_1month) || 0;
+
+        return {
+          id: course.id,
+          title: course.title || 'Untitled Course',
+          description: course.description || '',
+          image: course.thumbnail || null,
+          instructor: course.instructor || 'Expert Instructor',
+          price: displayPrice,
+          originalPrice: parseFloat(course.price_6months) || null,
+          price_1month: parseFloat(course.price_1month) || 0,
+          price_3months: parseFloat(course.price_3months) || 0,
+          price_6months: parseFloat(course.price_6months) || 0,
+          category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
+          course_type: course.course_type,
+          allowed_plan: course.allowed_plan,
+          level: course.level || 'intermediate',
+          duration: course.duration || 20,
+          rating: course.rating || 4.5,
+          reviewCount: course.review_count || 0,
+          enrolled: course.enrolled || 0,
+          createdAt: course.createdAt,
+          userAccess: course.userAccess || { hasAccess: false }
+        };
+      })
 
       _cache.courses = mappedCourses
       _cache.lastFetched = now
@@ -202,11 +212,16 @@ export const StorageService = {
     }
   },
   
-  getCourseById: async (id) => {
+  getCourseById: async (id, forceRefresh = false) => {
     const courseId = parseInt(id)
     
-    if (_cache.courseDetails[courseId]) {
+    if (!forceRefresh && _cache.courseDetails[courseId]) {
       return _cache.courseDetails[courseId]
+    }
+
+    if (!forceRefresh && _cache.courses) {
+      const cached = _cache.courses.find(c => c.id === courseId)
+      if (cached) return cached
     }
 
     try {

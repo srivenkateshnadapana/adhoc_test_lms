@@ -65,10 +65,20 @@ export default function CourseDetail() {
         ])
         setIsEnrolled(enrolled)
         setIsBookmarked(bookmarked)
+        
+        // Background refresh to ensure data is up to date (e.g. price changes)
+        try {
+          const freshCourse = await StorageService.getCourseById(courseId, true)
+          if (freshCourse && JSON.stringify(freshCourse) !== JSON.stringify(cachedCourse)) {
+            setCourse(freshCourse)
+          }
+        } catch (error) {
+          console.error('Error in background refresh:', error)
+        }
       } else {
         setLoading(true)
         try {
-          const data = await StorageService.getCourseById(courseId)
+          const data = await StorageService.getCourseById(courseId, true)
           if (data) {
             setCourse(data)
             const enrolled = await StorageService.isEnrolled(courseId)
