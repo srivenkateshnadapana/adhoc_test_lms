@@ -32,53 +32,28 @@ const DROPDOWN_ITEMS = [
   { href: "/feedback", label: "Feedback", icon: MessageCircle },
 ]
 
+import { authStore } from "../../utils/authStore"
+
 export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
   const [isAtTop, setIsAtTop] = React.useState(true)
-  const [authState, setAuthState] = React.useState({ isAuthenticated: false, user: null })
+  const [authState, setAuthState] = React.useState(authStore.getState())
   const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light')
   const dropdownRef = React.useRef(null)
 
   React.useEffect(() => {
-    const loadUser = async () => {
-      // First load from local storage
-      setAuthState({
-        isAuthenticated: StorageService.isAuthenticated(),
-        user: StorageService.getUser()
-      })
-      
-      // Then refresh from backend if authenticated
-      if (StorageService.isAuthenticated()) {
-        try {
-          const token = StorageService.getToken()
-          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-          const data = await res.json()
-          if (data.success && data.user) {
-            StorageService.updateUser(data.user)
-          }
-        } catch (error) {
-          console.error("Failed to refresh user", error)
-        }
-      }
-    }
-    
-    loadUser()
+    // Initial sync
+    setAuthState(authStore.getState());
 
-    // Listen for auth changes
-    const handleAuthUpdate = () => {
-      setAuthState({
-        isAuthenticated: StorageService.isAuthenticated(),
-        user: StorageService.getUser()
-      })
-    }
-    
-    window.addEventListener('storage-update-lms_auth', handleAuthUpdate)
-    return () => window.removeEventListener('storage-update-lms_auth', handleAuthUpdate)
+    // Subscribe to the store
+    const unsubscribe = authStore.subscribe((state) => {
+      setAuthState(state);
+    });
+
+    return unsubscribe;
   }, [])
 
 
@@ -149,6 +124,15 @@ export function Header() {
 
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-4">
+          {/* Theme Toggle - Always Visible */}
+          <button
+            onClick={handleToggleTheme}
+            className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
+          </button>
+
           {!isAuthenticated ? (
             <>
               <Link to="/auth" className="px-5 py-2 text-primary font-semibold hover:opacity-80 transition-all duration-200 active:scale-95">Login</Link>
@@ -162,14 +146,6 @@ export function Header() {
                 </Link>
               )}
               
-              {/* Theme Toggle */}
-              <button
-                onClick={handleToggleTheme}
-                className="p-2 bg-surface-container-high rounded-full border border-surface-dim hover:bg-surface-dim transition-colors"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
-              </button>
-
               {/* User Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -242,18 +218,29 @@ export function Header() {
             transition={{ duration: 0.2 }}
           >
             <div className="flex flex-col gap-1 px-4 py-3">
-              {(isAuthenticated ? PRIVATE_NAV_ITEMS : PUBLIC_NAV_ITEMS).map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-dim"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              
-              <div className="border-t border-surface-dim my-2"></div>
+            <button
+              onClick={() => {
+                handleToggleTheme()
+                setIsOpen(false)
+              }}
+              className="rounded-md px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-dim text-left flex items-center gap-2"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </button>
+
+            <div className="border-t border-surface-dim my-2"></div>
+
+            {(isAuthenticated ? PRIVATE_NAV_ITEMS : PUBLIC_NAV_ITEMS).map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="rounded-md px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-dim"
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
               
               <Link to="/settings" className="rounded-md px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-dim" onClick={() => setIsOpen(false)}>
                 Settings
@@ -265,16 +252,6 @@ export function Header() {
                 Feedback
               </Link>
               
-              <button
-                onClick={() => {
-                  handleToggleTheme()
-                  setIsOpen(false)
-                }}
-                className="rounded-md px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-dim text-left flex items-center gap-2"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-primary" />}
-                {theme === "dark" ? "Light Mode" : "Dark Mode"}
-              </button>
               
               {!isAuthenticated ? (
                 <>

@@ -70,11 +70,9 @@ export default function Home() {
   React.useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
-        const res = await fetch(`${API_URL}/feedbacks/home`)
-        const data = await res.json()
-        if (data.success && data.data && data.data.length > 0) {
-          setTestimonials(data.data)
+        const res = await api.feedbacks.getHome()
+        if (res.success && res.data && res.data.length > 0) {
+          setTestimonials(res.data)
         }
       } catch (err) {
         console.error("Failed to fetch home feedbacks:", err)

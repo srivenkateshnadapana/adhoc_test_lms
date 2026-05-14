@@ -31,12 +31,10 @@ export default function VerifyCertificate() {
     setResult(null)
     setError(null)
     try {
-      const res = await fetch(`${API_URL}/certificates/verify/${trimmed}`)
-      if (!res.ok) throw new Error('Server error')
-      const json = await res.json()
+      const json = await api.certificates.verify(trimmed)
       setResult(json)
-    } catch {
-      setError('Could not connect to the verification server. Please try again.')
+    } catch (err) {
+      setError(err.message || 'Could not connect to the verification server. Please try again.')
     } finally {
       setLoading(false)
     }

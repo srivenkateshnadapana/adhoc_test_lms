@@ -138,9 +138,11 @@ function AdminCoursesContent() {
       
       // Add price based on subscription duration
       const priceNum = Number(formData.price)
+      payload.price = priceNum // Always send the main price field to keep backend in sync
       if (formData.allowed_plan === '1month') payload.price_1month = priceNum
       if (formData.allowed_plan === '3months') payload.price_3months = priceNum
       if (formData.allowed_plan === '6months') payload.price_6months = priceNum
+
       
       console.log('Submitting payload:', payload) // Debug log
       

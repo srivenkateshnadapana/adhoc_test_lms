@@ -26,7 +26,6 @@ const itemVariants = {
 
 export default function Catalog() {
   const [courses, setCourses] = React.useState([])
-  const [filteredCourses, setFilteredCourses] = React.useState([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeCategory, setActiveCategory] = React.useState("all")
@@ -36,7 +35,6 @@ export default function Catalog() {
   const [duration, setDuration] = React.useState("all")
   const [favorites, setFavorites] = React.useState(new Set(StorageService.getFavorites()))
   const [visibleCount, setVisibleCount] = React.useState(9)
-  const [hasMore, setHasMore] = React.useState(true)
 
   // Load courses
   React.useEffect(() => {
@@ -45,20 +43,17 @@ export default function Catalog() {
       const cached = await StorageService.getCourses()
       if (cached && cached.length > 0) {
         setCourses(cached)
-        setFilteredCourses(cached)
         setLoading(false)
         
         // Background refresh to ensure data is up to date
         const fresh = await StorageService.getCourses(true)
-        if (JSON.stringify(fresh) !== JSON.stringify(cached)) {
+        if (fresh?.length !== cached?.length) {
           setCourses(fresh)
-          setFilteredCourses(fresh)
         }
       } else {
         setLoading(true)
         const data = await StorageService.getCourses()
         setCourses(data)
-        setFilteredCourses(data)
         setLoading(false)
       }
     }
@@ -66,7 +61,7 @@ export default function Catalog() {
   }, [])
 
   // Filter and sort courses
-  React.useEffect(() => {
+  const filteredCourses = React.useMemo(() => {
     let result = [...courses]
 
     // Search filter
@@ -115,38 +110,39 @@ export default function Catalog() {
     // Sorting
     switch (sortBy) {
       case "newest":
-        result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
       case "price-low":
-        result = [...result].sort((a, b) => a.price - b.price)
+        result.sort((a, b) => a.price - b.price)
         break
       case "price-high":
-        result = [...result].sort((a, b) => b.price - a.price)
+        result.sort((a, b) => b.price - a.price)
         break
       case "rating":
-        result = [...result].sort((a, b) => b.rating - a.rating)
+        result.sort((a, b) => b.rating - a.rating)
         break
       case "popular":
-        result = [...result].sort((a, b) => (b.enrolled || 0) - (a.enrolled || 0))
+        result.sort((a, b) => (b.enrolled || 0) - (a.enrolled || 0))
         break
       default:
         break
     }
 
-    setFilteredCourses(result)
-    setVisibleCount(9)
-    setHasMore(result.length > 9)
+    return result
   }, [courses, searchQuery, activeCategory, level, sortBy, priceRange, duration])
 
-  const handleFavoriteToggle = (id) => {
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setVisibleCount(9)
+  }, [searchQuery, activeCategory, level, sortBy, priceRange, duration])
+
+  const handleFavoriteToggle = React.useCallback((id) => {
     StorageService.toggleFavorite(id)
     setFavorites(new Set(StorageService.getFavorites()))
-  }
+  }, [])
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 9)
-    setHasMore(filteredCourses.length > visibleCount + 9)
-  }
+  // Derived state for pagination
+  const hasMore = filteredCourses.length > visibleCount
 
   const handleClearAllFilters = () => {
     setSearchQuery("")
@@ -160,16 +156,26 @@ export default function Catalog() {
   const hasActiveFilters = searchQuery || activeCategory !== "all" || level !== "all" || 
                           priceRange.min > 0 || priceRange.max < 5000 || duration !== "all"
 
-  const visibleCourses = filteredCourses.slice(0, visibleCount)
+  const visibleCourses = React.useMemo(() => {
+    return filteredCourses.slice(0, visibleCount)
+  }, [filteredCourses, visibleCount])
 
-  // Categories for filter
-  const categories = [
-    { id: "all", label: "All", count: courses.length },
-    { id: "development", label: "Development", count: courses.filter(c => c.category === "development").length },
-    { id: "design", label: "Design", count: courses.filter(c => c.category === "design").length },
-    { id: "business", label: "Business", count: courses.filter(c => c.category === "business").length },
-    { id: "marketing", label: "Marketing", count: courses.filter(c => c.category === "marketing").length },
-  ]
+  // Categories for filter - Optimized count calculation
+  const categories = React.useMemo(() => {
+    const counts = courses.reduce((acc, course) => {
+      const cat = course.category || "other";
+      acc[cat] = (acc[cat] || 0) + 1;
+      return acc;
+    }, {});
+
+    return [
+      { id: "all", label: "All", count: courses.length },
+      { id: "development", label: "Development", count: counts["development"] || 0 },
+      { id: "design", label: "Design", count: counts["design"] || 0 },
+      { id: "business", label: "Business", count: counts["business"] || 0 },
+      { id: "marketing", label: "Marketing", count: counts["marketing"] || 0 },
+    ]
+  }, [courses])
 
   return (
     <div className="min-h-screen bg-surface">
@@ -285,10 +291,10 @@ export default function Catalog() {
             )}
 
             {/* Load More Button */}
-            {hasMore && visibleCourses.length < filteredCourses.length && (
+            {hasMore && (
               <div className="text-center mt-12">
                 <button
-                  onClick={handleLoadMore}
+                  onClick={() => setVisibleCount(prev => prev + 9)}
                   className="px-6 py-3 border border-primary/30 text-primary rounded-xl font-medium hover:bg-primary/5 transition-all hover:scale-[1.02] active:scale-95"
                 >
                   Load More Courses

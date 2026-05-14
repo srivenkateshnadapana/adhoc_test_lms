@@ -1,32 +1,38 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { StorageService, AUTH_KEY } from "../services/storage"
+import { StorageService } from "../services/storage"
+import { authStore } from "../utils/authStore"
 
 export function ProtectedRoute({ 
   children, 
-  fallbackPath = "/auth" 
+  fallbackPath = "/auth",
+  requiredRole = null
 }) {
   const navigate = useNavigate()
   const [isHydrated, setIsHydrated] = React.useState(false)
-  const [authState, setAuthState] = React.useState(StorageService.getAuthState())
+  const [authState, setAuthState] = React.useState(authStore.getSnapshot())
 
   React.useEffect(() => {
-    const handleUpdate = () => {
-      const state = StorageService.getAuthState()
+    const unsubscribe = authStore.subscribe((state) => {
       setAuthState(state)
+      
       if (!state.isAuthenticated) {
         navigate(fallbackPath)
+      } else if (requiredRole && state.user?.role !== requiredRole) {
+        navigate("/unauthorized")
       }
-    }
+    })
 
-    if (!StorageService.getAuthState().isAuthenticated) {
+    // Initial check
+    if (!authState.isAuthenticated) {
       navigate(fallbackPath)
+    } else if (requiredRole && authState.user?.role !== requiredRole) {
+      navigate("/unauthorized")
     }
 
     setIsHydrated(true)
-    window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-    return () => window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
-  }, [navigate, fallbackPath])
+    return unsubscribe
+  }, [navigate, fallbackPath, requiredRole])
 
   if (!isHydrated) {
     return (
@@ -40,6 +46,9 @@ export function ProtectedRoute({
   }
 
   if (authState.isAuthenticated) {
+    if (requiredRole && authState.user?.role !== requiredRole) {
+      return null // Will be handled by navigate in useEffect
+    }
     return <>{children}</>
   }
 
