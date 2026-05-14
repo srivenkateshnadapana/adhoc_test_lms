@@ -26,7 +26,6 @@ const itemVariants = {
 
 export default function Catalog() {
   const [courses, setCourses] = React.useState([])
-  const [filteredCourses, setFilteredCourses] = React.useState([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeCategory, setActiveCategory] = React.useState("all")
@@ -36,7 +35,6 @@ export default function Catalog() {
   const [duration, setDuration] = React.useState("all")
   const [favorites, setFavorites] = React.useState(new Set(StorageService.getFavorites()))
   const [visibleCount, setVisibleCount] = React.useState(9)
-  const [hasMore, setHasMore] = React.useState(true)
 
   // Load courses
   React.useEffect(() => {
@@ -45,20 +43,17 @@ export default function Catalog() {
       const cached = await StorageService.getCourses()
       if (cached && cached.length > 0) {
         setCourses(cached)
-        setFilteredCourses(cached)
         setLoading(false)
         
         // Background refresh to ensure data is up to date
         const fresh = await StorageService.getCourses(true)
-        if (JSON.stringify(fresh) !== JSON.stringify(cached)) {
+        if (fresh?.length !== cached?.length) {
           setCourses(fresh)
-          setFilteredCourses(fresh)
         }
       } else {
         setLoading(true)
         const data = await StorageService.getCourses()
         setCourses(data)
-        setFilteredCourses(data)
         setLoading(false)
       }
     }
@@ -136,25 +131,18 @@ export default function Catalog() {
     return result
   }, [courses, searchQuery, activeCategory, level, sortBy, priceRange, duration])
 
-  // Update pagination state when filteredCourses changes
+  // Reset pagination when filters change
   React.useEffect(() => {
     setVisibleCount(9)
-    setHasMore(filteredCourses.length > 9)
-  }, [filteredCourses])
+  }, [searchQuery, activeCategory, level, sortBy, priceRange, duration])
 
-  const handleFavoriteToggle = (id) => {
+  const handleFavoriteToggle = React.useCallback((id) => {
     StorageService.toggleFavorite(id)
     setFavorites(new Set(StorageService.getFavorites()))
-  }
+  }, [])
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 9)
-  }
-
-  // Update hasMore based on visibleCount
-  React.useEffect(() => {
-    setHasMore(filteredCourses.length > visibleCount)
-  }, [visibleCount, filteredCourses])
+  // Derived state for pagination
+  const hasMore = filteredCourses.length > visibleCount
 
   const handleClearAllFilters = () => {
     setSearchQuery("")
@@ -303,10 +291,10 @@ export default function Catalog() {
             )}
 
             {/* Load More Button */}
-            {hasMore && visibleCourses.length < filteredCourses.length && (
+            {hasMore && (
               <div className="text-center mt-12">
                 <button
-                  onClick={handleLoadMore}
+                  onClick={() => setVisibleCount(prev => prev + 9)}
                   className="px-6 py-3 border border-primary/30 text-primary rounded-xl font-medium hover:bg-primary/5 transition-all hover:scale-[1.02] active:scale-95"
                 >
                   Load More Courses

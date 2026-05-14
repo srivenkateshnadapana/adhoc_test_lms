@@ -1,5 +1,7 @@
 // src/services/storage.js
 import { api } from './api'
+import { getStorage, setStorage, removeStorage } from '../utils/storage'
+import { authStore } from '../utils/authStore'
 
 // Keys for localStorage
 export const TOKEN_KEY = 'lms_token'
@@ -19,31 +21,25 @@ export const StorageService = {
   // ============ AUTHENTICATION ============
   
   setToken: (token) => {
-    if (token) localStorage.setItem(TOKEN_KEY, token)
+    if (token) setStorage(TOKEN_KEY, token)
   },
   
-  getToken: () => localStorage.getItem(TOKEN_KEY),
+  getToken: () => getStorage(TOKEN_KEY),
   
-  removeToken: () => localStorage.removeItem(TOKEN_KEY),
+  removeToken: () => removeStorage(TOKEN_KEY),
   
   setUser: (user) => {
-    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
+    if (user) setStorage(USER_KEY, user)
   },
   
   getUser: () => {
-    const raw = localStorage.getItem(USER_KEY)
-    if (!raw) return null
-    try {
-      const parsedUser = JSON.parse(raw)
-      if (parsedUser && typeof parsedUser.coins === 'undefined') {
-        parsedUser.coins = 0 // Default coins
-      }
-      return parsedUser
-    } catch {
-      // Corrupted data — clear it so the app recovers on next login
-      localStorage.removeItem(USER_KEY)
-      return null
+    const user = getStorage(USER_KEY)
+    if (!user) return null
+    
+    if (user && typeof user.coins === 'undefined') {
+      user.coins = 0 // Default coins
     }
+    return user
   },
   
   updateUser: (updates) => {
@@ -51,7 +47,8 @@ export const StorageService = {
     if (user) {
       const updatedUser = { ...user, ...updates }
       StorageService.setUser(updatedUser)
-      window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+      // Signal auth update via store
+      authStore.notify(updatedUser)
     }
   },
 
@@ -75,7 +72,7 @@ export const StorageService = {
     return false
   },
   
-  removeUser: () => localStorage.removeItem(USER_KEY),
+  removeUser: () => removeStorage(USER_KEY),
   
   isAuthenticated: () => {
     return !!StorageService.getToken()
@@ -93,7 +90,7 @@ export const StorageService = {
       if (data.success) {
         StorageService.setToken(data.token)
         StorageService.setUser(data.user)
-        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        authStore.notify(data.user)
         return { success: true, user: data.user }
       } else {
         return { success: false, message: data.message || 'Login failed' }
@@ -111,7 +108,7 @@ export const StorageService = {
       if (data.success) {
         StorageService.setToken(data.token)
         StorageService.setUser(data.user)
-        window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+        authStore.notify(data.user)
         return { success: true, user: data.user }
       } else {
         return { success: false, message: data.message || 'Registration failed' }
@@ -124,41 +121,66 @@ export const StorageService = {
 
   forgotPassword: async (email) => {
     try {
-      const response = await fetch(`${API_URL}/password/forgot`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
-      const data = await response.json()
-      return data
+      return await api.auth.forgotPassword(email)
     } catch (error) {
       console.error('Forgot password error:', error)
-      return { success: false, message: 'Network error. Please try again.' }
+      return { success: false, message: error.message || 'Network error. Please try again.' }
     }
   },
 
   resetPassword: async (token, newPassword) => {
     try {
-      const response = await fetch(`${API_URL}/password/reset/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword })
-      })
-      const data = await response.json()
-      return data
+      return await api.auth.resetPassword(token, newPassword)
     } catch (error) {
       console.error('Reset password error:', error)
-      return { success: false, message: 'Network error. Please try again.' }
+      return { success: false, message: error.message || 'Network error. Please try again.' }
     }
   },
   
   logout: () => {
     StorageService.removeToken()
     StorageService.removeUser()
-    window.dispatchEvent(new Event(`storage-update-${AUTH_KEY}`))
+    authStore.notify(null)
   },
 
   // ============ COURSES ============
+  
+  _mapCourse: (course) => {
+    const allowedPlan = course.allowed_plan || '1month';
+    let displayPrice = 0;
+    
+    // Extract plan price
+    if (allowedPlan === '1month') displayPrice = parseFloat(course.price_1month);
+    else if (allowedPlan === '3months') displayPrice = parseFloat(course.price_3months);
+    else if (allowedPlan === '6months') displayPrice = parseFloat(course.price_6months);
+    
+    // Fallback to whatever price is available to avoid 0/1 issues
+    displayPrice = displayPrice || parseFloat(course.price) || parseFloat(course.price_1month) || 0;
+
+    return {
+      id: course.id,
+      title: course.title || 'Untitled Course',
+      description: course.description || '',
+      image: course.thumbnail || course.imageUrl || null,
+      instructor: course.instructor || 'Expert Instructor',
+      price: displayPrice,
+      originalPrice: parseFloat(course.price_6months) || null,
+      price_1month: parseFloat(course.price_1month) || 0,
+      price_3months: parseFloat(course.price_3months) || 0,
+      price_6months: parseFloat(course.price_6months) || 0,
+      category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
+      course_type: course.course_type,
+      allowed_plan: course.allowed_plan,
+      level: course.level || 'intermediate',
+      duration: course.duration || 20,
+      rating: course.rating || 4.5,
+      reviewCount: course.review_count || 0,
+      enrolled: course.enrolled || 0,
+      createdAt: course.createdAt,
+      userAccess: course.userAccess || { hasAccess: false },
+      modules: course.modules || []
+    };
+  },
   
   getCourses: async (forceRefresh = false) => {
     try {
@@ -170,38 +192,7 @@ export const StorageService = {
       const data = await api.courses.getAll()
       const raw = data.data || []
 
-      const mappedCourses = raw.map(course => {
-        const allowedPlan = course.allowed_plan || '1month';
-        let displayPrice = 0;
-        if (allowedPlan === '1month') displayPrice = parseFloat(course.price_1month);
-        else if (allowedPlan === '3months') displayPrice = parseFloat(course.price_3months);
-        else if (allowedPlan === '6months') displayPrice = parseFloat(course.price_6months);
-        
-        displayPrice = displayPrice || parseFloat(course.price_1month) || 0;
-
-        return {
-          id: course.id,
-          title: course.title || 'Untitled Course',
-          description: course.description || '',
-          image: course.thumbnail || null,
-          instructor: course.instructor || 'Expert Instructor',
-          price: displayPrice,
-          originalPrice: parseFloat(course.price_6months) || null,
-          price_1month: parseFloat(course.price_1month) || 0,
-          price_3months: parseFloat(course.price_3months) || 0,
-          price_6months: parseFloat(course.price_6months) || 0,
-          category: course.category || (course.course_type === 'mega' ? 'development' : course.course_type === 'mini' ? 'design' : 'business'),
-          course_type: course.course_type,
-          allowed_plan: course.allowed_plan,
-          level: course.level || 'intermediate',
-          duration: course.duration || 20,
-          rating: course.rating || 4.5,
-          reviewCount: course.review_count || 0,
-          enrolled: course.enrolled || 0,
-          createdAt: course.createdAt,
-          userAccess: course.userAccess || { hasAccess: false }
-        };
-      })
+      const mappedCourses = raw.map(course => StorageService._mapCourse(course))
 
       _cache.courses = mappedCourses
       _cache.lastFetched = now
@@ -229,8 +220,9 @@ export const StorageService = {
       const data = await api.courses.getById(courseId, token)
       
       if (data && data.success) {
-        _cache.courseDetails[courseId] = data.data
-        return data.data
+        const mapped = StorageService._mapCourse(data.data)
+        _cache.courseDetails[courseId] = mapped
+        return mapped
       }
       
       return null
@@ -275,30 +267,22 @@ export const StorageService = {
         if (!token) return resolve({ success: false, message: 'Please login first' })
         
         // This part should probably be in api.js too, but let's keep it here for now to avoid breaking Razorpay flow
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/create-order`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0 })
-        })
-        const orderData = await response.json()
+        const orderData = await api.payments.createOrder({ 
+          courseId: parseInt(courseId), 
+          plan, 
+          coinsUsed: coinsUsed || 0 
+        }, token)
         
         if (!orderData.success) {
           return resolve(orderData)
         }
 
         if (orderData.isFree) {
-          const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/verify`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ courseId: parseInt(courseId), plan, coinsUsed: coinsUsed || 0 })
-          })
-          const verifyData = await verifyRes.json()
+          const verifyData = await api.payments.verify({ 
+            courseId: parseInt(courseId), 
+            plan, 
+            coinsUsed: coinsUsed || 0 
+          }, token)
           if (verifyData.success) {
             if (coinsUsed > 0) StorageService.useCoins(coinsUsed)
             window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
@@ -319,22 +303,14 @@ export const StorageService = {
           order_id: orderData.order.id,
           handler: async function (response) {
             try {
-              const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/payments/verify`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  courseId: parseInt(courseId),
-                  plan,
-                  coinsUsed: coinsUsed || 0
-                })
-              })
-              const verifyData = await verifyRes.json()
+              const verifyData = await api.payments.verify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                courseId: parseInt(courseId),
+                plan,
+                coinsUsed: coinsUsed || 0
+              }, token)
               if (verifyData.success) {
                 if (coinsUsed > 0) StorageService.useCoins(coinsUsed)
                 window.dispatchEvent(new Event(`storage-update-${ENROLLMENTS_KEY}`))
@@ -394,17 +370,7 @@ export const StorageService = {
   
   // ============ FAVORITES (Local only) ============
   
-  getFavorites: () => {
-    const raw = localStorage.getItem(FAVORITES_KEY)
-    if (!raw) return []
-    try {
-      const parsed = JSON.parse(raw)
-      return Array.isArray(parsed) ? parsed : []
-    } catch {
-      localStorage.removeItem(FAVORITES_KEY)
-      return []
-    }
-  },
+  getFavorites: () => getStorage(FAVORITES_KEY, []),
   
   toggleFavorite: (courseId) => {
     const favs = StorageService.getFavorites()
@@ -414,8 +380,7 @@ export const StorageService = {
     } else {
       favs.splice(index, 1)
     }
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs))
-    window.dispatchEvent(new Event(`storage-update-${FAVORITES_KEY}`))
+    setStorage(FAVORITES_KEY, favs)
   },
   
   isBookmarked: (courseId) => {
@@ -423,23 +388,13 @@ export const StorageService = {
     return favs.includes(courseId)
   },
   
-  getEnrollments: () => {
-    const raw = localStorage.getItem(ENROLLMENTS_KEY)
-    if (!raw) return []
-    try {
-      const parsed = JSON.parse(raw)
-      return Array.isArray(parsed) ? parsed : []
-    } catch {
-      localStorage.removeItem(ENROLLMENTS_KEY)
-      return []
-    }
-  },
+  getEnrollments: () => getStorage(ENROLLMENTS_KEY, []),
   
   addEnrollment: (courseId) => {
     const enrollments = StorageService.getEnrollments()
     if (!enrollments.includes(courseId)) {
       enrollments.push(courseId)
-      localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments))
+      setStorage(ENROLLMENTS_KEY, enrollments)
     }
   }
 }

@@ -1,439 +1,284 @@
 // src/services/api.js
 const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
 
+/**
+ * Custom Error class for API failures
+ */
+export class ApiError extends Error {
+  constructor(message, status, data = null) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 const handleResponse = async (response) => {
   if (response.status === 401) {
-    // Unauthorized - clear session and redirect
+    // Unauthorized - clear session
     localStorage.removeItem('lms_token');
     localStorage.removeItem('lms_user');
-    window.dispatchEvent(new Event('storage-update-lms_auth'));
-    window.location.href = '/login';
-    throw new Error('Session expired. Please login again.');
+    window.dispatchEvent(new CustomEvent('storage-update-lms_auth', { detail: null }));
+    throw new ApiError('Session expired. Please login again.', 401);
   }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || response.statusText || `Request failed with status ${response.status}`);
+    throw new ApiError(
+      errorData.message || response.statusText || `Request failed with status ${response.status}`,
+      response.status,
+      errorData
+    );
   }
+
   return response.json();
+};
+
+/**
+ * Centered request helper for standard headers and error handling
+ */
+const request = async (endpoint, options = {}) => {
+  const { token, body, method = 'GET', ...customOptions } = options;
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...customOptions.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    ...customOptions,
+  });
+
+  return handleResponse(response);
 };
 
 export const api = {
   // Auth endpoints
   auth: {
-    login: async (email, password) => {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      return handleResponse(response)
-    },
-    register: async (userData) => {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      })
-      return handleResponse(response)
-    },
-    getMe: async (token) => {
-      const response = await fetch(`${API_URL}/auth/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    changePassword: async (currentPassword, newPassword, token) => {
-      const response = await fetch(`${API_URL}/password/change`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ currentPassword, newPassword })
-      })
-      return handleResponse(response)
-    }
+    login: (email, password) => 
+      request('/auth/login', { method: 'POST', body: { email, password } }),
+    
+    register: (userData) => 
+      request('/auth/register', { method: 'POST', body: userData }),
+    
+    getMe: (token) => 
+      request('/auth/me', { token }),
+    
+    changePassword: (currentPassword, newPassword, token) => 
+      request('/password/change', { 
+        method: 'POST', 
+        token, 
+        body: { currentPassword, newPassword } 
+      }),
+
+    forgotPassword: (email) => 
+      request('/password/forgot', { method: 'POST', body: { email } }),
+
+    resetPassword: (token, newPassword) => 
+      request(`/password/reset/${token}`, { method: 'POST', body: { newPassword } })
   },
 
   // Course endpoints
   courses: {
-    getAll: async () => {
-      const response = await fetch(`${API_URL}/courses`)
-      return handleResponse(response)
-    },
-    getById: async (id, token) => {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
-      const response = await fetch(`${API_URL}/courses/${id}`, { headers })
-      return handleResponse(response)
-    },
-    getMyCourses: async (token) => {
-      const response = await fetch(`${API_URL}/courses/my-courses`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    getAll: () => request('/courses'),
+    getById: (id, token) => request(`/courses/${id}`, { token }),
+    getMyCourses: (token) => request('/courses/my-courses', { token })
   },
 
   // Progress endpoints
   progress: {
-    getCourseProgress: async (courseId, token) => {
-      const response = await fetch(`${API_URL}/progress/course/${courseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    markComplete: async (lessonId, token) => {
-      const response = await fetch(`${API_URL}/progress/lesson/${lessonId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      return handleResponse(response)
-    }
+    getCourseProgress: (courseId, token) => 
+      request(`/progress/course/${courseId}`, { token }),
+    
+    markComplete: (lessonId, token) => 
+      request(`/progress/lesson/${lessonId}/complete`, { method: 'POST', token })
   },
 
   // Enrollment/Purchase
   enrollments: {
-    purchase: async (courseId, plan, token) => {
-      const response = await fetch(`${API_URL}/subscriptions/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ courseId, plan, paymentId: 'web_' + Date.now() })
-      })
-      return handleResponse(response)
-    },
-    checkAccess: async (courseId, token) => {
-      const response = await fetch(`${API_URL}/subscriptions/course/${courseId}/access`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    purchase: (courseId, plan, token) => 
+      request('/subscriptions/create', { 
+        method: 'POST', 
+        token, 
+        body: { courseId, plan, paymentId: 'web_' + Date.now() } 
+      }),
+    
+    checkAccess: (courseId, token) => 
+      request(`/subscriptions/course/${courseId}/access`, { token })
+  },
+
+  // Payments
+  payments: {
+    createOrder: (data, token) => 
+      request('/payments/create-order', { method: 'POST', token, body: data }),
+    
+    verify: (data, token) => 
+      request('/payments/verify', { method: 'POST', token, body: data })
   },
 
   // Certificates
   certificates: {
-    getMyCertificates: async (token) => {
-      const response = await fetch(`${API_URL}/certificates/my`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
+    getMyCertificates: (token) => 
+      request('/certificates/my', { token }),
+    
+    verify: (code) => 
+      request(`/certificates/verify/${code}`),
+
     download: async (certificateId, token) => {
       const response = await fetch(`${API_URL}/certificates/${certificateId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      if (!response.ok) throw new Error(response.statusText || 'Download failed');
+      if (!response.ok) throw new ApiError(response.statusText || 'Download failed', response.status);
       return response.blob()
     },
-    generate: async (courseId, quizScore, token) => {
-      const response = await fetch(`${API_URL}/certificates/generate/${courseId}`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ quizScore })
-      })
-      return handleResponse(response)
-    },
-    verify: async (verificationCode) => {
-      const response = await fetch(`${API_URL}/certificates/verify/${verificationCode}`)
-      return handleResponse(response)
-    }
+    
+    generate: (courseId, quizScore, token) => 
+      request(`/certificates/generate/${courseId}`, { 
+        method: 'POST', 
+        token, 
+        body: { quizScore } 
+      }),
+    
+    verifyByCode: (verificationCode) => 
+      request(`/certificates/verify/${verificationCode}`)
   },
 
   // Quizzes (Student)
   quizzes: {
-    getCourseQuizzes: async (courseId, token) => {
-      const response = await fetch(`${API_URL}/quizzes/course/${courseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    getQuiz: async (quizId, token) => {
-      const response = await fetch(`${API_URL}/quizzes/${quizId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    submitQuiz: async (quizId, answers, token) => {
-      const response = await fetch(`${API_URL}/quizzes/${quizId}/submit`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ answers })
-      })
-      return handleResponse(response)
-    },
-    getMyAttempts: async (token) => {
-      const response = await fetch(`${API_URL}/quizzes/attempts/my`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    getCourseQuizzes: (courseId, token) => 
+      request(`/quizzes/course/${courseId}`, { token }),
+    
+    getQuiz: (quizId, token) => 
+      request(`/quizzes/${quizId}`, { token }),
+    
+    submitQuiz: (quizId, answers, token) => 
+      request(`/quizzes/${quizId}/submit`, { 
+        method: 'POST', 
+        token, 
+        body: { answers } 
+      }),
+    
+    getMyAttempts: (token) => 
+      request('/quizzes/attempts/my', { token })
   },
 
   // Admin endpoints
   admin: {
-    getStats: async (token) => {
-      const response = await fetch(`${API_URL}/admin/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    getAnalytics: async (token) => {
-      const response = await fetch(`${API_URL}/admin/analytics`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    // Courses
-    createCourse: async (data, token) => {
-      const response = await fetch(`${API_URL}/admin/courses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    updateCourse: async (id, data, token) => {
-      const response = await fetch(`${API_URL}/admin/courses/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    deleteCourse: async (id, token) => {
-      const response = await fetch(`${API_URL}/admin/courses/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
+    getStats: (token) => request('/admin/stats', { token }),
+    getAnalytics: (token) => request('/admin/analytics', { token }),
     
-    // Modules
-    createModule: async (courseId, data, token) => {
-      const response = await fetch(`${API_URL}/admin/courses/${courseId}/modules`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    updateModule: async (id, data, token) => {
-      const response = await fetch(`${API_URL}/admin/modules/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    deleteModule: async (id, token) => {
-      const response = await fetch(`${API_URL}/admin/modules/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    reorderModules: async (items, token) => {
-      const response = await fetch(`${API_URL}/admin/modules/reorder`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ items })
-      })
-      return handleResponse(response)
-    },
+    createCourse: (data, token) => 
+      request('/admin/courses', { method: 'POST', token, body: data }),
+    
+    updateCourse: (id, data, token) => 
+      request(`/admin/courses/${id}`, { method: 'PUT', token, body: data }),
+    
+    deleteCourse: (id, token) => 
+      request(`/admin/courses/${id}`, { method: 'DELETE', token }),
+    
+    createModule: (courseId, data, token) => 
+      request(`/admin/courses/${courseId}/modules`, { method: 'POST', token, body: data }),
+    
+    updateModule: (id, data, token) => 
+      request(`/admin/modules/${id}`, { method: 'PUT', token, body: data }),
+    
+    deleteModule: (id, token) => 
+      request(`/admin/modules/${id}`, { method: 'DELETE', token }),
+    
+    reorderModules: (items, token) => 
+      request('/admin/modules/reorder', { method: 'PUT', token, body: { items } }),
 
     // Lessons
-    createLesson: async (moduleId, data, token) => {
-      const response = await fetch(`${API_URL}/admin/modules/${moduleId}/lessons`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    updateLesson: async (id, data, token) => {
-      const response = await fetch(`${API_URL}/admin/lessons/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    deleteLesson: async (id, token) => {
-      const response = await fetch(`${API_URL}/admin/lessons/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    reorderLessons: async (items, token) => {
-      const response = await fetch(`${API_URL}/admin/lessons/reorder`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ items })
-      })
-      return handleResponse(response)
-    },
-
+    createLesson: (moduleId, data, token) => 
+      request(`/admin/modules/${moduleId}/lessons`, { method: 'POST', token, body: data }),
+    
+    updateLesson: (id, data, token) => 
+      request(`/admin/lessons/${id}`, { method: 'PUT', token, body: data }),
+    
+    deleteLesson: (id, token) => 
+      request(`/admin/lessons/${id}`, { method: 'DELETE', token }),
+    
+    reorderLessons: (items, token) => 
+      request('/admin/lessons/reorder', { method: 'PUT', token, body: { items } }),
+    
     // Quizzes
-    createQuiz: async (data, token) => {
-      const response = await fetch(`${API_URL}/quizzes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    updateQuiz: async (id, data, token) => {
-      const response = await fetch(`${API_URL}/quizzes/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    deleteQuiz: async (id, token) => {
-      const response = await fetch(`${API_URL}/quizzes/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    reorderQuizzes: async (items, token) => {
-      const response = await fetch(`${API_URL}/admin/quizzes/reorder`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ items })
-      })
-      return handleResponse(response)
-    },
-
+    createQuiz: (data, token) => 
+      request('/quizzes', { method: 'POST', token, body: data }),
+    
+    updateQuiz: (id, data, token) => 
+      request(`/quizzes/${id}`, { method: 'PUT', token, body: data }),
+    
+    deleteQuiz: (id, token) => 
+      request(`/quizzes/${id}`, { method: 'DELETE', token }),
+    
+    reorderQuizzes: (items, token) => 
+      request('/admin/quizzes/reorder', { method: 'PUT', token, body: { items } }),
+    
     // Questions
-    createQuestion: async (quizId, data, token) => {
-      const response = await fetch(`${API_URL}/quizzes/${quizId}/questions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ questions: [data] })
-      })
-      return handleResponse(response)
-    },
-    updateQuestion: async (id, data, token) => {
-      const response = await fetch(`${API_URL}/quizzes/questions/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    deleteQuestion: async (id, token) => {
-      const response = await fetch(`${API_URL}/quizzes/questions/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    createQuestion: (quizId, data, token) => 
+      request(`/quizzes/${quizId}/questions`, { method: 'POST', token, body: { questions: [data] } }),
+    
+    updateQuestion: (id, data, token) => 
+      request(`/quizzes/questions/${id}`, { method: 'PUT', token, body: data }),
+    
+    deleteQuestion: (id, token) => 
+      request(`/quizzes/questions/${id}`, { method: 'DELETE', token })
   },
 
   // Tickets / Doubts
   tickets: {
-    // Student
-    create: async (data, token) => {
-      const response = await fetch(`${API_URL}/tickets`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    getMy: async (token) => {
-      const response = await fetch(`${API_URL}/tickets/my`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    getById: async (ticketId, token) => {
-      const response = await fetch(`${API_URL}/tickets/my/${ticketId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    // Admin
-    getAll: async (token, filters = {}) => {
+    create: (data, token) => 
+      request('/tickets', { method: 'POST', token, body: data }),
+    
+    getMy: (token) => 
+      request('/tickets/my', { token }),
+    
+    getById: (ticketId, token) => 
+      request(`/tickets/my/${ticketId}`, { token }),
+    
+    getAll: (token, filters = {}) => {
       const params = new URLSearchParams(filters).toString()
-      const response = await fetch(`${API_URL}/tickets/all?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
+      return request(`/tickets/all?${params}`, { token })
     },
-    respond: async (ticketId, data, token) => {
-      const response = await fetch(`${API_URL}/tickets/${ticketId}/respond`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    updateStatus: async (ticketId, status, token) => {
-      const response = await fetch(`${API_URL}/tickets/${ticketId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ status })
-      })
-      return handleResponse(response)
-    },
-    getStats: async (token) => {
-      const response = await fetch(`${API_URL}/tickets/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    
+    respond: (ticketId, data, token) => 
+      request(`/tickets/${ticketId}/respond`, { method: 'PUT', token, body: data }),
+    
+    updateStatus: (ticketId, status, token) => 
+      request(`/tickets/${ticketId}/status`, { method: 'PUT', token, body: { status } }),
+    
+    getStats: (token) => 
+      request('/tickets/stats', { token })
   },
 
   // Feedbacks
   feedbacks: {
-    submit: async (data, token) => {
-      const response = await fetch(`${API_URL}/feedbacks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data)
-      })
-      return handleResponse(response)
-    },
-    getAll: async (token) => {
-      const response = await fetch(`${API_URL}/feedbacks`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    },
-    updateDisplay: async (id, showOnHome, token) => {
-      const response = await fetch(`${API_URL}/feedbacks/${id}/display`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ showOnHome })
-      })
-      return handleResponse(response)
-    },
-    getHomeFeedbacks: async () => {
-      const response = await fetch(`${API_URL}/feedbacks/home`)
-      return handleResponse(response)
-    },
-    delete: async (id, token) => {
-      const response = await fetch(`${API_URL}/feedbacks/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      return handleResponse(response)
-    }
+    submit: (data, token) => 
+      request('/feedbacks', { method: 'POST', token, body: data }),
+    
+    getAll: (token) => 
+      request('/feedbacks', { token }),
+    
+    updateDisplay: (id, showOnHome, token) => 
+      request(`/feedbacks/${id}/display`, { method: 'PUT', token, body: { showOnHome } }),
+    
+    getHome: () => 
+      request('/feedbacks/home'),
+    
+    delete: (id, token) => 
+      request(`/feedbacks/${id}`, { method: 'DELETE', token })
+  },
+
+  // Blogs
+  blogs: {
+    getAll: () => request('/blogs'),
+    getBySlug: (slug) => request(`/blogs/slug/${slug}`)
   }
 }

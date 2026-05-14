@@ -108,8 +108,12 @@ export default function CourseDetail() {
 
   const allowedPlanId = course?.allowed_plan || '1month'
   const planInfo = planMap[allowedPlanId] || planMap['1month']
-  const originalPrice = course?.prices ? course.prices[allowedPlanId] : (course?.price_1month || course?.price || 599)
+  
+  // Use the mapped price which already accounts for the allowed plan
+  const basePrice = course?.price || (course?.[`price_${allowedPlanId}`]) || 599
+  const originalPrice = basePrice
   const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
+
   
   const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
   const finalPrice = discountPrice - coinsToUse
