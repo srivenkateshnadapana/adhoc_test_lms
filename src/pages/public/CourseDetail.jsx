@@ -114,6 +114,7 @@ export default function CourseDetail() {
   const originalPrice = basePrice
   const discountPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice
 
+
   
   const coinsToUse = useCoins ? Math.min(userCoins, discountPrice) : 0
   const finalPrice = discountPrice - coinsToUse

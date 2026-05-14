@@ -147,15 +147,19 @@ export const StorageService = {
   
   _mapCourse: (course) => {
     const allowedPlan = course.allowed_plan || '1month';
-    let displayPrice = 0;
+    const p1 = parseFloat(course.price_1month) || 0;
+    const p3 = parseFloat(course.price_3months) || 0;
+    const p6 = parseFloat(course.price_6months) || 0;
+    const pGeneric = parseFloat(course.price) || 0;
+
+    // Select price based on plan, with cascading fallbacks
+    if (allowedPlan === '1month') displayPrice = p1;
+    else if (allowedPlan === '3months') displayPrice = p3 || p1;
+    else if (allowedPlan === '6months') displayPrice = p6 || p3 || p1;
     
-    // Extract plan price
-    if (allowedPlan === '1month') displayPrice = parseFloat(course.price_1month);
-    else if (allowedPlan === '3months') displayPrice = parseFloat(course.price_3months);
-    else if (allowedPlan === '6months') displayPrice = parseFloat(course.price_6months);
-    
-    // Fallback to whatever price is available to avoid 0/1 issues
-    displayPrice = displayPrice || parseFloat(course.price) || parseFloat(course.price_1month) || 0;
+    // Final safety fallback: prioritize plan prices over generic price
+    displayPrice = displayPrice || p1 || p3 || p6 || pGeneric || 0;
+
 
     return {
       id: course.id,
