@@ -444,6 +444,7 @@ function DashboardContent() {
             </div>
           )}
         </motion.section>
+        {/* recommendedCourses */}
 
         {recommendedCourses.length > 0 && (
           <motion.section
