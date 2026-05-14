@@ -15,9 +15,11 @@ import {
   Video,
   Clock,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
+import { StorageService } from "../../services/storage"
 
 // Animation variants
 const fadeUp = {
@@ -81,12 +83,27 @@ export default function Home() {
     fetchFeedbacks()
   }, [])
 
-  // Featured courses
-  const featuredCourses = [
-    { title: "AI Fundamentals", level: "Advanced", duration: "8 weeks", students: "2.5k" },
-    { title: "Cloud Architecture", level: "Expert", duration: "12 weeks", students: "1.8k" },
-    { title: "Data Strategy", level: "Intermediate", duration: "6 weeks", students: "3.2k" },
-  ]
+  // Courses state
+  const [featuredCourses, setFeaturedCourses] = React.useState([])
+  const [coursesLoading, setCoursesLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setCoursesLoading(true)
+        const data = await StorageService.getCourses()
+        console.log(data)
+        // Randomize and take 3 for variety on every refresh
+        const randomized = [...data].sort(() => 0.5 - Math.random())
+        setFeaturedCourses(randomized.slice(0, 3))
+      } catch (err) {
+        console.error("Failed to fetch featured courses:", err)
+      } finally {
+        setCoursesLoading(false)
+      }
+    }
+    fetchCourses()
+  }, [])
 
   return (
     <div className="bg-surface text-on-surface">
@@ -248,7 +265,7 @@ export default function Home() {
               {[
                 "150+ Expert Mentors from Global Firms",
                 "Certifications recognized across the tech industry",
-                
+                "Lifetime access to premium course assets",
                 "24/7 Mentor Support & Community Access"
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-3 text-on-surface font-medium group">
@@ -285,36 +302,46 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course, idx) => ( 
-              <div
-                key={idx}
-                onMouseEnter={() => setHoveredCard(idx)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl group"
-              > 
-                <div className="flex justify-between items-start mb-4">
-                  <Sparkles className="w-8 h-8 text-primary" />
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                    {course.level}
-                  </span>
-                </div>
-                <h3 className="text-xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-2">{course.title}</h3>
-                <div className="flex justify-between items-center text-sm text-secondary mb-4">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {course.duration}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> {course.students} students
-                  </span>
-                </div>
-                <Link
-                  to="/catalog"
-                  className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
-                >
-                  Learn More <ArrowRight className="w-3 h-3" />
-                </Link>
+            {coursesLoading ? (
+              <div className="col-span-full flex justify-center py-12">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
-            ))}
+            ) : featuredCourses.length > 0 ? (
+              featuredCourses.map((course, idx) => ( 
+                <div
+                  key={idx}
+                  onMouseEnter={() => setHoveredCard(idx)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl group"
+                > 
+                  <div className="flex justify-between items-start mb-4">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full capitalize">
+                      {course.level}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-2 line-clamp-1">{course.title}</h3>
+                  <div className="flex justify-between items-center text-sm text-secondary mb-4">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {course.duration} {typeof course.duration === 'number' ? 'Weeks' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3" /> {course.enrolled || "1.2k+"} students
+                    </span>
+                  </div>
+                  <Link
+                    to={`/course/${course.id}`}
+                    className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
+                  >
+                    Learn More <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-secondary">
+                No courses available at the moment.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -344,7 +371,7 @@ export default function Home() {
               <p className="text-secondary max-w-md">Our certs are designed directly with enterprise CTOs, providing immediate professional legitimacy.</p>
               <div className="mt-6 flex items-center gap-2 text-primary text-sm font-medium">
                 Recognized by 500+ companies
-                
+                <ArrowRight className="w-3 h-3" />
               </div>
             </motion.div>
 
