@@ -151,8 +151,10 @@ export const StorageService = {
     const p3 = parseFloat(course.price_3months) || 0;
     const p6 = parseFloat(course.price_6months) || 0;
     const pGeneric = parseFloat(course.price) || 0;
+    let displayPrice = 0;
 
     // Select price based on plan, with cascading fallbacks
+
     if (allowedPlan === '1month') displayPrice = p1;
     else if (allowedPlan === '3months') displayPrice = p3 || p1;
     else if (allowedPlan === '6months') displayPrice = p6 || p3 || p1;
