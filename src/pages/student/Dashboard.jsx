@@ -39,6 +39,7 @@ function DashboardContent() {
   const [recentActivity, setRecentActivity] = React.useState([])
   const [upcomingDeadlines, setUpcomingDeadlines] = React.useState([])
   const [streak, setStreak] = React.useState(0)
+  const [recommendedCourses, setRecommendedCourses] = React.useState([])
   const navigate = useNavigate()
   const user = StorageService.getUser()
 
@@ -136,6 +137,19 @@ function DashboardContent() {
       }
       
       setStreak(totalCompletedLessons > 0 ? Math.min(totalCompletedLessons, 7) : 0)
+      
+      // Load Recommended Courses
+      try {
+        const allCourses = await StorageService.getCourses()
+        const enrolledIds = enrolled.map(c => c.id)
+        const recommended = allCourses
+          .filter(course => !enrolledIds.includes(course.id))
+          .slice(0, 3)
+        setRecommendedCourses(recommended)
+      } catch (err) {
+        console.error("Failed to load recommended courses", err)
+      }
+
       setIsHydrated(true)
     }
     loadEnrolledCourses()
@@ -430,9 +444,9 @@ function DashboardContent() {
             </div>
           )}
         </motion.section>
+        {/* recommendedCourses */}
 
-        {/* Recommended Courses Section */}
-        {courses.length > 0 && (
+        {recommendedCourses.length > 0 && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -446,15 +460,15 @@ function DashboardContent() {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-surface-container-lowest rounded-2xl p-5 border border-surface-dim/20 hover:border-primary/30 transition-all">
+              {recommendedCourses.map((course) => (
+                <div key={course.id} className="bg-surface-container-lowest rounded-2xl p-5 border border-surface-dim/20 hover:border-primary/30 transition-all">
                   <div className="flex items-center gap-3 mb-3">
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span className="text-xs font-bold text-primary">Trending</span>
                   </div>
-                  <h3 className="font-headline font-bold text-lg mb-2">Advanced {i === 1 ? 'AI' : i === 2 ? 'Cloud' : 'Data'} Strategies</h3>
-                  <p className="text-on-surface-variant text-sm mb-4">By Expert Instructor</p>
-                  <Link to="/catalog" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
+                  <h3 className="font-headline font-bold text-lg mb-2">{course.title}</h3>
+                  <p className="text-on-surface-variant text-sm mb-4">By {course.instructor || 'Expert Instructor'}</p>
+                  <Link to={`/course/${course.id}`} className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
                     Explore <ChevronRight className="w-3 h-3" />
                   </Link>
                 </div>
