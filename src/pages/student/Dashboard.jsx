@@ -382,7 +382,7 @@ function DashboardContent() {
                   >
                     <div className="w-full sm:w-48 h-48 sm:h-auto shrink-0 relative overflow-hidden">
                       <img 
-                        src={course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&q=100"} 
+                        src={course.thumbnail || course.image || course.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=2560&auto=format&q=100"} 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         alt={course.title} 
                       />
