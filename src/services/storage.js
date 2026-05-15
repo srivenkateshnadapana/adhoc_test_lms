@@ -206,7 +206,9 @@ export const StorageService = {
         course_type: course.course_type,
         allowed_plan: course.allowed_plan,
         level: course.level || 'intermediate',
-        duration: course.duration || 20,
+        duration: course.lessons && course.lessons.length > 0 
+          ? Math.round(course.lessons.reduce((acc, l) => acc + (Number(l.duration) || 0), 0) / 60) 
+          : (course.duration || 20),
         rating: course.rating || 4.5,
         reviewCount: course.review_count || 0,
         enrolled: course.enrolled || 0,
