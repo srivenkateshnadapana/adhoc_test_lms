@@ -147,19 +147,20 @@ export const StorageService = {
   
   _mapCourse: (course) => {
     const allowedPlan = course.allowed_plan || '1month';
-    const p1 = parseFloat(course.price_1month) || 0;
-    const p3 = parseFloat(course.price_3months) || 0;
-    const p6 = parseFloat(course.price_6months) || 0;
+    // API returns either flat price_1month fields OR a nested prices object — handle both
+    const prices = course.prices || {};
+    const p1 = parseFloat(course.price_1month) || parseFloat(prices['1month']) || 0;
+    const p3 = parseFloat(course.price_3months) || parseFloat(prices['3months']) || 0;
+    const p6 = parseFloat(course.price_6months) || parseFloat(prices['6months']) || 0;
     const pGeneric = parseFloat(course.price) || 0;
     let displayPrice = 0;
 
-    // Select price based on plan, with cascading fallbacks
-
+    // Select price based on allowed plan
     if (allowedPlan === '1month') displayPrice = p1;
     else if (allowedPlan === '3months') displayPrice = p3 || p1;
     else if (allowedPlan === '6months') displayPrice = p6 || p3 || p1;
-    
-    // Final safety fallback: prioritize plan prices over generic price
+
+    // Final safety fallback
     displayPrice = displayPrice || p1 || p3 || p6 || pGeneric || 0;
 
 
@@ -326,6 +327,12 @@ export const StorageService = {
               resolve(verifyData)
             } catch (err) {
               resolve({ success: false, message: 'Payment verification failed' })
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              // User closed Razorpay popup without paying — resolve so the button unlocks
+              resolve({ success: false, message: 'cancelled' })
             }
           },
           prefill: {
