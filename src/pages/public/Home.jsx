@@ -454,11 +454,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-[#1e293b] rounded-[2rem] p-6 sm:p-10 flex flex-col lg:flex-row items-center lg:items-start gap-12 border border-white/5"
+            className="bg-white dark:bg-black rounded-[2rem] p-6 sm:p-10 flex flex-col lg:flex-row items-center lg:items-start gap-12 border border-black/5 dark:border-white/5"
           >
             {/* CEO Image */}
             <div className="w-full lg:w-1/3 max-w-[320px]">
-              <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+              <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10">
                 <img
                   src="https://th.bing.com/th/id/OIP.i51_D3UKjIuOrKBkRQ9X6QAAAA"
                   alt="Devika Pakruthi - CEO"
@@ -468,11 +468,11 @@ export default function Home() {
             </div>
 
             {/* Content */}
-            <div className="lg:w-3/4 text-white space-y-4">
-              <h2 className="text-2xl font-headline font-bold text-white mb-2">Message from the CEO</h2>
-              <div className="space-y-3 text-white leading-relaxed text-base">
+            <div className="lg:w-3/4 text-black dark:text-white space-y-4">
+              <h2 className="text-2xl font-headline font-bold text-black dark:text-white mb-2">Message from the CEO</h2>
+              <div className="space-y-3 text-black dark:text-white leading-relaxed text-base">
                 <p>
-                  <span className="font-bold text-white">ADHOC NETWORK LMS</span> is dedicated to a comprehensive ecosystem for trending courses from Data Analytics to AI cutting-edge cases in EdTech. We construct each course to help overcome the divide between academic exposure and world grounded experience.
+                  <span className="font-bold text-black dark:text-white">ADHOC NETWORK LMS</span> is dedicated to a comprehensive ecosystem for trending courses from Data Analytics to AI cutting-edge cases in EdTech. We construct each course to help overcome the divide between academic exposure and world grounded experience.
                 </p>
                 <p>
                   It gives us great joy to see our students learn the various components of professional tools to prepare them for the future. We offer a full range of trending technology courses.
@@ -482,10 +482,10 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-white/10">
-                <p className="text-xl font-bold text-white">Devika Pakruthi</p>
-                <p className="text-white font-medium">Chief Executive Officer</p>
-                <p className="text-white text-sm font-bold uppercase tracking-wider">ADHOC NETWORK</p>
+              <div className="pt-4 border-t border-black/10 dark:border-white/10">
+                <p className="text-xl font-bold text-black dark:text-white">Devika Pakruthi</p>
+                <p className="text-black dark:text-white font-medium">Chief Executive Officer</p>
+                <p className="text-black dark:text-white text-sm font-bold uppercase tracking-wider">ADHOC NETWORK</p>
               </div>
             </div>
           </motion.div>
