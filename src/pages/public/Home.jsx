@@ -256,7 +256,7 @@ export default function Home() {
       <section id="about" className="py-12 sm:py-16 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-8">
-            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
+            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed - Now for the Enterprise</h2>
             <p className="text-secondary text-lg leading-relaxed">
               The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
             </p>

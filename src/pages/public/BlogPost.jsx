@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Loader2, BookOpen } from 'lucide-react';
+import { api } from '../../services/api';
 
 export default function BlogPost() {
   const { slug } = useParams();
