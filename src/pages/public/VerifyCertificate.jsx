@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { Award, CheckCircle2, XCircle, Loader2, User, BookOpen, Calendar, Hash, Star, Shield, ArrowLeft, Copy, Check } from 'lucide-react'
+import { api } from '../../services/api'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
 
