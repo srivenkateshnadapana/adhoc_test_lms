@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 import { StorageService } from "../../services/storage"
+import { api } from "../../services/api"
 
 // Animation variants
 const fadeUp = {
