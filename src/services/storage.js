@@ -396,6 +396,7 @@ export const StorageService = {
       favs.splice(index, 1)
     }
     setStorage(FAVORITES_KEY, favs)
+    window.dispatchEvent(new Event(`storage-update-${FAVORITES_KEY}`))
   },
   
   isBookmarked: (courseId) => {
