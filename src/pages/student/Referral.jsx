@@ -12,13 +12,10 @@ export default function Referral() {
       try {
         const token = StorageService.getToken()
         if (token) {
-          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-          const data = await res.json()
-          if (data.success && data.user) {
-            StorageService.updateUser(data.user)
-            setUser(data.user)
+          const res = await api.auth.getMe(token)
+          if (res.success && res.data) {
+            StorageService.updateUser(res.data)
+            setUser(res.data)
           }
         }
       } catch (error) {

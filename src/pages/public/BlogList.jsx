@@ -14,10 +14,9 @@ export default function BlogList() {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/blogs`);
-      const data = await res.json();
-      if (data.success) {
-        setBlogs(data.data);
+      const res = await api.blogs.getAll();
+      if (res.success) {
+        setBlogs(res.data);
       }
     } catch (err) {
       console.error('Failed to fetch blogs', err);

@@ -62,18 +62,16 @@ function AdminCoursesContent() {
     if (course) {
       setEditingCourse(course)
       
-      // Fix price extraction
+      // Fix price extraction - prioritize specific fields then generic
       let priceValue = ''
-      if (course.prices) {
-        if (course.allowed_plan === '1month') priceValue = course.prices['1month'] || course.price_1month || ''
-        else if (course.allowed_plan === '3months') priceValue = course.prices['3months'] || course.price_3months || ''
-        else if (course.allowed_plan === '6months') priceValue = course.prices['6months'] || course.price_6months || ''
-      } else {
-        // Fallback for different price structure
-        if (course.allowed_plan === '1month') priceValue = course.price_1month || course.price || ''
-        else if (course.allowed_plan === '3months') priceValue = course.price_3months || course.price || ''
-        else if (course.allowed_plan === '6months') priceValue = course.price_6months || course.price || ''
-      }
+      const p1 = course.price_1month || (course.prices ? course.prices['1month'] : null)
+      const p3 = course.price_3months || (course.prices ? course.prices['3months'] : null)
+      const p6 = course.price_6months || (course.prices ? course.prices['6months'] : null)
+      
+      if (course.allowed_plan === '3months') priceValue = p3 || p1 || course.price
+      else if (course.allowed_plan === '6months') priceValue = p6 || p3 || p1 || course.price
+      else priceValue = p1 || course.price || ''
+
       
       setFormData({
         title: course.title || '',
@@ -138,9 +136,11 @@ function AdminCoursesContent() {
       
       // Add price based on subscription duration
       const priceNum = Number(formData.price)
-      if (formData.allowed_plan === '1month') payload.price_1month = priceNum
-      if (formData.allowed_plan === '3months') payload.price_3months = priceNum
-      if (formData.allowed_plan === '6months') payload.price_6months = priceNum
+      payload.price = priceNum // Update the main price field
+      payload.price_1month = (formData.allowed_plan === '1month') ? priceNum : (editingCourse?.price_1month || 0)
+      payload.price_3months = (formData.allowed_plan === '3months') ? priceNum : (editingCourse?.price_3months || 0)
+      payload.price_6months = (formData.allowed_plan === '6months') ? priceNum : (editingCourse?.price_6months || 0)
+
       
       console.log('Submitting payload:', payload) // Debug log
       

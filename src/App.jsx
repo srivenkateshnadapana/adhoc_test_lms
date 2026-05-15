@@ -34,10 +34,12 @@ const BlogPost = React.lazy(() => import('./pages/public/BlogPost'))
 const AdminBlogs = React.lazy(() => import('./pages/admin/AdminBlogs'))
 const AdminFeedbacks = React.lazy(() => import('./pages/admin/AdminFeedbacks'))
 const StudentFeedback = React.lazy(() => import('./pages/student/StudentFeedback'))
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 
 function App() {
   return (
-    <Router>
+    <ErrorBoundary>
+      <Router>
       <ScrollToTop />
       <div className="min-h-screen bg-surface font-body text-on-surface flex flex-col">
         <Header />
@@ -87,6 +89,7 @@ function App() {
         <Toaster position="top-right" richColors duration={5000} closeButton />
       </div>
     </Router>
+    </ErrorBoundary>
   )
 }
 
