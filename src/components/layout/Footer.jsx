@@ -22,10 +22,10 @@ export function Footer() {
       { name: "Careers", href: "#" },
     ],
     legal: [
-      { name: "Terms of Engagement", href: "#" },
-      { name: "Privacy Protocol", href: "#" },
-      { name: "Cookie Policy", href: "#" },
-      { name: "Data Processing", href: "#" },
+      { name: "Terms of Engagement", href: "/terms" },
+      { name: "Privacy Protocol", href: "/privacy" },
+      // { name: "Cookie Policy", href: "#" },
+      // { name: "Data Processing", href: "#" },
     ]
   }
 
