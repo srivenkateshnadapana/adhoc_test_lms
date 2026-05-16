@@ -5,6 +5,8 @@ import { Footer } from './components/layout/Footer'
 import { Toaster } from 'sonner'
 import { BottomNav } from './components/layout/BottomNav'
 import { ScrollToTop } from './components/layout/ScrollToTop'
+import Terms from "./components/Terms";
+import Privacy from "./components/Privacy"
 
 // Lazy Pages
 const Home = React.lazy(() => import('./pages/public/Home'))
@@ -81,6 +83,8 @@ function App() {
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
           </React.Suspense>
         </main>
