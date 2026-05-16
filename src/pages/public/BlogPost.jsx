@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Loader2, BookOpen } from 'lucide-react';
+import { api } from '../../services/api';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -16,16 +17,15 @@ export default function BlogPost() {
   const fetchBlog = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/blogs/slug/${slug}`);
-      const data = await res.json();
-      if (data.success) {
-        setBlog(data.data);
+      const res = await api.blogs.getBySlug(slug);
+      if (res.success) {
+        setBlog(res.data);
       } else {
         setError('Blog not found');
       }
     } catch (err) {
       console.error('Failed to fetch blog', err);
-      setError('An error occurred while loading the blog');
+      setError(err.message || 'An error occurred while loading the blog');
     } finally {
       setLoading(false);
     }

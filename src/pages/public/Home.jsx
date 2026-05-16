@@ -15,9 +15,12 @@ import {
   Video,
   Clock,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
+import { StorageService } from "../../services/storage"
+import { api } from "../../services/api"
 
 // Animation variants
 const fadeUp = {
@@ -68,11 +71,9 @@ export default function Home() {
   React.useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'
-        const res = await fetch(`${API_URL}/feedbacks/home`)
-        const data = await res.json()
-        if (data.success && data.data && data.data.length > 0) {
-          setTestimonials(data.data)
+        const res = await api.feedbacks.getHome()
+        if (res.success && res.data && res.data.length > 0) {
+          setTestimonials(res.data)
         }
       } catch (err) {
         console.error("Failed to fetch home feedbacks:", err)
@@ -81,12 +82,27 @@ export default function Home() {
     fetchFeedbacks()
   }, [])
 
-  // Featured courses
-  const featuredCourses = [
-    { title: "AI Fundamentals", level: "Advanced", duration: "8 weeks", students: "2.5k" },
-    { title: "Cloud Architecture", level: "Expert", duration: "12 weeks", students: "1.8k" },
-    { title: "Data Strategy", level: "Intermediate", duration: "6 weeks", students: "3.2k" },
-  ]
+  // Courses state
+  const [featuredCourses, setFeaturedCourses] = React.useState([])
+  const [coursesLoading, setCoursesLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setCoursesLoading(true)
+        const data = await StorageService.getCourses()
+        console.log(data)
+        // Randomize and take 3 for variety on every refresh
+        const randomized = [...data].sort(() => 0.5 - Math.random())
+        setFeaturedCourses(randomized.slice(0, 3))
+      } catch (err) {
+        console.error("Failed to fetch featured courses:", err)
+      } finally {
+        setCoursesLoading(false)
+      }
+    }
+    fetchCourses()
+  }, [])
 
   return (
     <div className="bg-surface text-on-surface">
@@ -96,7 +112,7 @@ export default function Home() {
         initial="hidden"
         animate={isHeroInView ? "visible" : "hidden"}
         variants={fadeUp}
-        className="relative overflow-hidden py-16 px-4 sm:px-8 lg:py-28"
+        className="relative overflow-hidden py-12 px-4 sm:px-8 lg:py-20"
       >
         {/* Background Gradient */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
@@ -212,7 +228,7 @@ export default function Home() {
               <img
                 alt="Students Learning"
                 className="w-full h-full object-cover"
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=2560&auto=format&fit=crop&q=100"
+                src="https://images.unsplash.com/photo-1629904853716-f0bc54eea481?w=3840&q=100&fm=jpg&crop=entropy&cs=tinysrgb&fit=max"
                 fetchpriority="high"
                 loading="eager"
               />
@@ -237,10 +253,10 @@ export default function Home() {
       </motion.section>
 
       {/* Philosophy Section */}
-      <section id="about" className="py-20 sm:py-24 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
+      <section id="about" className="py-12 sm:py-16 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-8">
-            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
+            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed - Now for the Enterprise</h2>
             <p className="text-secondary text-lg leading-relaxed">
               The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
             </p>
@@ -274,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* Featured Courses Section (NEW) */}
-      <section id="courses" className="py-24 px-8 bg-surface">
+      <section id="courses" className="py-16 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest mb-4">
@@ -285,42 +301,50 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course, idx) => ( 
-              <div
-                key={idx}
-                onMouseEnter={() => setHoveredCard(idx)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl group"
-              > 
-                <div className="flex justify-between items-start mb-4">
-                  <Sparkles className="w-8 h-8 text-primary" />
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                    {course.level}
-                  </span>
-                </div>
-                <h3 className="text-xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-2">{course.title}</h3>
-                <div className="flex justify-between items-center text-sm text-secondary mb-4">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {course.duration}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> {course.students} students
-                  </span>
-                </div>
-                <Link
-                  to="/catalog"
-                  className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
-                >
-                  Learn More <ArrowRight className="w-3 h-3" />
-                </Link>
+            {coursesLoading ? (
+              <div className="col-span-full flex justify-center py-12">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
-            ))}
+            ) : featuredCourses.length > 0 ? (
+              featuredCourses.map((course, idx) => (
+                <div
+                  key={idx}
+                  onMouseEnter={() => setHoveredCard(idx)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  className="bg-surface-container-lowest rounded-2xl p-6 border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl group"
+                >
+
+                  <div className="flex justify-between items-start mb-4">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full capitalize">
+                      {course.level}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-2 line-clamp-1">{course.title}</h3>
+                  <div className="flex justify-between items-center text-sm text-secondary mb-4">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {course.duration} Hours
+                    </span>
+                  </div>
+                  <Link
+                    to={`/course/${course.id}`}
+                    className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all"
+                  >
+                    Learn More <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-secondary">
+                No courses available at the moment.
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Bento Grid Features (Enhanced) */}
-      <section className="py-24 px-8 bg-surface-container-lowest">
+      <section className="py-16 px-8 bg-surface-container-lowest">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">The Editorial Experience</h2>
@@ -344,7 +368,7 @@ export default function Home() {
               <p className="text-secondary max-w-md">Our certs are designed directly with enterprise CTOs, providing immediate professional legitimacy.</p>
               <div className="mt-6 flex items-center gap-2 text-primary text-sm font-medium">
                 Recognized by 500+ companies
-                
+                <ArrowRight className="w-3 h-3" />
               </div>
             </motion.div>
 
@@ -382,7 +406,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section (NEW) */}
-      <section id="testimonials" className="py-24 px-8 bg-surface">
+      <section id="testimonials" className="py-16 px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-headline font-bold text-primary mb-4">What Our Learners Say</h2>
@@ -408,7 +432,6 @@ export default function Home() {
                   />
                   <div>
                     <p className="font-bold text-sm">{testimonial.user?.name || "Unknown User"}</p>
-                    <p className="text-xs text-secondary">{testimonial.user?.role || "Learner"}</p>
                   </div>
                 </div>
               </div>
@@ -424,8 +447,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Message from the CEO Section */}
+      <section className="py-4 px-8 bg-surface">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white dark:bg-black rounded-[2rem] p-6 sm:p-10 flex flex-col lg:flex-row items-center lg:items-start gap-12 border border-black/5 dark:border-white/5"
+          >
+            {/* CEO Image */}
+            <div className="w-full lg:w-1/3 max-w-[320px]">
+              <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10">
+                <img
+                  src="https://th.bing.com/th/id/OIP.i51_D3UKjIuOrKBkRQ9X6QAAAA"
+                  alt="Devika Pakruthi - CEO"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="lg:w-3/4 text-black dark:text-white space-y-4">
+              <h2 className="text-2xl font-headline font-bold text-black dark:text-white mb-2">Message from the CEO</h2>
+              <div className="space-y-3 text-black dark:text-white leading-relaxed text-base">
+                <p>
+                  <span className="font-bold text-black dark:text-white">ADHOC NETWORK LMS</span> is dedicated to a comprehensive ecosystem for trending courses from Data Analytics to AI cutting-edge cases in EdTech. We construct each course to help overcome the divide between academic exposure and world grounded experience.
+                </p>
+                <p>
+                  It gives us great joy to see our students learn the various components of professional tools to prepare them for the future. We offer a full range of trending technology courses.
+                </p>
+                <p>
+                  This empowers students to learn the skills needed to succeed in the global IT domain.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-black/10 dark:border-white/10">
+                <p className="text-xl font-bold text-black dark:text-white">Devika Pakruthi</p>
+                <p className="text-black dark:text-white font-medium">Chief Executive Officer</p>
+                <p className="text-black dark:text-white text-sm font-bold uppercase tracking-wider">ADHOC NETWORK</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section (NEW) */}
-      <section className="py-20 px-8 signature-gradient">
+      <section className="py-12 px-8 signature-gradient">
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-4xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
@@ -434,12 +502,12 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/catalog"
-              className="px-8 py-4 border-2 border-white/30 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
+              className="px-8 py-3 border-2 border-white/30 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform shadow-lg"
             >
               Browse All Courses
             </Link>
           </div>
-          <p className="text-sm opacity-70 mt-6">No credit card required • Cancel anytime</p>
+          <p className="text-xs opacity-70 mt-6">No credit card required • Cancel anytime</p>
         </div>
       </section>
     </div>

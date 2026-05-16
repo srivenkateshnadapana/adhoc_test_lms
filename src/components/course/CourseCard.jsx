@@ -3,7 +3,13 @@ import * as React from "react"
 import { Link } from "react-router-dom"
 import { Heart, Star, Clock, BookOpen, Users } from "lucide-react"
 
-export function CourseCard({ 
+const levelColors = {
+  beginner: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  advanced: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+}
+
+export const CourseCard = React.memo(({ 
   id, 
   title, 
   instructor, 
@@ -16,14 +22,8 @@ export function CourseCard({
   onFavoriteToggle, 
   duration = 15, 
   level = "intermediate" 
-}) {
+}) => {
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
-
-  const levelColors = {
-    beginner: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-    intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    advanced: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  }
 
   return (
     <div className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden border border-surface-dim/20 hover:border-primary/30 transition-all hover:shadow-xl">
@@ -57,6 +57,7 @@ export function CourseCard({
           </Link>
           <button
             onClick={() => onFavoriteToggle(id)}
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
             className="flex-shrink-0 p-1.5 rounded-full hover:bg-primary/10 transition-colors"
           >
             <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-on-surface-variant'}`} />
@@ -100,4 +101,4 @@ export function CourseCard({
       </div>
     </div>
   )
-}
+})

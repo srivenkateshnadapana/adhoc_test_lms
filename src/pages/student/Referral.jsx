@@ -2,6 +2,7 @@ import React from 'react'
 import { ProtectedRoute } from "../../context/ProtectedRoute"
 import { Gift } from "lucide-react"
 import { StorageService } from "../../services/storage"
+import { api } from "../../services/api"
 import { toast } from "sonner"
 
 export default function Referral() {
@@ -12,13 +13,10 @@ export default function Referral() {
       try {
         const token = StorageService.getToken()
         if (token) {
-          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-          const data = await res.json()
-          if (data.success && data.user) {
-            StorageService.updateUser(data.user)
-            setUser(data.user)
+          const res = await api.auth.getMe(token)
+          if (res.success && res.data) {
+            StorageService.updateUser(res.data)
+            setUser(res.data)
           }
         }
       } catch (error) {

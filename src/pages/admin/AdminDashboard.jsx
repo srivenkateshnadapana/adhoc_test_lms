@@ -30,28 +30,21 @@ function AdminDashboardContent() {
         const token = StorageService.getToken()
         if (!token) { setAuthError(true); setLoading(false); return }
 
-        // Use raw fetch to detect 403 before parsing JSON
-        const [statsRaw, analyticsRaw, ticketsRaw] = await Promise.all([
-          fetch(`${BASE}/admin/stats`,     { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BASE}/admin/analytics`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BASE}/tickets/stats`,   { headers: { 'Authorization': `Bearer ${token}` } })
+        const [statsRes, analyticsRes, ticketsRes] = await Promise.all([
+          api.admin.getStats(token),
+          api.admin.getAnalytics(token),
+          api.tickets.getStats(token)
         ])
 
-        if ([statsRaw, analyticsRaw, ticketsRaw].some(r => r.status === 403)) {
-          setAuthError(true)
-          setLoading(false)
-          return
-        }
+        if (statsRes?.success) setStats(statsRes.data)
+        if (analyticsRes?.success) setAnalytics(analyticsRes.data)
+        if (ticketsRes?.success) setTicketStats(ticketsRes.data)
 
-        const [statsData, analyticsData, ticketsData] = await Promise.all([
-          statsRaw.json(), analyticsRaw.json(), ticketsRaw.json()
-        ])
-
-        if (statsData?.success)   setStats(statsData.data)
-        if (analyticsData?.success) setAnalytics(analyticsData.data)
-        if (ticketsData?.success) setTicketStats(ticketsData.data)
       } catch (err) {
         console.error("Failed to load admin stats", err)
+        if (err.status === 403) {
+          setAuthError(true)
+        }
       } finally {
         setLoading(false)
       }
