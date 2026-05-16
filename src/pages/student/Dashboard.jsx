@@ -176,9 +176,14 @@ function DashboardContent() {
           priority: diffDays < 0 ? 'expired' : (diffDays < 15 ? 'high' : 'medium')
         };
       }).filter(d => d.deadlineDate !== 'N/A').sort((a, b) => a.diffDays - b.diffDays);
+      // Finalize and set the dynamic deadlines for display on the dashboard
       setUpcomingDeadlines(deadlines)
       
+      /* 
+      // Calculate and set the learning streak
+      // Currently using a placeholder logic that maps completed lessons to streak days (capped at 7)
       setStreak(totalCompletedLessons > 0 ? Math.min(totalCompletedLessons, 7) : 0)
+      */
       
       // Load Recommended Courses
       try {
@@ -244,8 +249,8 @@ function DashboardContent() {
               </p>
             </div>
             
-            {/* Streak Badge */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-fit">
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-fit lg:mr-20">
+              {/* Learning Streak Badge - Commented for now and we'll update this section after Deployment
               <div className="flex-1 lg:flex-none lg:min-w-[220px] bg-surface-container-low px-4 sm:px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
                   <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
@@ -255,6 +260,7 @@ function DashboardContent() {
                   <p className="text-primary font-headline font-bold text-xl sm:text-2xl">{streak} days</p>
                 </div>
               </div>
+              */}
               <div className="flex-1 lg:flex-none lg:min-w-[220px] bg-surface-container-low px-4 sm:px-6 py-4 rounded-2xl border border-surface-dim/20 flex items-center gap-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full signature-gradient flex items-center justify-center text-white shadow-lg">
                   <Target className="w-5 h-5 sm:w-6 sm:h-6" />
