@@ -1,9 +1,10 @@
 import * as React from "react"
 import { toast } from "sonner"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
-import { StorageService, AUTH_KEY } from "../../services/storage"
+import { StorageService, AUTH_KEY, FAVORITES_KEY } from "../../services/storage"
 import { api } from "../../services/api"
-import { Shield, Bell, Key, Trash2, Sun, Moon, Award, Heart, Gift, Copy } from "lucide-react"
+import { Shield, Bell, Key, Trash2, Sun, Moon, Award, Heart, Gift, Copy, BookOpen, ArrowRight, X } from "lucide-react"
+import { Link } from "react-router-dom"
 
 export default function Profile() {
   return (
@@ -19,6 +20,28 @@ function ProfileContent() {
   const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light')
   const [passwords, setPasswords] = React.useState({ current: "", new: "" })
   const [isUpdating, setIsUpdating] = React.useState(false)
+  const [wishlist, setWishlist] = React.useState([])
+  const [wishlistLoading, setWishlistLoading] = React.useState(true)
+
+  // Load wishlist course details from favoriteIds stored in localStorage
+  const loadWishlist = React.useCallback(async () => {
+    setWishlistLoading(true)
+    try {
+      const favoriteIds = StorageService.getFavorites() // array of courseIds (numbers)
+      if (!favoriteIds || favoriteIds.length === 0) {
+        setWishlist([])
+        return
+      }
+      // Fetch full course data for each favorited id
+      const allCourses = await StorageService.getCourses()
+      const wishlistedCourses = allCourses.filter(c => favoriteIds.includes(c.id))
+      setWishlist(wishlistedCourses)
+    } catch (err) {
+      console.error("Error loading wishlist:", err)
+    } finally {
+      setWishlistLoading(false)
+    }
+  }, [])
 
   React.useEffect(() => {
     const handleUpdate = async () => {
@@ -32,16 +55,20 @@ function ProfileContent() {
     }
 
     handleUpdate()
+    loadWishlist()
+
     window.addEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+    window.addEventListener(`storage-update-${FAVORITES_KEY}`, loadWishlist)
 
     const syncTheme = () => setTheme(localStorage.getItem('theme') || 'light')
     window.addEventListener('themeSync', syncTheme)
 
     return () => {
       window.removeEventListener(`storage-update-${AUTH_KEY}`, handleUpdate)
+      window.removeEventListener(`storage-update-${FAVORITES_KEY}`, loadWishlist)
       window.removeEventListener('themeSync', syncTheme)
     }
-  }, [])
+  }, [loadWishlist])
 
   const user = authState.user || { name: "Guest", email: "guest@example.com" }
 
@@ -50,12 +77,10 @@ function ProfileContent() {
       toast.error("Please provide both current and new access keys.")
       return
     }
-
     if (passwords.new.length < 6) {
       toast.error("New access key must be at least 6 characters long.")
       return
     }
-
     setIsUpdating(true)
     try {
       const token = StorageService.getToken()
@@ -93,6 +118,11 @@ function ProfileContent() {
     }
   }
 
+  const handleRemoveFromWishlist = (courseId) => {
+    StorageService.toggleFavorite(courseId) // toggles off → triggers event → loadWishlist runs
+    toast.success("Removed from wishlist")
+  }
+
   return (
     <main className="min-h-screen bg-surface relative overflow-hidden pt-8 pb-24">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
@@ -114,11 +144,117 @@ function ProfileContent() {
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <span className="bg-surface-container-high px-4 py-1.5 rounded-full text-xs font-bold text-primary border border-surface-dim uppercase tracking-widest">{enrollments.length} Courses</span>
               <span className="bg-surface-container-high px-4 py-1.5 rounded-full text-xs font-bold text-primary border border-surface-dim uppercase tracking-widest">Active Member</span>
+              {wishlist.length > 0 && (
+                <span className="bg-rose-500/10 px-4 py-1.5 rounded-full text-xs font-bold text-rose-500 border border-rose-500/20 uppercase tracking-widest flex items-center gap-1">
+                  <Heart className="w-3 h-3 fill-rose-500" /> {wishlist.length} Saved
+                </span>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Main Grid: items-start prevents the cards from stretching vertically */}
+        {/* ===== WISHLIST SECTION ===== */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-rose-500/10 rounded-xl text-rose-500">
+                <Heart className="w-6 h-6 fill-rose-500" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-headline font-bold text-primary">My Wishlist</h2>
+                <p className="text-secondary text-sm">Courses you've saved for later</p>
+              </div>
+            </div>
+            <Link
+              to="/catalog"
+              className="text-xs font-bold text-primary border-b border-primary pb-0.5 hover:opacity-70 transition-all flex items-center gap-1"
+            >
+              Browse More <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {wishlistLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-56 bg-surface-container-lowest rounded-[2rem] border border-surface-dim animate-pulse" />
+              ))}
+            </div>
+          ) : wishlist.length === 0 ? (
+            <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-14 text-center">
+              <Heart className="w-14 h-14 text-surface-dim mx-auto mb-4" />
+              <h3 className="text-xl font-headline font-bold text-primary mb-2">No saved courses yet</h3>
+              <p className="text-secondary text-sm mb-6 max-w-xs mx-auto">
+                Click "Save to Wishlist" on any course detail page to save it here.
+              </p>
+              <Link
+                to="/catalog"
+                className="inline-flex items-center gap-2 px-6 py-3 signature-gradient text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all"
+              >
+                Explore Courses <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishlist.map(course => (
+                <div
+                  key={course.id}
+                  className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] overflow-hidden hover:border-primary/30 hover:shadow-xl transition-all group relative"
+                >
+                  {/* Remove button */}
+                  <button
+                    onClick={() => handleRemoveFromWishlist(course.id)}
+                    title="Remove from wishlist"
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-rose-500 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  {/* Thumbnail */}
+                  <div className="w-full h-36 overflow-hidden">
+                    <img
+                      src={course.image || course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="text-[9px] font-bold text-secondary uppercase tracking-widest bg-surface-container px-2 py-0.5 rounded-full">
+                        {course.category || 'Course'}
+                      </span>
+                      <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-2 py-0.5 rounded-full">
+                        {course.level || 'All Levels'}
+                      </span>
+                    </div>
+
+                    <h3 className="font-headline font-bold text-base text-on-surface mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+                      {course.title}
+                    </h3>
+
+                    <p className="text-xs text-secondary mb-3 line-clamp-2">
+                      {course.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-headline font-extrabold text-primary">
+                        ₹{course.price || 0}
+                      </span>
+                      <Link
+                        to={`/course/${course.id}`}
+                        className="text-xs font-bold px-4 py-2 signature-gradient text-white rounded-xl hover:opacity-90 transition-all flex items-center gap-1"
+                      >
+                        View <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           
           {/* LEFT COLUMN: Security and Platform Preferences */}
@@ -154,7 +290,7 @@ function ProfileContent() {
               </div>
             </div>
 
-            {/* Platform Preferences (Moved here from the right column) */}
+            {/* Platform Preferences */}
             <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-3 bg-surface-container-low rounded-xl text-primary"><Bell className="w-6 h-6" /></div>
@@ -172,9 +308,8 @@ function ProfileContent() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Referral Program and Danger Zone */}
+          {/* RIGHT COLUMN: Referral Program */}
           <div className="flex flex-col gap-8">
-            {/* Referral Program */}
             {enrollments.length > 0 && user.referralCode && (
               <div className="bg-surface-container-lowest border border-surface-dim rounded-[2rem] p-8 ambient-shadow relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none" />
@@ -216,13 +351,6 @@ function ProfileContent() {
                 </div>
               </div>
             )}
-
-            {/* Danger Zone
-            <div className="border border-error/20 bg-error/5 rounded-[2rem] p-8">
-              <h3 className="text-xl font-headline font-bold text-error mb-2">Danger Zone</h3>
-              <p className="text-xs text-secondary mb-6">Irreversible deletion of your entire academic record.</p>
-              <button className="w-full py-4 bg-surface-container-lowest text-error font-bold rounded-xl border border-error/20 hover:bg-error hover:text-white transition-all uppercase tracking-widest text-xs">Delete Identity</button>
-            </div> */}
           </div>
         </div>
       </div>

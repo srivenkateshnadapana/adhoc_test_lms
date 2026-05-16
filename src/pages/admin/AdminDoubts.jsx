@@ -49,31 +49,17 @@ function AdminDoubtsContent() {
       }
       const filters = filterStatus !== 'all' ? { status: filterStatus } : {}
 
-      // Fetch raw responses to detect 403
-      const params = new URLSearchParams(filters).toString()
-      const [ticketsRaw, statsRaw] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/tickets/all?${params}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${import.meta.env.VITE_API_URL || 'https://lms-backend-g1cy.onrender.com/api'}/tickets/stats`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      ])
-
-      if (ticketsRaw.status === 403 || statsRaw.status === 403) {
-        setAuthError(true)
-        return
-      }
-
       const [ticketsRes, statsRes] = await Promise.all([
-        ticketsRaw.json(),
-        statsRaw.json()
+        api.tickets.getAll(token, filters),
+        api.tickets.getStats(token)
       ])
 
       if (ticketsRes.success) setTickets(ticketsRes.data || [])
       if (statsRes.success) setStats(statsRes.data)
-    } catch {
-      // silent
+    } catch (err) {
+      if (err.status === 403) {
+        setAuthError(true)
+      }
     } finally {
       setLoading(false)
     }

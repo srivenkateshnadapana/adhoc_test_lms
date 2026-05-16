@@ -1,6 +1,12 @@
 import * as React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
-import { Play, CheckCircle, ArrowLeft, Loader2, Layers, ShieldCheck, HelpCircle, Award, Lock, MessageCircle, Send, Plus, Clock, CheckCircle2, AlertCircle, ChevronDown, Star } from "lucide-react"
+import { 
+  Layers, Play, CheckCircle, ChevronLeft, ChevronRight, 
+  MessageCircle, Send, Loader2, Star, Download, Lock, ArrowLeft, ShieldCheck, AlertCircle, CheckCircle2, Award, HelpCircle
+} from "lucide-react"
+import { QuizPlayer } from "../../components/course/QuizPlayer"
+import { DoubtSection } from "../../components/course/DoubtSection"
+import { FeedbackModal } from "../../components/course/FeedbackModal"
 import { StorageService } from "../../services/storage"
 import { api } from "../../services/api"
 import { ProtectedRoute } from "../../context/ProtectedRoute"
@@ -264,52 +270,15 @@ function PlayerContent() {
         </div>
         
         {sidebarTab === 'doubts' ? (
-          <div className="flex-grow overflow-y-auto no-scrollbar p-5 space-y-4">
-            {/* Post Doubt Form */}
-            <form onSubmit={handlePostDoubt} className="bg-surface-container-lowest rounded-2xl p-4 border border-surface-dim/20 space-y-3">
-              <p className="text-xs font-bold text-outline uppercase tracking-widest">Ask a Question</p>
-              {activeItem && <p className="text-[10px] text-secondary truncate">Re: {activeItem.title}</p>}
-              <input
-                type="text" required value={doubtForm.subject}
-                onChange={e => setDoubtForm(p => ({ ...p, subject: e.target.value }))}
-                placeholder="Subject of your doubt..."
-                className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 text-primary text-sm focus:outline-none focus:border-primary/50 transition-colors placeholder:text-outline/50"
-              />
-              <textarea rows={3} required value={doubtForm.message}
-                onChange={e => setDoubtForm(p => ({ ...p, message: e.target.value }))}
-                placeholder="Describe your question in detail..."
-                className="w-full px-4 py-3 bg-surface-container rounded-xl border border-surface-dim/20 text-primary text-sm focus:outline-none focus:border-primary/50 transition-colors placeholder:text-outline/50 resize-none"
-              />
-              <button type="submit" disabled={postingDoubt} className="w-full py-3 signature-gradient text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow">
-                {postingDoubt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Post Question
-              </button>
-            </form>
-
-            {/* Past Doubts */}
-            {doubtsLoading ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-            ) : doubts.length === 0 ? (
-              <div className="text-center py-8 text-outline text-sm">No doubts raised yet for this course.</div>
-            ) : doubts.map(t => (
-              <div key={t.id} className="bg-surface-container-lowest rounded-2xl p-4 border border-surface-dim/20 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-bold text-primary leading-tight">{t.subject}</p>
-                  <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${
-                    t.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-600' :
-                    t.status === 'in-progress' ? 'bg-amber-500/10 text-amber-600' :
-                    'bg-blue-500/10 text-blue-600'
-                  }`}>{t.status}</span>
-                </div>
-                <p className="text-xs text-on-surface-variant line-clamp-2">{t.message}</p>
-                {t.adminResponse && (
-                  <div className="mt-2 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
-                    <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Answer</p>
-                    <p className="text-xs text-primary">{t.adminResponse}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <DoubtSection 
+            doubts={doubts}
+            doubtsLoading={doubtsLoading}
+            activeItem={activeItem}
+            doubtForm={doubtForm}
+            setDoubtForm={setDoubtForm}
+            handlePostDoubt={handlePostDoubt}
+            postingDoubt={postingDoubt}
+          />
         ) : (
         <div className="flex-grow overflow-y-auto no-scrollbar p-6 space-y-8 bg-surface-container-low/30 backdrop-blur-3xl">
           {/* Modules and Lessons */}
@@ -497,65 +466,15 @@ function PlayerContent() {
                     </div>
                   </div>
 
-                  {quizResult ? (
-                    <div className="py-12 text-center">
-                      <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-6 border-8 ${quizResult.passed || activeItem.type === 'module' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-red-500 bg-red-500/10 text-red-500'}`}>
-                        <span className="text-4xl font-headline font-bold">{quizResult.percentage}%</span>
-                      </div>
-                      <h3 className="text-3xl font-headline font-bold text-primary mb-2">
-                        {quizResult.passed || activeItem.type === 'module' ? 'Quiz Completed Successfully!' : 'Quiz Failed'}
-                      </h3>
-                      <p className="text-on-surface-variant text-lg max-w-md mx-auto mb-8">
-                        You scored {quizResult.score} out of {quizResult.totalPoints} points.
-                        {activeItem.type === 'final' && quizResult.passed && " Your certificate has been generated and unlocked."}
-                        {activeItem.type === 'final' && !quizResult.passed && ` You needed at least ${quizResult.passingScore}% to pass.`}
-                      </p>
-                      <button onClick={() => setQuizResult(null)} className="px-8 py-4 bg-surface-container text-primary rounded-xl font-bold hover:bg-surface-dim transition-colors">
-                        Review Questions
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-12">
-                      {activeItem.questions?.length === 0 ? (
-                        <p className="text-secondary italic text-center py-12">No questions have been configured for this quiz.</p>
-                      ) : (
-                        activeItem.questions?.map((q, idx) => (
-                          <div key={q.id} className="space-y-4">
-                            <h4 className="text-xl font-bold text-primary flex gap-4">
-                              <span className="text-secondary">{idx + 1}.</span> {q.questionText}
-                            </h4>
-                            <div className="space-y-3 pl-8">
-                              {q.options?.map((option, optIdx) => (
-                                <label key={optIdx} className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all ${quizAnswers[q.id] === optIdx ? 'border-primary bg-primary/5' : 'border-surface-dim/20 bg-surface-container-low hover:border-primary/30'}`}>
-                                  <input 
-                                    type="radio" 
-                                    name={`question-${q.id}`} 
-                                    className="w-5 h-5 accent-primary" 
-                                    checked={quizAnswers[q.id] === optIdx}
-                                    onChange={() => setQuizAnswers(prev => ({...prev, [q.id]: optIdx}))}
-                                  />
-                                  <span className="text-on-surface font-medium">{option}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        ))
-                      )}
-
-                      {activeItem.questions?.length > 0 && (
-                        <div className="pt-8 border-t border-surface-dim/20 flex justify-end">
-                          <button
-                            onClick={handleQuizSubmit}
-                            disabled={submittingQuiz}
-                            className={`px-10 py-5 rounded-2xl font-bold text-white shadow-xl transition-all active:scale-[0.98] flex items-center gap-3 ${activeItem.type === 'final' ? 'signature-gradient' : 'bg-blue-600 hover:bg-blue-700'}`}
-                          >
-                            {submittingQuiz && <Loader2 className="w-5 h-5 animate-spin" />}
-                            SUBMIT {activeItem.type === 'final' ? 'CERTIFICATION' : 'KNOWLEDGE CHECK'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <QuizPlayer 
+                    activeItem={activeItem}
+                    quizAnswers={quizAnswers}
+                    setQuizAnswers={setQuizAnswers}
+                    quizResult={quizResult}
+                    setQuizResult={setQuizResult}
+                    submittingQuiz={submittingQuiz}
+                    handleQuizSubmit={handleQuizSubmit}
+                  />
                 </div>
              </div>
           </div>
@@ -563,70 +482,14 @@ function PlayerContent() {
       </main>
 
       {/* Feedback Modal */}
-      {showFeedbackModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest p-8 md:p-12 rounded-[2.5rem] shadow-2xl max-w-lg w-full relative animate-in fade-in zoom-in duration-300">
-            <button 
-              onClick={() => setShowFeedbackModal(false)}
-              className="absolute top-6 right-6 p-2 rounded-full hover:bg-surface-container transition-colors text-secondary"
-            >
-              ✕
-            </button>
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-4">
-                <Star className="w-8 h-8 fill-current text-amber-400" />
-              </div>
-              <h2 className="text-2xl font-headline font-bold text-primary mb-2">Congratulations!</h2>
-              <p className="text-secondary text-sm">You have earned your certificate. We'd love to hear your feedback on the course!</p>
-            </div>
-
-            <form onSubmit={handleFeedbackSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-primary mb-3 text-center">Rate your experience</label>
-                <div className="flex justify-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setFeedbackForm(p => ({ ...p, rating: star }))}
-                      className="focus:outline-none hover:scale-110 transition-transform"
-                    >
-                      <Star
-                        className={`w-8 h-8 ${feedbackForm.rating >= star ? 'text-amber-400 fill-current' : 'text-surface-dim fill-current'}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-primary mb-2">Your Feedback</label>
-                <textarea
-                  value={feedbackForm.content}
-                  onChange={(e) => setFeedbackForm(p => ({ ...p, content: e.target.value }))}
-                  placeholder="Tell us what you liked and how we can improve..."
-                  className="w-full h-32 bg-surface-container border border-surface-dim/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                  required
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                disabled={submittingFeedback}
-                className="w-full py-4 signature-gradient text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg"
-              >
-                {submittingFeedback ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" /> Submit Feedback
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      <FeedbackModal 
+        show={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        feedbackForm={feedbackForm}
+        setFeedbackForm={setFeedbackForm}
+        handleFeedbackSubmit={handleFeedbackSubmit}
+        submittingFeedback={submittingFeedback}
+      />
     </div>
   )
 }
