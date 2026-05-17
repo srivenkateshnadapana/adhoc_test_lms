@@ -9,13 +9,11 @@ import {
   Trophy, 
   Target, 
   ArrowRight, 
-  Calendar, 
   TrendingUp, 
   Award, 
   Flame,
   ChevronRight,
-  Sparkles,
-  BarChart3
+  Sparkles
 } from "lucide-react"
 import { StorageService, ENROLLMENTS_KEY } from "../../services/storage"
 import { Link, useNavigate } from "react-router-dom"
@@ -175,7 +173,7 @@ function DashboardContent() {
           diffDays: diffDays,
           priority: diffDays < 0 ? 'expired' : (diffDays < 15 ? 'high' : 'medium')
         };
-      }).filter(d => d.deadlineDate !== 'N/A').sort((a, b) => a.diffDays - b.diffDays);
+      }).filter(d => d.deadlineDate !== 'N/A').sort((a, b) => a.diffDays - b.diffDays).slice(0, 2);
       // Finalize and set the dynamic deadlines for display on the dashboard
       setUpcomingDeadlines(deadlines)
       

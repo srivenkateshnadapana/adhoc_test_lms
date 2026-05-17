@@ -91,7 +91,6 @@ export default function Home() {
       try {
         setCoursesLoading(true)
         const data = await StorageService.getCourses()
-        console.log(data)
         // Randomize and take 3 for variety on every refresh
         const randomized = [...data].sort(() => 0.5 - Math.random())
         setFeaturedCourses(randomized.slice(0, 3))
@@ -462,7 +461,7 @@ export default function Home() {
                 <img
                   src="https://github.com/saiakhil1629/ascs_bootcamp/blob/main/WhatsApp%20Image%202026-05-17%20at%2011.16.33%20AM.jpeg?raw=true"
                   alt="Devika Pakruthi - CEO"
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto max-h-[400px] object-contain"
                 />
               </div>
             </div>
