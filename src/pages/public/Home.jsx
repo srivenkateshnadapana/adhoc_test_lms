@@ -256,7 +256,7 @@ export default function Home() {
       <section id="about" className="py-12 sm:py-16 px-4 sm:px-8 bg-surface-container-lowest border-y border-surface-dim/10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-8">
-            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed.</h2>
+            <h2 className="text-4xl font-headline font-bold text-primary">Academic Authority, Digital Speed - Now for the Enterprise</h2>
             <p className="text-secondary text-lg leading-relaxed">
               The traditional classroom just got an upgrade. We’ve built a high-speed learning environment that cuts through the noise. With clean typography and a distraction-free layout, mastering complex material has never been more efficient. Your path to industry-recognized certification starts here.
             </p>
@@ -264,7 +264,7 @@ export default function Home() {
               {[
                 "150+ Expert Mentors from Global Firms",
                 "Certifications recognized across the tech industry",
-
+                 "Limited-time access to premium course assets", 
                 "24/7 Mentor Support & Community Access"
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-3 text-on-surface font-medium group">
@@ -495,9 +495,9 @@ export default function Home() {
       {/* CTA Section (NEW) */}
       <section className="py-12 px-8 signature-gradient">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-3xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
-          <p className="text-base opacity-90 mb-8 max-w-2xl mx-auto">
-            Join an exclusive community of professionals transforming their careers with our premium courses.
+          <h2 className="text-4xl font-headline font-bold mb-4">Ready to Elevate Your Career?</h2>
+          <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+             Join an exclusive community of professionals transforming their careers with our premium courses.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

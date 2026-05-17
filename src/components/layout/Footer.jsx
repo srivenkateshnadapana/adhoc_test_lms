@@ -1,7 +1,7 @@
 // src/components/layout/Footer.jsx
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { Instagram, Twitter, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react"
+import { Instagram, Twitter, Linkedin, Mail, MapPin, Phone, Send, TextAlignCenter } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -22,10 +22,10 @@ export function Footer() {
       { name: "Careers", href: "#" },
     ],
     legal: [
-      { name: "Terms of Engagement", href: "#" },
-      { name: "Privacy Protocol", href: "#" },
-      { name: "Cookie Policy", href: "#" },
-      { name: "Data Processing", href: "#" },
+      { name: "Terms of Engagement", href: "/terms" },
+      { name: "Privacy Protocol", href: "/privacy" },
+      // { name: "Cookie Policy", href: "#" },
+      // { name: "Data Processing", href: "#" },
     ]
   }
 
@@ -43,7 +43,7 @@ export function Footer() {
               <div className="w-8 h-8 sm:w-10 sm:h-10 signature-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <span className="text-white font-headline font-bold text-lg sm:text-xl">A</span>
               </div>
-              <span className="text-lg sm:text-xl font-headline font-bold tracking-tighter text-primary">Adhoc Tech</span>
+              <span className="text-lg sm:text-xl font-headline font-bold tracking-tighter text-primary">Adhoc Network Tech</span>
             </Link>
             <p className="text-on-surface-variant text-sm font-medium leading-relaxed max-w-sm mb-8 opacity-70 italic">
               Empowering the next generation of academic leaders through sophisticated learning ecosystems and decentralized knowledge protocols.
@@ -70,7 +70,7 @@ export function Footer() {
 
           {/* Newsletter Signup */}
           <div className="sm:col-span-2 lg:col-span-4">
-            <h4 className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6 sm:mb-8 italic">Neural Dispatch</h4>
+            <h4 className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6 sm:mb-8 italic">Newsletter</h4>
             <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">
               Subscribe to receive tactical insights, curriculum updates, and exclusive content.
             </p>
@@ -130,16 +130,8 @@ export function Footer() {
         {/* Bottom Shard */}
         <div className="pt-4 border-t border-surface-dim/20 flex flex-col lg:flex-row justify-between items-center gap-6">
           <p className="text-[10px] sm:text-xs font-bold text-outline uppercase tracking-widest text-center lg:text-left">
-            &copy; {currentYear} Adhoc Network Tech. All Security Protocols Active.
+            &copy; {currentYear} Adhoc Network Tech.
           </p>
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.3em]">Operational Status: Optimum</span>
-            </div>
-            <div className="hidden sm:block w-px h-4 bg-outline-variant" />
-            <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.3em]">v2.0.0</span>
-          </div>
         </div>
       </div>
     </footer>
