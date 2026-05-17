@@ -457,12 +457,12 @@ export default function Home() {
             className="bg-white dark:bg-black rounded-[2rem] p-6 sm:p-10 flex flex-col lg:flex-row items-center lg:items-start gap-12 border border-black/5 dark:border-white/5"
           >
             {/* CEO Image */}
-            <div className="w-full lg:w-1/3 max-w-[320px]">
-              <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10">
+            <div className="w-full lg:w-1/3 max-w-[380px]">
+              <div className="rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5">
                 <img
-                  src="https://th.bing.com/th/id/OIP.i51_D3UKjIuOrKBkRQ9X6QAAAA"
+                  src="https://github.com/saiakhil1629/ascs_bootcamp/blob/main/WhatsApp%20Image%202026-05-17%20at%2011.16.33%20AM.jpeg?raw=true"
                   alt="Devika Pakruthi - CEO"
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-contain"
                 />
               </div>
             </div>
