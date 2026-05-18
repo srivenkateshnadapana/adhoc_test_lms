@@ -9,13 +9,11 @@ import {
   Trophy, 
   Target, 
   ArrowRight, 
-  Calendar, 
   TrendingUp, 
   Award, 
   Flame,
   ChevronRight,
-  Sparkles,
-  BarChart3
+  Sparkles
 } from "lucide-react"
 import { StorageService, ENROLLMENTS_KEY } from "../../services/storage"
 import { Link, useNavigate } from "react-router-dom"
@@ -175,7 +173,7 @@ function DashboardContent() {
           diffDays: diffDays,
           priority: diffDays < 0 ? 'expired' : (diffDays < 15 ? 'high' : 'medium')
         };
-      }).filter(d => d.deadlineDate !== 'N/A').sort((a, b) => a.diffDays - b.diffDays);
+      }).filter(d => d.deadlineDate !== 'N/A').sort((a, b) => a.diffDays - b.diffDays).slice(0, 2);
       // Finalize and set the dynamic deadlines for display on the dashboard
       setUpcomingDeadlines(deadlines)
       
@@ -344,11 +342,13 @@ function DashboardContent() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-surface-container-lowest rounded-3xl p-6 border border-surface-dim/20"
+            className="bg-surface-container-lowest rounded-3xl p-6 border border-surface-dim/20 flex flex-col"
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-headline font-bold text-primary">Deadlines</h2>
-              
+              <Link to="/student/deadlines" className="text-sm font-medium text-primary flex items-center gap-1 hover:opacity-80 transition-opacity">
+                View More <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
             
             {upcomingDeadlines.length === 0 ? (
@@ -356,9 +356,9 @@ function DashboardContent() {
                 <p className="text-on-surface-variant">No upcoming deadlines</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="flex-1 flex flex-col gap-4">
                 {upcomingDeadlines.map((deadline) => (
-                  <div key={deadline.id} className="p-5 rounded-2xl bg-surface-container-high/40 border border-surface-dim/10 hover:bg-surface-container-high/60 transition-all group">
+                  <div key={deadline.id} className="py-6 px-5 flex-1 min-h-[120px] flex flex-col justify-between rounded-2xl bg-surface-container-high/40 border border-surface-dim/10 hover:bg-surface-container-high/60 transition-all group">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-bold text-primary leading-tight group-hover:text-blue-500 transition-colors">{deadline.course}</h3>
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest ${
