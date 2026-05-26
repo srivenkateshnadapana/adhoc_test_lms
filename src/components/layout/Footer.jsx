@@ -24,6 +24,7 @@ export function Footer() {
     legal: [
       { name: "Terms of Engagement", href: "/terms" },
       { name: "Privacy Protocol", href: "/privacy" },
+      { name: "Refund Policy", href: "/RefundPolicy" },
       // { name: "Cookie Policy", href: "#" },
       // { name: "Data Processing", href: "#" },
     ]

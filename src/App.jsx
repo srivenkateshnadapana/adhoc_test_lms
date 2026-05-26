@@ -7,6 +7,7 @@ import { BottomNav } from './components/layout/BottomNav'
 import { ScrollToTop } from './components/layout/ScrollToTop'
 import Terms from "./components/Terms";
 import Privacy from "./components/Privacy"
+import RefundPolicy from "./components/RefundPolicy";
 
 // Lazy Pages
 const Home = React.lazy(() => import('./pages/public/Home'))
@@ -85,6 +86,7 @@ function App() {
             <Route path="*" element={<Navigate to="/404" replace />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="RefundPolicy" element={<RefundPolicy/>} />
           </Routes>
           </React.Suspense>
         </main>
