@@ -22,6 +22,7 @@ const Unauthorized = React.lazy(() => import('./pages/public/Unauthorized'))
 const Dashboard = React.lazy(() => import('./pages/student/Dashboard'))
 const Profile = React.lazy(() => import('./pages/student/Profile'))
 const CoursePlayer = React.lazy(() => import('./pages/student/CoursePlayer'))
+const AllDeadlines = React.lazy(() => import('./pages/student/AllDeadlines'))
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'))
 const MyCourses = React.lazy(() => import('./pages/student/MyCourses'))
 const Certificates = React.lazy(() => import('./pages/student/Certificates'))
@@ -67,6 +68,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/student/deadlines" element={<AllDeadlines />} />
             <Route path="/student/course/:id" element={<CoursePlayer />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-courses" element={<MyCourses />} />

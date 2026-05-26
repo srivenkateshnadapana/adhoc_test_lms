@@ -130,7 +130,7 @@ export function Footer() {
 
         {/* Bottom Shard */}
         <div className="pt-4 border-t border-surface-dim/20 flex flex-col lg:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] sm:text-xs font-bold text-outline uppercase tracking-widest text-center lg:text-left">
+          <p className="text-[10px] sm:text-xs font-bold text-outline uppercase tracking-widest text-center  lg:text-left">
             &copy; {currentYear} Adhoc Network Tech.
           </p>
         </div>
